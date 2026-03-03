@@ -62,6 +62,15 @@ export class SocketService {
     });
   }
 
+  rejoinGame(code: string, name: string): Observable<{ success: boolean; startPage?: string; targetPage?: string; startTime?: number; room?: RoomInfo; error?: string }> {
+    return new Observable(obs => {
+      this.socket.emit('rejoin-game', { code, name }, (data: any) => {
+        obs.next(data);
+        obs.complete();
+      });
+    });
+  }
+
   navigate(page: string): Observable<{ success: boolean; won: boolean }> {
     return new Observable(obs => {
       this.socket.emit('navigate', { page }, (data: { success: boolean; won: boolean }) => {

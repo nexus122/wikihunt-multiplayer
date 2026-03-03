@@ -133,6 +133,28 @@ io.on('connection', (socket) => {
     }
   );
 
+  socket.on('rejoin-game', ({ code, name }: { code: string; name: string }, callback: Function) => {
+    try {
+      const room = roomManager.rejoinRoom(code.toUpperCase().trim(), socket.id, name);
+      if (!room) {
+        callback({ success: false, error: 'La partida no existe o ya ha terminado' });
+        return;
+      }
+      socket.join(room.code);
+      io.to(room.code).emit('room-updated', roomManager.getRoomInfo(room));
+      console.log(`[Room] ${name} rejoined ${room.code}`);
+      callback({
+        success: true,
+        startPage: room.startPage,
+        targetPage: room.targetPage,
+        startTime: room.startTime,
+        room: roomManager.getRoomInfo(room),
+      });
+    } catch {
+      callback({ success: false, error: 'Failed to rejoin' });
+    }
+  });
+
   socket.on('navigate', ({ page }: { page: string }, callback: Function) => {
     try {
       const result = roomManager.navigate(socket.id, page);

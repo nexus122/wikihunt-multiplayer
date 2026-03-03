@@ -21,6 +21,57 @@
 
 .form-card { width: 100%; max-width: 400px; }
 
+.rejoin-card {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  background: rgba(88, 166, 255, 0.05);
+  border-color: rgba(88, 166, 255, 0.25);
+
+  .rejoin-info {
+    flex: 1;
+    min-width: 0;
+
+    .rejoin-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .rejoin-route {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .rejoin-code {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+  }
+
+  .rejoin-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+
+    button:first-child { padding: 8px 16px; font-size: 13px; }
+    button:last-child  { padding: 8px 10px; font-size: 13px; }
+  }
+}
+
 .tabs {
   display: flex;
   gap: 4px;

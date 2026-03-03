@@ -104,6 +104,15 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loadPage(this.startPage);
     this.setupSocketListeners();
 
+    // Save game state so the player can rejoin if they accidentally leave
+    localStorage.setItem('wh_game', JSON.stringify({
+      roomCode: this.room?.code || '',
+      playerName: localStorage.getItem('wh_name') || '',
+      isHost: this.isHost,
+      startPage: this.startPage,
+      targetPage: this.targetPage,
+    }));
+
     // Trap browser back button inside the game
     history.pushState(null, '', window.location.href);
     window.addEventListener('popstate', this.onPopState);
@@ -182,6 +191,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
         this.countdownActive = false;
         clearInterval(this.countdownInterval);
         this.timerSub?.unsubscribe();
+        localStorage.removeItem('wh_game'); // game over, no need to rejoin
       })
     );
 
@@ -340,12 +350,14 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   playAgain(): void {
+    localStorage.removeItem('wh_game');
     this.router.navigate(['/lobby', this.room?.code], {
       state: { room: this.room, isHost: this.isHost },
     });
   }
 
   goHome(): void {
+    localStorage.removeItem('wh_game');
     this.router.navigate(['/']);
   }
 }

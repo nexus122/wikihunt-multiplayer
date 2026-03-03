@@ -18,7 +18,10 @@ export class HomeComponent implements OnInit {
   joinCode = '';
   creating = false;
   joining = false;
+  rejoining = false;
   error = '';
+
+  savedGame: { roomCode: string; playerName: string; isHost: boolean; startPage: string; targetPage: string } | null = null;
 
   steps = [
     { n: 1, text: 'Create a room and share the code with friends' },
@@ -32,6 +35,48 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     const saved = localStorage.getItem('wh_name');
     if (saved) { this.createName = saved; this.joinName = saved; }
+
+    const savedGame = localStorage.getItem('wh_game');
+    if (savedGame) {
+      try {
+        this.savedGame = JSON.parse(savedGame);
+      } catch {
+        localStorage.removeItem('wh_game');
+      }
+    }
+  }
+
+  rejoinGame(): void {
+    if (!this.savedGame) return;
+    this.rejoining = true;
+    this.error = '';
+
+    this.socketService.rejoinGame(this.savedGame.roomCode, this.savedGame.playerName).subscribe({
+      next: (data) => {
+        if (!data.success || !data.startPage) {
+          this.error = data.error || 'La partida ya no existe.';
+          localStorage.removeItem('wh_game');
+          this.savedGame = null;
+          this.rejoining = false;
+          return;
+        }
+        this.router.navigate(['/game', this.savedGame!.roomCode], {
+          state: {
+            room: data.room,
+            isHost: this.savedGame!.isHost,
+            startPage: data.startPage,
+            targetPage: data.targetPage,
+            startTime: data.startTime,
+          },
+        });
+      },
+      error: () => { this.error = 'Error al reconectar.'; this.rejoining = false; },
+    });
+  }
+
+  dismissSavedGame(): void {
+    localStorage.removeItem('wh_game');
+    this.savedGame = null;
   }
 
   createRoom(): void {

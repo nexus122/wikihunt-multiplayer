@@ -1,4 +1,21 @@
 <div class="home">
+
+  @if (savedGame) {
+    <div class="card rejoin-card">
+      <div class="rejoin-info">
+        <span class="rejoin-label">Partida en curso</span>
+        <p class="rejoin-route">{{ savedGame.startPage }} → {{ savedGame.targetPage }}</p>
+        <span class="rejoin-code">Sala {{ savedGame.roomCode }}</span>
+      </div>
+      <div class="rejoin-actions">
+        <button class="btn-primary" (click)="rejoinGame()" [disabled]="rejoining">
+          {{ rejoining ? 'Reconectando...' : '↩ Retomar' }}
+        </button>
+        <button class="btn-secondary" (click)="dismissSavedGame()">✕</button>
+      </div>
+    </div>
+  }
+
   <div class="hero">
     <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
     <p class="tagline">Race through Wikipedia. First to the target wins.</p>

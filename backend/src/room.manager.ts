@@ -105,6 +105,24 @@ class RoomManager {
     }
   }
 
+  rejoinRoom(code: string, socketId: string, name: string): Room | null {
+    const room = this.rooms.get(code);
+    if (!room || room.status !== 'playing') return null;
+
+    const player: Player = {
+      socketId,
+      name,
+      currentPage: room.startPage,
+      steps: 0,
+      path: room.startPage ? [room.startPage] : [],
+      finished: false,
+    };
+
+    room.players.set(socketId, player);
+    this.socketToRoom.set(socketId, code);
+    return room;
+  }
+
   startGame(code: string, startPage: string, targetPage: string, graceTime: number = 60): boolean {
     const room = this.rooms.get(code);
     if (!room || room.status !== 'waiting') return false;
