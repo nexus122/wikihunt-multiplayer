@@ -171,20 +171,19 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  // Carga la página inicial (sin contar pasos)
   loadPage(title: string): void {
     this.loading = true;
     this.loadError = '';
     this.wikiService.getPageContent(title).subscribe({
       next: (data) => {
         this.pageTitle = data.title;
-        this.pageContent = this.sanitizer.bypassSecurityTrustHtml(
-          this.processHtml(data.html)
-        );
+        this.pageContent = this.sanitizer.bypassSecurityTrustHtml(this.processHtml(data.html));
         this.loading = false;
         setTimeout(() => this.scrollToTop(), 50);
       },
       error: () => {
-        this.loadError = `Failed to load "${title}". Try a different link.`;
+        this.loadError = `No se pudo cargar "${title}". Prueba otro enlace.`;
         this.loading = false;
       },
     });
@@ -239,17 +238,39 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
   private navigateTo(title: string): void {
     if (this.loading) return;
 
+    const prevPage = this.currentPage;
+    const prevPath = [...this.myPath];
+
     this.currentPage = title;
     this.myPath.push(title);
-    this.mySteps++;
-    this.loadPage(title);
+    this.loading = true;
+    this.loadError = '';
 
-    this.socketService.navigate(title).subscribe({
-      next: (res) => {
-        if (res.won) {
-          this.iWon = true;
-          this.timerSub?.unsubscribe();
-        }
+    this.wikiService.getPageContent(title).subscribe({
+      next: (data) => {
+        // Solo contamos el paso si la página existe
+        this.mySteps++;
+        this.pageTitle = data.title;
+        this.pageContent = this.sanitizer.bypassSecurityTrustHtml(this.processHtml(data.html));
+        this.loading = false;
+        setTimeout(() => this.scrollToTop(), 50);
+
+        this.socketService.navigate(title).subscribe({
+          next: (res) => {
+            if (res.won) {
+              this.iWon = true;
+              this.timerSub?.unsubscribe();
+            }
+          },
+        });
+      },
+      error: () => {
+        // Revertir navegación — el paso no se cuenta
+        this.currentPage = prevPage;
+        this.myPath = prevPath;
+        this.loading = false;
+        this.loadError = `"${title}" no existe en Wikipedia en español. Elige otro enlace.`;
+        setTimeout(() => { this.loadError = ''; }, 4000);
       },
     });
   }

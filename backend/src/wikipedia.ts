@@ -4,13 +4,20 @@ import fetch from 'node-fetch';
 const router = Router();
 
 router.get('/random', async (_req: Request, res: Response) => {
-  try {
-    const response = await fetch('https://es.wikipedia.org/api/rest_v1/page/random/summary');
-    const data = await response.json() as any;
-    res.json({ title: data.title, extract: data.extract, thumbnail: data.thumbnail });
-  } catch {
-    res.status(500).json({ error: 'Failed to fetch random page' });
+  for (let i = 0; i < 10; i++) {
+    try {
+      const response = await fetch('https://es.wikipedia.org/api/rest_v1/page/random/summary');
+      if (!response.ok) continue;
+      const data = await response.json() as any;
+      if (data.type === 'disambiguation') continue;
+      if (!data.extract || data.extract.length < 150) continue;
+      res.json({ title: data.title, extract: data.extract, thumbnail: data.thumbnail });
+      return;
+    } catch {
+      continue;
+    }
   }
+  res.status(500).json({ error: 'Failed to fetch a valid random page' });
 });
 
 router.get('/summary/:title', async (req: Request, res: Response) => {

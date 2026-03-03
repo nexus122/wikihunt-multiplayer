@@ -17,10 +17,43 @@ app.use(express.json());
 app.use('/api/wikipedia', wikipediaRouter);
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-async function getRandomPageTitle(): Promise<string> {
-  const res = await fetch('https://es.wikipedia.org/api/rest_v1/page/random/summary');
-  const data = await res.json() as { title: string };
-  return data.title;
+async function isPageValid(title: string): Promise<boolean> {
+  try {
+    const res = await fetch(
+      `https://es.wikipedia.org/api/rest_v1/page/html/${encodeURIComponent(title)}`,
+      { method: 'HEAD' }
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function getValidRandomPage(maxAttempts = 10): Promise<string> {
+  for (let i = 0; i < maxAttempts; i++) {
+    try {
+      const res = await fetch('https://es.wikipedia.org/api/rest_v1/page/random/summary');
+      if (!res.ok) continue;
+
+      const data = await res.json() as { title: string; extract?: string; type?: string };
+
+      // Descartar páginas de desambiguación y artículos muy cortos (stubs)
+      if (data.type === 'disambiguation') continue;
+      if (!data.extract || data.extract.length < 150) continue;
+
+      // Verificar que el endpoint de contenido HTML responde correctamente
+      const valid = await isPageValid(data.title);
+      if (!valid) continue;
+
+      console.log(`[Page] Valid page found: "${data.title}" (attempt ${i + 1})`);
+      return data.title;
+    } catch {
+      continue;
+    }
+  }
+
+  console.warn('[Page] Could not find valid page after max attempts, using fallback');
+  return 'España';
 }
 
 function normalizePage(page: string): string {
@@ -68,12 +101,12 @@ io.on('connection', (socket) => {
         if (!room) { callback({ success: false, error: 'Room not found' }); return; }
         if (room.hostId !== socket.id) { callback({ success: false, error: 'Only the host can start' }); return; }
 
-        const start = startPage || (await getRandomPageTitle());
-        let target = targetPage || (await getRandomPageTitle());
+        const start = startPage || (await getValidRandomPage());
+        let target = targetPage || (await getValidRandomPage());
 
         let attempts = 0;
         while (normalizePage(target) === normalizePage(start) && attempts < 5) {
-          target = await getRandomPageTitle();
+          target = await getValidRandomPage();
           attempts++;
         }
 
