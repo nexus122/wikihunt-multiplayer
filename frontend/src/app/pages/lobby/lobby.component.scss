@@ -132,7 +132,55 @@ h3 { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap:
 .page-pickers { display: flex; flex-direction: column; gap: 14px; margin-bottom: 14px; }
 
 .picker {
-  label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text-secondary); margin-bottom: 5px; }
+  label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text-secondary); margin: 0; }
+}
+
+.picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.mode-pills {
+  display: flex;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.pill {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  cursor: pointer;
+  transition: all .15s;
+  border-left: 1px solid var(--border-color);
+  border-radius: 0;
+  &:first-child { border-left: none; }
+  &.active { background: var(--bg-tertiary); color: var(--text-primary); }
+  &:hover:not(.active) { color: var(--text-primary); }
+}
+
+.page-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chip-clear {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 4px;
+  line-height: 1;
+  &:hover { color: var(--danger); }
 }
 
 .search-wrap { position: relative; }

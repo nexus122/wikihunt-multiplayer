@@ -20,7 +20,8 @@ export class LobbyComponent implements OnInit, OnDestroy {
   mySocketId = '';
   codeCopied = false;
 
-  useCustomPages = false;
+  customStart = false;
+  customTarget = false;
   searchStartQuery = '';
   searchTargetQuery = '';
   startResults: WikiPage[] = [];
@@ -112,15 +113,37 @@ export class LobbyComponent implements OnInit, OnDestroy {
     this.wikipediaService.searchPages(this.searchTargetQuery).subscribe(r => (this.targetResults = r));
   }
 
+  setStartMode(custom: boolean): void {
+    this.customStart = custom;
+    if (!custom) { this.selectedStart = null; this.searchStartQuery = ''; this.startResults = []; }
+  }
+
+  setTargetMode(custom: boolean): void {
+    this.customTarget = custom;
+    if (!custom) { this.selectedTarget = null; this.searchTargetQuery = ''; this.targetResults = []; }
+  }
+
   selectStart(p: WikiPage): void {
     this.selectedStart = p;
-    this.searchStartQuery = p.title;
+    this.searchStartQuery = '';
     this.startResults = [];
   }
 
   selectTarget(p: WikiPage): void {
     this.selectedTarget = p;
-    this.searchTargetQuery = p.title;
+    this.searchTargetQuery = '';
+    this.targetResults = [];
+  }
+
+  clearStart(): void {
+    this.selectedStart = null;
+    this.searchStartQuery = '';
+    this.startResults = [];
+  }
+
+  clearTarget(): void {
+    this.selectedTarget = null;
+    this.searchTargetQuery = '';
     this.targetResults = [];
   }
 
@@ -129,12 +152,11 @@ export class LobbyComponent implements OnInit, OnDestroy {
     this.starting = true;
     this.error = '';
 
-    const opts = {
+    const opts: { graceTime: number; startPage?: string; targetPage?: string } = {
       graceTime: this.graceTime,
-      ...(this.useCustomPages && this.selectedStart && this.selectedTarget
-        ? { startPage: this.selectedStart.title, targetPage: this.selectedTarget.title }
-        : {}),
     };
+    if (this.selectedStart) opts.startPage = this.selectedStart.title;
+    if (this.selectedTarget) opts.targetPage = this.selectedTarget.title;
 
     this.socketService.startGame(opts).subscribe({
       next: (d) => {

@@ -31,6 +31,10 @@
       <div class="target-box">
         <span class="label">TARGET</span>
         <span class="target-name">{{ targetPage }}</span>
+        @if (targetSummary?.extract) {
+          <p class="target-extract">{{ targetSummary!.extract.slice(0, 160) }}…</p>
+        }
+        <a class="target-link" [href]="'https://es.wikipedia.org/wiki/' + targetPage" target="_blank" rel="noopener noreferrer">Ver en Wikipedia ↗</a>
       </div>
 
       <div class="my-stats">

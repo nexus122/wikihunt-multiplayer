@@ -5,7 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
 import { SocketService } from '../../core/services/socket.service';
 import { WikipediaService } from '../../core/services/wikipedia.service';
-import { RoomInfo, PlayerPublicInfo, LeaderboardEntry } from '../../core/models/types';
+import { RoomInfo, PlayerPublicInfo, LeaderboardEntry, WikiPage } from '../../core/models/types';
 
 @Component({
   selector: 'app-game',
@@ -37,6 +37,9 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
   // Timer
   elapsed = '00:00';
   private timerSub?: Subscription;
+
+  // Target info
+  targetSummary: WikiPage | null = null;
 
   // Multiplayer
   players: PlayerPublicInfo[] = [];
@@ -112,6 +115,12 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     this.startTimer();
     this.loadPage(this.currentPage);
     this.setupSocketListeners();
+
+    // Fetch brief description of the target page
+    this.wikiService.getPageSummary(this.targetPage).subscribe({
+      next: (s) => { this.targetSummary = s; },
+      error: () => {},
+    });
 
     // Save game state so the player can rejoin if they accidentally leave.
     // Steps/currentPage/path are updated on every navigation via saveProgress().

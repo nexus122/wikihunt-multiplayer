@@ -56,6 +56,23 @@
     color: var(--danger);
     display: block;
     word-break: break-word;
+    margin-bottom: 6px;
+  }
+
+  .target-extract {
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    margin: 0 0 7px;
+  }
+
+  .target-link {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(248,81,73,.7);
+    text-decoration: none;
+    display: inline-block;
+    &:hover { color: var(--danger); text-decoration: underline; }
   }
 }
 

@@ -40,50 +40,67 @@
         <div class="card host-card">
           <h3>Game Setup</h3>
 
-          <label class="toggle">
-            <span>Custom pages</span>
-            <input type="checkbox" [(ngModel)]="useCustomPages" />
-            <span class="slider"></span>
-            <span class="toggle-hint">{{ useCustomPages ? 'Custom pages' : 'Random pages' }}</span>
-          </label>
-
-          @if (useCustomPages) {
-            <div class="page-pickers">
-              <div class="picker">
+          <div class="page-pickers">
+            <!-- Start page picker -->
+            <div class="picker">
+              <div class="picker-row">
                 <label>Start page</label>
-                <div class="search-wrap">
-                  <input type="text" placeholder="Search Wikipedia..." [(ngModel)]="searchStartQuery" (input)="searchStart()" />
-                  @if (startResults.length) {
-                    <div class="results">
-                      @for (r of startResults; track r.title) {
-                        <button class="result" (click)="selectStart(r)">{{ r.title }}</button>
-                      }
-                    </div>
-                  }
+                <div class="mode-pills">
+                  <button class="pill" [class.active]="!customStart" (click)="setStartMode(false)">🎲 Random</button>
+                  <button class="pill" [class.active]="customStart" (click)="setStartMode(true)">Custom</button>
                 </div>
+              </div>
+              @if (customStart) {
                 @if (selectedStart) {
-                  <span class="page-tag start">{{ selectedStart.title }}</span>
+                  <div class="page-chip">
+                    <span class="page-tag start">{{ selectedStart.title }}</span>
+                    <button class="chip-clear" (click)="clearStart()" title="Clear">✕</button>
+                  </div>
+                } @else {
+                  <div class="search-wrap">
+                    <input type="text" placeholder="Search Wikipedia..." [(ngModel)]="searchStartQuery" (input)="searchStart()" />
+                    @if (startResults.length) {
+                      <div class="results">
+                        @for (r of startResults; track r.title) {
+                          <button class="result" (click)="selectStart(r)">{{ r.title }}</button>
+                        }
+                      </div>
+                    }
+                  </div>
                 }
-              </div>
-
-              <div class="picker">
-                <label>Target page</label>
-                <div class="search-wrap">
-                  <input type="text" placeholder="Search Wikipedia..." [(ngModel)]="searchTargetQuery" (input)="searchTarget()" />
-                  @if (targetResults.length) {
-                    <div class="results">
-                      @for (r of targetResults; track r.title) {
-                        <button class="result" (click)="selectTarget(r)">{{ r.title }}</button>
-                      }
-                    </div>
-                  }
-                </div>
-                @if (selectedTarget) {
-                  <span class="page-tag target">{{ selectedTarget.title }}</span>
-                }
-              </div>
+              }
             </div>
-          }
+
+            <!-- Target page picker -->
+            <div class="picker">
+              <div class="picker-row">
+                <label>Target page</label>
+                <div class="mode-pills">
+                  <button class="pill" [class.active]="!customTarget" (click)="setTargetMode(false)">🎲 Random</button>
+                  <button class="pill" [class.active]="customTarget" (click)="setTargetMode(true)">Custom</button>
+                </div>
+              </div>
+              @if (customTarget) {
+                @if (selectedTarget) {
+                  <div class="page-chip">
+                    <span class="page-tag target">{{ selectedTarget.title }}</span>
+                    <button class="chip-clear" (click)="clearTarget()" title="Clear">✕</button>
+                  </div>
+                } @else {
+                  <div class="search-wrap">
+                    <input type="text" placeholder="Search Wikipedia..." [(ngModel)]="searchTargetQuery" (input)="searchTarget()" />
+                    @if (targetResults.length) {
+                      <div class="results">
+                        @for (r of targetResults; track r.title) {
+                          <button class="result" (click)="selectTarget(r)">{{ r.title }}</button>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          </div>
 
           <div class="field">
             <label>Tiempo de gracia tras el primer ganador</label>
@@ -104,7 +121,7 @@
           <button
             class="btn-success start-btn"
             (click)="startGame()"
-            [disabled]="starting || (useCustomPages && (!selectedStart || !selectedTarget))"
+            [disabled]="starting"
           >
             {{ starting ? 'Starting...' : '🚀 Start Game' }}
           </button>
