@@ -12,6 +12,11 @@
   text-align: center;
   .logo { font-size: 52px; letter-spacing: -2px; margin-bottom: 10px; }
   .tagline { color: var(--text-secondary); font-size: 17px; }
+
+  @media (max-width: 480px) {
+    .logo { font-size: 38px; }
+    .tagline { font-size: 15px; }
+  }
 }
 
 .form-card { width: 100%; max-width: 400px; }
@@ -68,6 +73,10 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .step {

@@ -53,6 +53,9 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
   // Path history modal
   showPath = false;
 
+  // Mobile drawer
+  mobileMenuOpen = false;
+
   private subs: Subscription[] = [];
 
   constructor(

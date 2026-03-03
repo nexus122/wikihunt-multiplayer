@@ -1,8 +1,32 @@
 <div class="game">
-  <!-- Sidebar -->
-  <aside class="sidebar">
+
+  <!-- ─── Mobile top HUD ─── -->
+  <div class="mobile-hud">
+    <div class="hud-target">
+      <span class="hud-label">TARGET</span>
+      <span class="hud-value">{{ targetPage }}</span>
+    </div>
+    <div class="hud-meta">
+      <span class="hud-chip accent">{{ mySteps }} steps</span>
+      <span class="hud-chip">{{ elapsed }}</span>
+    </div>
+    <button class="hud-players-btn" (click)="mobileMenuOpen = true">
+      👥 {{ players.length }}
+    </button>
+  </div>
+
+  <!-- ─── Mobile overlay ─── -->
+  @if (mobileMenuOpen) {
+    <div class="mobile-overlay" (click)="mobileMenuOpen = false"></div>
+  }
+
+  <!-- ─── Sidebar ─── -->
+  <aside class="sidebar" [class.mobile-open]="mobileMenuOpen">
     <div class="sidebar-top">
-      <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
+      <div class="sidebar-head">
+        <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
+        <button class="sidebar-close-btn btn-secondary" (click)="mobileMenuOpen = false">✕</button>
+      </div>
 
       <div class="target-box">
         <span class="label">TARGET</span>
@@ -26,7 +50,7 @@
       </div>
 
       @if (myPath.length > 1) {
-        <button class="back-btn btn-secondary" (click)="goBack()">← Back</button>
+        <button class="back-btn btn-secondary" (click)="goBack()">← Atrás</button>
       }
     </div>
 
@@ -47,12 +71,12 @@
       </ul>
     </div>
 
-    <button class="btn-secondary path-btn" (click)="showPath = !showPath">
+    <button class="btn-secondary path-btn" (click)="showPath = !showPath; mobileMenuOpen = false">
       {{ showPath ? 'Hide' : 'Show' }} my path
     </button>
   </aside>
 
-  <!-- Wikipedia Content -->
+  <!-- ─── Wikipedia Content ─── -->
   <main class="wiki-area">
     @if (loading) {
       <div class="loading">
@@ -73,7 +97,18 @@
     }
   </main>
 
-  <!-- Path modal -->
+  <!-- ─── Mobile bottom bar ─── -->
+  <div class="mobile-bottom">
+    @if (myPath.length > 1) {
+      <button class="btn-secondary mobile-btn" (click)="goBack()">← Atrás</button>
+    } @else {
+      <div class="mobile-btn-ghost"></div>
+    }
+    <span class="mobile-current-page">{{ currentPage }}</span>
+    <button class="btn-secondary mobile-btn" (click)="showPath = !showPath">📍 Ruta</button>
+  </div>
+
+  <!-- ─── Path modal ─── -->
   @if (showPath) {
     <div class="modal-overlay" (click)="showPath = false">
       <div class="modal path-modal" (click)="$event.stopPropagation()">
@@ -88,7 +123,7 @@
     </div>
   }
 
-  <!-- Countdown banner (aparece cuando alguien gana, todos tienen tiempo de llegar) -->
+  <!-- ─── Countdown banner ─── -->
   @if (countdownActive && winner) {
     <div class="countdown-banner" [class.urgent]="countdownSeconds <= 10">
       @if (iWon) {
@@ -102,7 +137,7 @@
     </div>
   }
 
-  <!-- Leaderboard (se muestra en cuanto alguien gana) -->
+  <!-- ─── Leaderboard ─── -->
   @if (showLeaderboard) {
     <div class="modal-overlay">
       <div class="modal leaderboard-modal">
@@ -135,4 +170,5 @@
       </div>
     </div>
   }
+
 </div>
