@@ -105,16 +105,23 @@ class RoomManager {
     }
   }
 
-  rejoinRoom(code: string, socketId: string, name: string): Room | null {
+  rejoinRoom(
+    code: string,
+    socketId: string,
+    name: string,
+    steps = 0,
+    currentPage?: string | null,
+    path?: string[],
+  ): Room | null {
     const room = this.rooms.get(code);
     if (!room || room.status !== 'playing') return null;
 
     const player: Player = {
       socketId,
       name,
-      currentPage: room.startPage,
-      steps: 0,
-      path: room.startPage ? [room.startPage] : [],
+      currentPage: currentPage || room.startPage,
+      steps,
+      path: path?.length ? path : (room.startPage ? [room.startPage] : []),
       finished: false,
     };
 

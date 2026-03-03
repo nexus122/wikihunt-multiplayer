@@ -21,7 +21,7 @@ export class HomeComponent implements OnInit {
   rejoining = false;
   error = '';
 
-  savedGame: { roomCode: string; playerName: string; isHost: boolean; startPage: string; targetPage: string } | null = null;
+  savedGame: { roomCode: string; playerName: string; isHost: boolean; startPage: string; targetPage: string; steps?: number; currentPage?: string; path?: string[] } | null = null;
 
   steps = [
     { n: 1, text: 'Create a room and share the code with friends' },
@@ -51,7 +51,9 @@ export class HomeComponent implements OnInit {
     this.rejoining = true;
     this.error = '';
 
-    this.socketService.rejoinGame(this.savedGame.roomCode, this.savedGame.playerName).subscribe({
+    const { roomCode, playerName, steps, currentPage, path } = this.savedGame;
+
+    this.socketService.rejoinGame(roomCode, playerName, steps, currentPage, path).subscribe({
       next: (data) => {
         if (!data.success || !data.startPage) {
           this.error = data.error || 'La partida ya no existe.';
@@ -67,6 +69,10 @@ export class HomeComponent implements OnInit {
             startPage: data.startPage,
             targetPage: data.targetPage,
             startTime: data.startTime,
+            // Restore client-side progress
+            rejoinSteps: steps || 0,
+            rejoinCurrentPage: currentPage,
+            rejoinPath: path,
           },
         });
       },

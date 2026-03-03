@@ -62,9 +62,15 @@ export class SocketService {
     });
   }
 
-  rejoinGame(code: string, name: string): Observable<{ success: boolean; startPage?: string; targetPage?: string; startTime?: number; room?: RoomInfo; error?: string }> {
+  rejoinGame(
+    code: string,
+    name: string,
+    steps = 0,
+    currentPage?: string,
+    path?: string[],
+  ): Observable<{ success: boolean; startPage?: string; targetPage?: string; startTime?: number; room?: RoomInfo; error?: string }> {
     return new Observable(obs => {
-      this.socket.emit('rejoin-game', { code, name }, (data: any) => {
+      this.socket.emit('rejoin-game', { code, name, steps, currentPage, path }, (data: any) => {
         obs.next(data);
         obs.complete();
       });

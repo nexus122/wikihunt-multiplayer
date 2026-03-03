@@ -84,6 +84,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     this.mySocketId = this.socketService.getSocketId();
     const state = history.state as {
       room: RoomInfo; isHost: boolean; startPage: string; targetPage: string; startTime: number;
+      rejoinSteps?: number; rejoinCurrentPage?: string; rejoinPath?: string[];
     } | undefined;
 
     if (!state?.startPage) {
@@ -97,20 +98,32 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     this.targetPage = state.targetPage;
     this.startTime = state.startTime || Date.now();
     this.players = state.room?.players || [];
-    this.myPath = [this.startPage];
-    this.currentPage = this.startPage;
+
+    // Restore progress if rejoining mid-game
+    if (state.rejoinCurrentPage) {
+      this.mySteps = state.rejoinSteps || 0;
+      this.currentPage = state.rejoinCurrentPage;
+      this.myPath = state.rejoinPath?.length ? state.rejoinPath : [this.startPage];
+    } else {
+      this.myPath = [this.startPage];
+      this.currentPage = this.startPage;
+    }
 
     this.startTimer();
-    this.loadPage(this.startPage);
+    this.loadPage(this.currentPage);
     this.setupSocketListeners();
 
-    // Save game state so the player can rejoin if they accidentally leave
+    // Save game state so the player can rejoin if they accidentally leave.
+    // Steps/currentPage/path are updated on every navigation via saveProgress().
     localStorage.setItem('wh_game', JSON.stringify({
       roomCode: this.room?.code || '',
       playerName: localStorage.getItem('wh_name') || '',
       isHost: this.isHost,
       startPage: this.startPage,
       targetPage: this.targetPage,
+      steps: this.mySteps,
+      currentPage: this.currentPage,
+      path: this.myPath,
     }));
 
     // Trap browser back button inside the game
@@ -293,6 +306,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
         this.myPath[this.myPath.length - 1] = data.title;
         this.pageContent = this.sanitizer.bypassSecurityTrustHtml(this.processHtml(data.html));
         this.loading = false;
+        this.saveProgress();
         setTimeout(() => this.scrollToTop(), 50);
 
         // Send canonical title to server for win detection
@@ -316,6 +330,19 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  private saveProgress(): void {
+    const saved = localStorage.getItem('wh_game');
+    if (!saved) return;
+    try {
+      localStorage.setItem('wh_game', JSON.stringify({
+        ...JSON.parse(saved),
+        steps: this.mySteps,
+        currentPage: this.currentPage,
+        path: this.myPath,
+      }));
+    } catch { /* ignore */ }
+  }
+
   private scrollToTop(): void {
     if (this.wikiContentEl?.nativeElement) {
       this.wikiContentEl.nativeElement.scrollTop = 0;
@@ -327,6 +354,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     this.myPath.pop();
     const prev = this.myPath[this.myPath.length - 1];
     this.currentPage = prev;
+    this.saveProgress();
     this.loadPage(prev);
     // Note: going back doesn't count as a step (no navigate emit)
   }

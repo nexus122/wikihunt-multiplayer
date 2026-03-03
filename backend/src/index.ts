@@ -133,9 +133,12 @@ io.on('connection', (socket) => {
     }
   );
 
-  socket.on('rejoin-game', ({ code, name }: { code: string; name: string }, callback: Function) => {
+  socket.on('rejoin-game', (
+    { code, name, steps, currentPage, path }: { code: string; name: string; steps?: number; currentPage?: string; path?: string[] },
+    callback: Function
+  ) => {
     try {
-      const room = roomManager.rejoinRoom(code.toUpperCase().trim(), socket.id, name);
+      const room = roomManager.rejoinRoom(code.toUpperCase().trim(), socket.id, name, steps, currentPage, path);
       if (!room) {
         callback({ success: false, error: 'La partida no existe o ya ha terminado' });
         return;
