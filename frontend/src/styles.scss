@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --border-color: #30363d;
+  --text-primary: #f0f6fc;
+  --text-secondary: #8b949e;
+  --accent: #58a6ff;
+  --accent-hover: #79b8ff;
+  --success: #3fb950;
+  --warning: #d29922;
+  --danger: #f85149;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-hover); text-decoration: underline; }
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 20px;
+  transition: all 0.15s ease;
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.btn-primary {
+  background: var(--accent); color: #0d1117;
+  &:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+}
+.btn-secondary {
+  background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color);
+  &:hover:not(:disabled) { background: var(--border-color); }
+}
+.btn-success {
+  background: var(--success); color: #0d1117;
+  &:hover:not(:disabled) { filter: brightness(1.1); }
+}
+.btn-danger {
+  background: var(--danger); color: white;
+  &:hover:not(:disabled) { filter: brightness(1.1); }
+}
+
+input, select {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.15s ease;
+  width: 100%;
+  &:focus { border-color: var(--accent); }
+  &::placeholder { color: var(--text-secondary); }
+}
+
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.badge {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  color: var(--text-secondary);
+}
+
+.error-message {
+  background: rgba(248, 81, 73, 0.1);
+  border: 1px solid rgba(248, 81, 73, 0.3);
+  border-radius: 8px;
+  color: var(--danger);
+  font-size: 14px;
+  padding: 10px 14px;
+  margin-top: 8px;
+}
+
+.wh-logo {
+  font-weight: 800;
+  .logo-wiki { color: var(--text-primary); }
+  .logo-hunt { color: var(--accent); }
+}

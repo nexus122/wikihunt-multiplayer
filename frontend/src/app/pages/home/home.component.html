@@ -1,0 +1,57 @@
+<div class="home">
+  <div class="hero">
+    <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
+    <p class="tagline">Race through Wikipedia. First to the target wins.</p>
+  </div>
+
+  <div class="card form-card">
+    <div class="tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'create'" (click)="activeTab='create'; error=''">Create Room</button>
+      <button class="tab-btn" [class.active]="activeTab === 'join'" (click)="activeTab='join'; error=''">Join Room</button>
+    </div>
+
+    @if (activeTab === 'create') {
+      <div class="tab-content">
+        <div class="field">
+          <label>Your name</label>
+          <input type="text" placeholder="Enter your name" [(ngModel)]="createName" maxlength="20" (keydown.enter)="createRoom()" autofocus />
+        </div>
+        <button class="btn-primary" (click)="createRoom()" [disabled]="creating">
+          {{ creating ? 'Creating...' : '🚀 Create Room' }}
+        </button>
+      </div>
+    }
+
+    @if (activeTab === 'join') {
+      <div class="tab-content">
+        <div class="field">
+          <label>Your name</label>
+          <input type="text" placeholder="Enter your name" [(ngModel)]="joinName" maxlength="20" />
+        </div>
+        <div class="field">
+          <label>Room code</label>
+          <input class="code-input" type="text" placeholder="ABC123" [(ngModel)]="joinCode" maxlength="6" (keydown.enter)="joinRoom()" />
+        </div>
+        <button class="btn-primary" (click)="joinRoom()" [disabled]="joining">
+          {{ joining ? 'Joining...' : '🎮 Join Room' }}
+        </button>
+      </div>
+    }
+
+    @if (error) {
+      <div class="error-message">{{ error }}</div>
+    }
+  </div>
+
+  <div class="how-to-play">
+    <h3>How to play</h3>
+    <div class="steps">
+      @for (step of steps; track step.n) {
+        <div class="step">
+          <span class="step-num">{{ step.n }}</span>
+          <p>{{ step.text }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

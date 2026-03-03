@@ -1,0 +1,138 @@
+<div class="game">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
+
+      <div class="target-box">
+        <span class="label">TARGET</span>
+        <span class="target-name">{{ targetPage }}</span>
+      </div>
+
+      <div class="my-stats">
+        <div class="stat">
+          <span class="stat-label">Steps</span>
+          <span class="stat-value">{{ mySteps }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Time</span>
+          <span class="stat-value">{{ elapsed }}</span>
+        </div>
+      </div>
+
+      <div class="current-page">
+        <span class="label">Current page</span>
+        <span class="page-name">{{ currentPage }}</span>
+      </div>
+
+      @if (myPath.length > 1) {
+        <button class="back-btn btn-secondary" (click)="goBack()">← Back</button>
+      }
+    </div>
+
+    <div class="players-section">
+      <p class="label">Players</p>
+      <ul class="players">
+        @for (p of players; track p.socketId) {
+          <li class="player" [class.me]="p.socketId === mySocketId" [class.finished]="p.finished">
+            <div class="avatar sm" [style.background]="getAvatarColor(p.socketId)">{{ p.name[0].toUpperCase() }}</div>
+            <div class="player-info">
+              <span class="player-name">{{ p.name }}</span>
+              <span class="player-page">{{ p.currentPage || '...' }}</span>
+            </div>
+            <span class="player-steps">{{ p.steps }}</span>
+            @if (p.finished) { <span class="done">✓</span> }
+          </li>
+        }
+      </ul>
+    </div>
+
+    <button class="btn-secondary path-btn" (click)="showPath = !showPath">
+      {{ showPath ? 'Hide' : 'Show' }} my path
+    </button>
+  </aside>
+
+  <!-- Wikipedia Content -->
+  <main class="wiki-area">
+    @if (loading) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading article...</p>
+      </div>
+    } @else if (loadError) {
+      <div class="load-error">
+        <p>{{ loadError }}</p>
+      </div>
+    } @else {
+      <div
+        #wikiContent
+        class="wiki-content"
+        [innerHTML]="pageContent"
+        (click)="onContentClick($event)"
+      ></div>
+    }
+  </main>
+
+  <!-- Path modal -->
+  @if (showPath) {
+    <div class="modal-overlay" (click)="showPath = false">
+      <div class="modal path-modal" (click)="$event.stopPropagation()">
+        <h3>My Path ({{ myPath.length }} pages)</h3>
+        <ol class="path-list">
+          @for (p of myPath; track $index) {
+            <li [class.current]="p === currentPage">{{ p }}</li>
+          }
+        </ol>
+        <button class="btn-secondary" (click)="showPath = false">Close</button>
+      </div>
+    </div>
+  }
+
+  <!-- Countdown banner (aparece cuando alguien gana, todos tienen tiempo de llegar) -->
+  @if (countdownActive && winner) {
+    <div class="countdown-banner" [class.urgent]="countdownSeconds <= 10">
+      @if (iWon) {
+        <span>🏆 ¡Llegaste! Esperando a los demás…</span>
+      } @else {
+        <span>🏁 <strong>{{ winner.name }}</strong> llegó primero — ¡sigue intentándolo!</span>
+      }
+      <div class="countdown-timer" [class.urgent]="countdownSeconds <= 10">
+        {{ countdownSeconds }}s
+      </div>
+    </div>
+  }
+
+  <!-- Leaderboard (se muestra en cuanto alguien gana) -->
+  @if (showLeaderboard) {
+    <div class="modal-overlay">
+      <div class="modal leaderboard-modal">
+        <div class="lb-header">
+          @if (iWon) {
+            <div class="result-badge won">🏆 ¡Ganaste!</div>
+          } @else {
+            <div class="result-badge lost">mejor suerte la próxima</div>
+          }
+          <h2>Fin de la partida</h2>
+          <p class="route-label">{{ startPage }} → {{ targetPage }}</p>
+        </div>
+
+        <ul class="leaderboard">
+          @for (e of leaderboard; track e.socketId; let i = $index) {
+            <li class="lb-entry" [class.me]="e.socketId === mySocketId" [class.winner]="i === 0 && e.finished">
+              <span class="rank">{{ getRankEmoji(i) }}</span>
+              <div class="avatar sm" [style.background]="getAvatarColor(e.socketId)">{{ e.name[0].toUpperCase() }}</div>
+              <span class="lb-name">{{ e.name }}@if (e.socketId === mySocketId) { <span class="you-tag">tú</span> }</span>
+              <span class="lb-steps">{{ e.steps }} pasos</span>
+              <span class="lb-time">{{ e.finished ? formatTime(e.time) : 'No terminó' }}</span>
+            </li>
+          }
+        </ul>
+
+        <div class="lb-actions">
+          <button class="btn-primary" (click)="playAgain()">Jugar de nuevo</button>
+          <button class="btn-secondary" (click)="goHome()">Inicio</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

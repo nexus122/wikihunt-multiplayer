@@ -1,0 +1,123 @@
+@if (room) {
+<div class="lobby">
+  <header class="header">
+    <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
+    <button class="btn-secondary" (click)="leaveRoom()">← Leave</button>
+  </header>
+
+  <div class="content">
+    <!-- Room Code -->
+    <div class="card code-card">
+      <p class="label">Room Code</p>
+      <div class="code-row">
+        <span class="code">{{ roomCode }}</span>
+        <button class="btn-secondary" (click)="copyCode()">{{ codeCopied ? '✓ Copied!' : 'Copy' }}</button>
+      </div>
+      <p class="hint">Share this code with friends</p>
+    </div>
+
+    <div class="grid">
+      <!-- Players -->
+      <div class="card">
+        <h3>Players <span class="badge">{{ room.players.length }}</span></h3>
+        <ul class="player-list">
+          @for (p of room.players; track p.socketId) {
+            <li class="player-item">
+              <div class="avatar" [style.background]="getAvatarColor(p.socketId)">{{ p.name[0].toUpperCase() }}</div>
+              <span class="name">{{ p.name }}</span>
+              @if (p.socketId === room.hostId) { <span class="tag host">Host</span> }
+              @if (p.socketId === mySocketId) { <span class="tag you">You</span> }
+            </li>
+          }
+        </ul>
+        @if (room.players.length === 1) {
+          <p class="waiting-hint">Waiting for players...</p>
+        }
+      </div>
+
+      <!-- Host Controls / Waiting -->
+      @if (isHost) {
+        <div class="card host-card">
+          <h3>Game Setup</h3>
+
+          <label class="toggle">
+            <span>Custom pages</span>
+            <input type="checkbox" [(ngModel)]="useCustomPages" />
+            <span class="slider"></span>
+            <span class="toggle-hint">{{ useCustomPages ? 'Custom pages' : 'Random pages' }}</span>
+          </label>
+
+          @if (useCustomPages) {
+            <div class="page-pickers">
+              <div class="picker">
+                <label>Start page</label>
+                <div class="search-wrap">
+                  <input type="text" placeholder="Search Wikipedia..." [(ngModel)]="searchStartQuery" (input)="searchStart()" />
+                  @if (startResults.length) {
+                    <div class="results">
+                      @for (r of startResults; track r.title) {
+                        <button class="result" (click)="selectStart(r)">{{ r.title }}</button>
+                      }
+                    </div>
+                  }
+                </div>
+                @if (selectedStart) {
+                  <span class="page-tag start">{{ selectedStart.title }}</span>
+                }
+              </div>
+
+              <div class="picker">
+                <label>Target page</label>
+                <div class="search-wrap">
+                  <input type="text" placeholder="Search Wikipedia..." [(ngModel)]="searchTargetQuery" (input)="searchTarget()" />
+                  @if (targetResults.length) {
+                    <div class="results">
+                      @for (r of targetResults; track r.title) {
+                        <button class="result" (click)="selectTarget(r)">{{ r.title }}</button>
+                      }
+                    </div>
+                  }
+                </div>
+                @if (selectedTarget) {
+                  <span class="page-tag target">{{ selectedTarget.title }}</span>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="field">
+            <label>Tiempo de gracia tras el primer ganador</label>
+            <div class="grace-options">
+              @for (opt of graceOptions; track opt.value) {
+                <button
+                  class="grace-btn"
+                  [class.active]="graceTime === opt.value"
+                  (click)="graceTime = opt.value"
+                >{{ opt.label }}</button>
+              }
+            </div>
+            <p class="field-hint">Los demás jugadores tendrán este tiempo para llegar al destino</p>
+          </div>
+
+          @if (error) { <div class="error-message">{{ error }}</div> }
+
+          <button
+            class="btn-success start-btn"
+            (click)="startGame()"
+            [disabled]="starting || (useCustomPages && (!selectedStart || !selectedTarget))"
+          >
+            {{ starting ? 'Starting...' : '🚀 Start Game' }}
+          </button>
+        </div>
+      } @else {
+        <div class="card waiting-card">
+          <div class="dots">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+          <p>Waiting for the host to start...</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+}
