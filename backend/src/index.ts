@@ -17,15 +17,19 @@ app.use(express.json());
 app.use('/api/wikipedia', wikipediaRouter);
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-async function isPageValid(title: string): Promise<boolean> {
+// Returns the canonical Wikipedia title (after redirects) via Content-Location header, or null if invalid
+async function getCanonicalTitle(title: string): Promise<string | null> {
   try {
     const res = await fetch(
       `https://es.wikipedia.org/api/rest_v1/page/html/${encodeURIComponent(title)}`,
       { method: 'HEAD' }
     );
-    return res.ok;
+    if (!res.ok) return null;
+    const cl = res.headers.get('content-location');
+    const encoded = cl?.split('/page/html/')[1]?.split('/')[0];
+    return encoded ? decodeURIComponent(encoded).replace(/_/g, ' ') : title;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -41,12 +45,12 @@ async function getValidRandomPage(maxAttempts = 10): Promise<string> {
       if (data.type === 'disambiguation') continue;
       if (!data.extract || data.extract.length < 150) continue;
 
-      // Verificar que el endpoint de contenido HTML responde correctamente
-      const valid = await isPageValid(data.title);
-      if (!valid) continue;
+      // Obtener el título canónico real (el que Wikipedia usa en sus propios links)
+      const canonical = await getCanonicalTitle(data.title);
+      if (!canonical) continue;
 
-      console.log(`[Page] Valid page found: "${data.title}" (attempt ${i + 1})`);
-      return data.title;
+      console.log(`[Page] Valid page found: "${canonical}" (attempt ${i + 1})`);
+      return canonical;
     } catch {
       continue;
     }

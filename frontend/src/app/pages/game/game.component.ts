@@ -58,6 +58,20 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private subs: Subscription[] = [];
 
+  // Intercept browser back button: navigate within the game instead of leaving it
+  private readonly onPopState = (): void => {
+    history.pushState(null, '', window.location.href);
+    if (this.showLeaderboard) {
+      this.router.navigate(['/']);
+      return;
+    }
+    if (this.myPath.length > 1) {
+      this.goBack();
+    } else {
+      this.router.navigate(['/']);
+    }
+  };
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -89,6 +103,10 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     this.startTimer();
     this.loadPage(this.startPage);
     this.setupSocketListeners();
+
+    // Trap browser back button inside the game
+    history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', this.onPopState);
   }
 
   ngAfterViewInit(): void {}
@@ -97,6 +115,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subs.forEach(s => s.unsubscribe());
     this.timerSub?.unsubscribe();
     clearInterval(this.countdownInterval);
+    window.removeEventListener('popstate', this.onPopState);
   }
 
   private startCountdown(seconds: number): void {
@@ -180,7 +199,12 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loadError = '';
     this.wikiService.getPageContent(title).subscribe({
       next: (data) => {
+        // Use canonical title returned by API (follows Wikipedia redirects)
         this.pageTitle = data.title;
+        this.currentPage = data.title;
+        if (this.myPath.length > 0) {
+          this.myPath[this.myPath.length - 1] = data.title;
+        }
         this.pageContent = this.sanitizer.bypassSecurityTrustHtml(this.processHtml(data.html));
         this.loading = false;
         setTimeout(() => this.scrollToTop(), 50);
@@ -253,12 +277,16 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
       next: (data) => {
         // Solo contamos el paso si la página existe
         this.mySteps++;
+        // Use canonical title from API — Wikipedia may redirect e.g. "Highland City" → "Highland City (Florida)"
         this.pageTitle = data.title;
+        this.currentPage = data.title;
+        this.myPath[this.myPath.length - 1] = data.title;
         this.pageContent = this.sanitizer.bypassSecurityTrustHtml(this.processHtml(data.html));
         this.loading = false;
         setTimeout(() => this.scrollToTop(), 50);
 
-        this.socketService.navigate(title).subscribe({
+        // Send canonical title to server for win detection
+        this.socketService.navigate(data.title).subscribe({
           next: (res) => {
             if (res.won) {
               this.iWon = true;

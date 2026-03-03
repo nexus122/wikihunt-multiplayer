@@ -66,7 +66,16 @@ router.get('/content/:title', async (req: Request, res: Response) => {
       return;
     }
     const html = await response.text();
-    res.json({ html, title: decodeURIComponent(title) });
+
+    // Extract canonical title from Content-Location header (e.g. "Highland City" → "Highland City (Florida)")
+    // This ensures win detection uses the same title Wikipedia uses in its own links
+    const cl = response.headers.get('content-location');
+    const encoded = cl?.split('/page/html/')[1]?.split('/')[0];
+    const canonicalTitle = encoded
+      ? decodeURIComponent(encoded).replace(/_/g, ' ')
+      : decodeURIComponent(title);
+
+    res.json({ html, title: canonicalTitle });
   } catch {
     res.status(500).json({ error: 'Failed to fetch page content' });
   }
