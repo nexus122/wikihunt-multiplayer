@@ -517,10 +517,18 @@
 
   .wiki-content {
     padding: 14px 16px;
+    overflow-x: hidden;
 
     h1 { font-size: 22px; }
     h2 { font-size: 18px; }
     h3 { font-size: 15px; }
+
+    // Images and their containers must never exceed the viewport width
+    img, figure {
+      max-width: 100% !important;
+      height: auto !important;
+      width: auto !important;
+    }
 
     // Infoboxes: no floats on mobile, full width
     .infobox, .thumb {
