@@ -6,6 +6,7 @@ export interface Player {
   path: string[];
   finished: boolean;
   finishTime?: number;
+  gaveUp?: boolean;
 }
 
 export interface Room {
@@ -39,6 +40,7 @@ export interface PlayerPublicInfo {
   path: string[];
   finished: boolean;
   finishTime?: number;
+  gaveUp?: boolean;
 }
 
 export interface LeaderboardEntry {
@@ -47,5 +49,6 @@ export interface LeaderboardEntry {
   steps: number;
   time?: number;
   finished: boolean;
+  gaveUp?: boolean;
   path: string[];
 }

@@ -56,6 +56,10 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
   // Path history modal
   showPath = false;
 
+  // Give up / spectator
+  showGiveUpConfirm = false;
+  isSpectating = false;
+
   // Mobile drawer
   mobileMenuOpen = false;
 
@@ -223,6 +227,14 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
         this.players = room.players;
       })
     );
+
+    this.subs.push(
+      this.socketService.onPlayerGaveUp().subscribe(ev => {
+        this.players = this.players.map(p =>
+          p.socketId === ev.playerId ? { ...p, gaveUp: true } : p
+        );
+      })
+    );
   }
 
   // Carga la página inicial (sin contar pasos)
@@ -262,7 +274,15 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     return content;
   }
 
+  giveUp(): void {
+    this.showGiveUpConfirm = false;
+    this.isSpectating = true;
+    this.timerSub?.unsubscribe();
+    this.socketService.giveUp().subscribe();
+  }
+
   onContentClick(event: MouseEvent): void {
+    if (this.isSpectating) return;
     if (this.winner && !this.iWon) return; // Game over, don't navigate
 
     let target = event.target as HTMLElement | null;

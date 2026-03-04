@@ -6,6 +6,7 @@ export interface PlayerPublicInfo {
   path: string[];
   finished: boolean;
   finishTime?: number;
+  gaveUp?: boolean;
 }
 
 export interface RoomInfo {
@@ -24,7 +25,13 @@ export interface LeaderboardEntry {
   steps: number;
   time?: number;
   finished: boolean;
+  gaveUp?: boolean;
   path: string[];
+}
+
+export interface PlayerGaveUpEvent {
+  playerId: string;
+  name: string;
 }
 
 export interface WikiPage {

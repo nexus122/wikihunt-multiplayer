@@ -157,7 +157,7 @@ class RoomManager {
     if (!room || room.status !== 'playing') return null;
 
     const player = room.players.get(socketId);
-    if (!player || player.finished) return null;
+    if (!player || player.finished || player.gaveUp) return null;
 
     player.steps += 1;
     player.currentPage = page;
@@ -172,6 +172,17 @@ class RoomManager {
     return { player, room, won };
   }
 
+  giveUp(socketId: string): { player: Player; room: Room } | null {
+    const room = this.getRoomBySocketId(socketId);
+    if (!room || room.status !== 'playing') return null;
+
+    const player = room.players.get(socketId);
+    if (!player || player.finished || player.gaveUp) return null;
+
+    player.gaveUp = true;
+    return { player, room };
+  }
+
   getRoomInfo(room: Room): RoomInfo {
     const players: PlayerPublicInfo[] = Array.from(room.players.values()).map(p => ({
       socketId: p.socketId,
@@ -181,6 +192,7 @@ class RoomManager {
       path: p.path,
       finished: p.finished,
       finishTime: p.finishTime,
+      gaveUp: p.gaveUp,
     }));
 
     return {
@@ -217,6 +229,7 @@ class RoomManager {
         name: p.name,
         steps: p.steps,
         finished: false,
+        gaveUp: p.gaveUp || false,
         path: p.path,
       }));
 

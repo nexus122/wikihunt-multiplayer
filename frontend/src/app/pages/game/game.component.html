@@ -70,6 +70,7 @@
             </div>
             <span class="player-steps">{{ p.steps }}</span>
             @if (p.finished) { <span class="done">✓</span> }
+            @if (p.gaveUp) { <span class="gave-up-icon">🏳️</span> }
           </li>
         }
       </ul>
@@ -78,10 +79,23 @@
     <button class="btn-secondary path-btn" (click)="showPath = !showPath; mobileMenuOpen = false">
       {{ showPath ? 'Hide' : 'Show' }} my path
     </button>
+
+    @if (!iWon && !isSpectating) {
+      <button class="giveup-btn" (click)="showGiveUpConfirm = true">🏳️ Rendirse</button>
+    }
+    @if (isSpectating) {
+      <button class="btn-secondary" style="font-size:12px;padding:7px;width:100%" (click)="goHome()">← Salir</button>
+    }
   </aside>
 
   <!-- ─── Wikipedia Content ─── -->
-  <main class="wiki-area">
+  <main class="wiki-area" [class.spectating]="isSpectating">
+    @if (isSpectating) {
+      <div class="spectating-banner">
+        🏳️ Te has rendido &nbsp;·&nbsp; Mira cómo acaban los demás
+      </div>
+    }
+
     @if (loading) {
       <div class="loading">
         <div class="spinner"></div>
@@ -111,6 +125,21 @@
     <span class="mobile-current-page">{{ currentPage }}</span>
     <button class="btn-secondary mobile-btn" (click)="showPath = !showPath">📍 Ruta</button>
   </div>
+
+  <!-- ─── Give up modal ─── -->
+  @if (showGiveUpConfirm) {
+    <div class="modal-overlay" (click)="showGiveUpConfirm = false">
+      <div class="modal giveup-modal" (click)="$event.stopPropagation()">
+        <p class="giveup-emoji">🏳️</p>
+        <h3>¿Te rindes?</h3>
+        <p class="giveup-sub">Saldrás de la partida. Los demás seguirán jugando.</p>
+        <div class="giveup-actions">
+          <button class="btn-danger" (click)="giveUp()">Sí, me rindo</button>
+          <button class="btn-secondary" (click)="showGiveUpConfirm = false">Seguir intentándolo</button>
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- ─── Path modal ─── -->
   @if (showPath) {
@@ -162,7 +191,7 @@
               <div class="avatar sm" [style.background]="getAvatarColor(e.socketId)">{{ e.name[0].toUpperCase() }}</div>
               <span class="lb-name">{{ e.name }}@if (e.socketId === mySocketId) { <span class="you-tag">tú</span> }</span>
               <span class="lb-steps">{{ e.steps }} pasos</span>
-              <span class="lb-time">{{ e.finished ? formatTime(e.time) : 'No terminó' }}</span>
+              <span class="lb-time">{{ e.finished ? formatTime(e.time) : (e.gaveUp ? '🏳️ Rendido' : 'No terminó') }}</span>
             </li>
           }
         </ul>

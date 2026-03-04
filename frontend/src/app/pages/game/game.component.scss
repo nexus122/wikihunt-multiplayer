@@ -143,6 +143,46 @@
 
 .path-btn { font-size: 12px; padding: 7px; width: 100%; }
 
+.giveup-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 12px;
+  padding: 7px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all .15s;
+  &:hover { border-color: var(--danger); color: var(--danger); }
+}
+
+.giveup-modal {
+  text-align: center;
+  max-width: 340px;
+
+  .giveup-emoji { font-size: 36px; margin: 0 0 10px; }
+  h3 { font-size: 18px; margin-bottom: 8px; }
+  .giveup-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
+}
+
+.giveup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  button { width: 100%; padding: 10px; }
+}
+
+.btn-danger {
+  background: rgba(248,81,73,.15);
+  border: 1px solid rgba(248,81,73,.4);
+  color: var(--danger);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  &:hover { background: rgba(248,81,73,.25); }
+}
+
 /* ─── Wiki Area ─── */
 .wiki-area {
   flex: 1;
@@ -151,6 +191,22 @@
   flex-direction: column;
   background: #fff;
   min-width: 0;
+
+  &.spectating .wiki-content {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+}
+
+.spectating-banner {
+  background: rgba(139,148,158,.1);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 20px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 .loading, .load-error {

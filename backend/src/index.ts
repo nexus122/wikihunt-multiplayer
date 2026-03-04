@@ -203,8 +203,8 @@ io.on('connection', (socket) => {
           }, room.graceTime * 1000);
         }
 
-        // Si ya terminaron todos, cancelar el countdown y terminar ya
-        const allFinished = Array.from(room.players.values()).every(p => p.finished);
+        // Si ya terminaron todos (o se rindieron), cancelar el countdown y terminar ya
+        const allFinished = Array.from(room.players.values()).every(p => p.finished || p.gaveUp);
         if (allFinished && room.graceTimeoutId) {
           clearTimeout(room.graceTimeoutId);
           room.graceTimeoutId = undefined;
@@ -218,6 +218,32 @@ io.on('connection', (socket) => {
       callback({ success: true, won });
     } catch {
       callback({ success: false, won: false });
+    }
+  });
+
+  socket.on('give-up', (_: unknown, callback: Function) => {
+    try {
+      const result = roomManager.giveUp(socket.id);
+      if (!result) { callback({ success: false }); return; }
+
+      const { player, room } = result;
+      console.log(`[GiveUp] ${player.name} gave up in ${room.code}`);
+
+      io.to(room.code).emit('player-gave-up', { playerId: socket.id, name: player.name });
+
+      // Si ya no quedan jugadores activos, terminar la partida
+      const allDone = Array.from(room.players.values()).every(p => p.finished || p.gaveUp);
+      if (allDone) {
+        if (room.graceTimeoutId) {
+          clearTimeout(room.graceTimeoutId);
+          room.graceTimeoutId = undefined;
+        }
+        io.to(room.code).emit('game-finished', { leaderboard: roomManager.getLeaderboard(room) });
+      }
+
+      callback({ success: true });
+    } catch {
+      callback({ success: false });
     }
   });
 

@@ -9,6 +9,7 @@ import {
   PlayerWonEvent,
   GameFinishedEvent,
   CountdownStartedEvent,
+  PlayerGaveUpEvent,
 } from '../models/types';
 
 @Injectable({ providedIn: 'root' })
@@ -77,6 +78,15 @@ export class SocketService {
     });
   }
 
+  giveUp(): Observable<{ success: boolean }> {
+    return new Observable(obs => {
+      this.socket.emit('give-up', {}, (data: { success: boolean }) => {
+        obs.next(data);
+        obs.complete();
+      });
+    });
+  }
+
   navigate(page: string): Observable<{ success: boolean; won: boolean }> {
     return new Observable(obs => {
       this.socket.emit('navigate', { page }, (data: { success: boolean; won: boolean }) => {
@@ -125,6 +135,13 @@ export class SocketService {
     return new Observable(obs => {
       this.socket.on('countdown-started', (data: CountdownStartedEvent) => obs.next(data));
       return () => this.socket.off('countdown-started');
+    });
+  }
+
+  onPlayerGaveUp(): Observable<PlayerGaveUpEvent> {
+    return new Observable(obs => {
+      this.socket.on('player-gave-up', (data: PlayerGaveUpEvent) => obs.next(data));
+      return () => this.socket.off('player-gave-up');
     });
   }
 
