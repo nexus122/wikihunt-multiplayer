@@ -19,8 +19,9 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Game state
   room: RoomInfo | null = null;
-  isHost = false;
+  get isHost(): boolean { return !!this.room && this.room.hostId === this.mySocketId; }
   mySocketId = '';
+  socketDisconnected = false;
   startPage = '';
   targetPage = '';
   startTime = 0;
@@ -103,7 +104,6 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.room = state.room;
-    this.isHost = state.isHost;
     this.startPage = state.startPage;
     this.targetPage = state.targetPage;
     this.startTime = state.startTime || Date.now();
@@ -208,7 +208,6 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
         this.winner = ev.winner;
         this.countdownSeconds = ev.seconds;
         this.countdownActive = true;
-        if (!this.iWon) this.timerSub?.unsubscribe(); // parar el timer propio
         this.startCountdown(ev.seconds);
       })
     );
@@ -238,6 +237,40 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
         );
       })
     );
+
+    this.subs.push(
+      this.socketService.onDisconnect().subscribe(() => {
+        if (!this.showLeaderboard) this.socketDisconnected = true;
+      })
+    );
+
+    this.subs.push(
+      this.socketService.onConnect().subscribe(() => {
+        if (!this.socketDisconnected) return;
+        this.socketDisconnected = false;
+        this.autoRejoin();
+      })
+    );
+  }
+
+  private autoRejoin(): void {
+    const raw = localStorage.getItem('wh_game');
+    if (!raw) { this.router.navigate(['/']); return; }
+    try {
+      const { roomCode, playerName, steps, currentPage, path } = JSON.parse(raw);
+      this.socketService.rejoinGame(roomCode, playerName, steps, currentPage, path).subscribe({
+        next: (data) => {
+          if (data.success) {
+            this.mySocketId = this.socketService.getSocketId();
+          } else {
+            this.router.navigate(['/']);
+          }
+        },
+        error: () => this.router.navigate(['/']),
+      });
+    } catch {
+      this.router.navigate(['/']);
+    }
   }
 
   // Carga la página inicial (sin contar pasos)
@@ -294,8 +327,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onContentClick(event: MouseEvent): void {
-    if (this.isSpectating) return;
-    if (this.winner && !this.iWon) return; // Game over, don't navigate
+    if (this.isSpectating || this.iWon || this.showLeaderboard) return;
 
     let target = event.target as HTMLElement | null;
     // Walk up to find anchor tag
@@ -391,7 +423,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   goBack(): void {
-    if (this.myPath.length <= 1) return;
+    if (this.loading || this.myPath.length <= 1) return;
     this.myPath.pop();
     const prev = this.myPath[this.myPath.length - 1];
     this.currentPage = prev;

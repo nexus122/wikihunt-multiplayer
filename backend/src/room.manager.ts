@@ -136,6 +136,11 @@ class RoomManager {
       room.cleanupTimeoutId = undefined;
     }
 
+    // If the room was empty, the stored hostId points to a dead socket — first to rejoin becomes host
+    if (room.players.size === 0) {
+      room.hostId = socketId;
+    }
+
     const player: Player = {
       socketId,
       name,

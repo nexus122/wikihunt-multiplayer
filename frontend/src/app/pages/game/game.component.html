@@ -63,7 +63,7 @@
       <ul class="players">
         @for (p of players; track p.socketId) {
           <li class="player" [class.me]="p.socketId === mySocketId" [class.finished]="p.finished">
-            <div class="avatar sm" [style.background]="getAvatarColor(p.socketId)">{{ p.name[0].toUpperCase() }}</div>
+            <div class="avatar sm" [style.background]="getAvatarColor(p.socketId)">{{ (p.name?.[0] || '?').toUpperCase() }}</div>
             <div class="player-info">
               <span class="player-name">{{ p.name }}</span>
               <span class="player-page">{{ p.currentPage || '...' }}</span>
@@ -191,7 +191,7 @@
           @for (e of leaderboard; track e.socketId; let i = $index) {
             <li class="lb-entry" [class.me]="e.socketId === mySocketId" [class.winner]="i === 0 && e.finished">
               <span class="rank">{{ getRankEmoji(i) }}</span>
-              <div class="avatar sm" [style.background]="getAvatarColor(e.socketId)">{{ e.name[0].toUpperCase() }}</div>
+              <div class="avatar sm" [style.background]="getAvatarColor(e.socketId)">{{ (e.name?.[0] || '?').toUpperCase() }}</div>
               <span class="lb-name">{{ e.name }}@if (e.socketId === mySocketId) { <span class="you-tag">tú</span> }</span>
               <span class="lb-steps">{{ e.steps }} pasos</span>
               <span class="lb-time">{{ e.finished ? formatTime(e.time) : (e.gaveUp ? '🏳️ Rendido' : 'No terminó') }}</span>
@@ -204,6 +204,14 @@
           <button class="btn-secondary" (click)="goHome()">Inicio</button>
         </div>
       </div>
+    </div>
+  }
+
+  <!-- ─── Socket reconnecting overlay ─── -->
+  @if (socketDisconnected) {
+    <div class="reconnect-overlay">
+      <div class="spinner"></div>
+      <p>Reconectando…</p>
     </div>
   }
 

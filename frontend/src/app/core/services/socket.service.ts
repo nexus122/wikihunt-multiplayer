@@ -36,6 +36,8 @@ export class SocketService {
     return this.socket.connected;
   }
 
+  // ── Emit helpers ──────────────────────────────────────────────────────────
+
   createRoom(name: string): Observable<{ code: string; room: RoomInfo }> {
     return new Observable(obs => {
       this.socket.emit('create-room', { name }, (data: { code: string; room: RoomInfo }) => {
@@ -96,52 +98,77 @@ export class SocketService {
     });
   }
 
+  // ── Server-event listeners (named handlers so off() only removes its own) ─
+
   onRoomUpdated(): Observable<RoomInfo> {
     return new Observable(obs => {
-      this.socket.on('room-updated', (data: RoomInfo) => obs.next(data));
-      return () => this.socket.off('room-updated');
+      const handler = (data: RoomInfo) => obs.next(data);
+      this.socket.on('room-updated', handler);
+      return () => this.socket.off('room-updated', handler);
     });
   }
 
   onGameStarted(): Observable<GameStartedEvent> {
     return new Observable(obs => {
-      this.socket.on('game-started', (data: GameStartedEvent) => obs.next(data));
-      return () => this.socket.off('game-started');
+      const handler = (data: GameStartedEvent) => obs.next(data);
+      this.socket.on('game-started', handler);
+      return () => this.socket.off('game-started', handler);
     });
   }
 
   onPlayerMoved(): Observable<PlayerMovedEvent> {
     return new Observable(obs => {
-      this.socket.on('player-moved', (data: PlayerMovedEvent) => obs.next(data));
-      return () => this.socket.off('player-moved');
+      const handler = (data: PlayerMovedEvent) => obs.next(data);
+      this.socket.on('player-moved', handler);
+      return () => this.socket.off('player-moved', handler);
     });
   }
 
   onPlayerWon(): Observable<PlayerWonEvent> {
     return new Observable(obs => {
-      this.socket.on('player-won', (data: PlayerWonEvent) => obs.next(data));
-      return () => this.socket.off('player-won');
+      const handler = (data: PlayerWonEvent) => obs.next(data);
+      this.socket.on('player-won', handler);
+      return () => this.socket.off('player-won', handler);
     });
   }
 
   onGameFinished(): Observable<GameFinishedEvent> {
     return new Observable(obs => {
-      this.socket.on('game-finished', (data: GameFinishedEvent) => obs.next(data));
-      return () => this.socket.off('game-finished');
+      const handler = (data: GameFinishedEvent) => obs.next(data);
+      this.socket.on('game-finished', handler);
+      return () => this.socket.off('game-finished', handler);
     });
   }
 
   onCountdownStarted(): Observable<CountdownStartedEvent> {
     return new Observable(obs => {
-      this.socket.on('countdown-started', (data: CountdownStartedEvent) => obs.next(data));
-      return () => this.socket.off('countdown-started');
+      const handler = (data: CountdownStartedEvent) => obs.next(data);
+      this.socket.on('countdown-started', handler);
+      return () => this.socket.off('countdown-started', handler);
     });
   }
 
   onPlayerGaveUp(): Observable<PlayerGaveUpEvent> {
     return new Observable(obs => {
-      this.socket.on('player-gave-up', (data: PlayerGaveUpEvent) => obs.next(data));
-      return () => this.socket.off('player-gave-up');
+      const handler = (data: PlayerGaveUpEvent) => obs.next(data);
+      this.socket.on('player-gave-up', handler);
+      return () => this.socket.off('player-gave-up', handler);
+    });
+  }
+
+  onDisconnect(): Observable<void> {
+    return new Observable(obs => {
+      const handler = () => obs.next();
+      this.socket.on('disconnect', handler);
+      return () => this.socket.off('disconnect', handler);
+    });
+  }
+
+  onConnect(): Observable<void> {
+    return new Observable(obs => {
+      const handler = () => obs.next();
+      this.socket.on('connect', handler);
+      return () => this.socket.off('connect', handler);
     });
   }
 
