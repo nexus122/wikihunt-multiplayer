@@ -1,4 +1,5 @@
 import { Room, Player, RoomInfo, PlayerPublicInfo, LeaderboardEntry } from './types';
+import { normalizePage } from './wiki.helpers';
 
 function generateCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -7,10 +8,6 @@ function generateCode(): string {
     code += chars[Math.floor(Math.random() * chars.length)];
   }
   return code;
-}
-
-function normalizePage(page: string): string {
-  return page.toLowerCase().replace(/_/g, ' ').trim();
 }
 
 class RoomManager {
@@ -141,6 +138,9 @@ class RoomManager {
       room.hostId = socketId;
     }
 
+    // Preserve gave-up state: a player who surrendered this game cannot rejoin as active
+    const previouslyGaveUp = room.gaveUpNames?.has(name) ?? false;
+
     const player: Player = {
       socketId,
       name,
@@ -148,6 +148,7 @@ class RoomManager {
       steps,
       path: path?.length ? path : (room.startPage ? [room.startPage] : []),
       finished: false,
+      gaveUp: previouslyGaveUp || undefined,
     };
 
     room.players.set(socketId, player);
@@ -171,6 +172,7 @@ class RoomManager {
     room.startTime = Date.now();
     room.graceTime = graceTime;
     room.firstWinnerId = undefined;
+    room.gaveUpNames = new Set<string>();
 
     for (const player of room.players.values()) {
       player.currentPage = startPage;
@@ -182,6 +184,12 @@ class RoomManager {
     }
 
     return true;
+  }
+
+  // Marks the game as finished so late navigate/give-up events are ignored
+  finishGame(code: string): void {
+    const room = this.rooms.get(code);
+    if (room) room.status = 'finished';
   }
 
   navigate(socketId: string, page: string): { player: Player; room: Room; won: boolean } | null {
@@ -212,6 +220,9 @@ class RoomManager {
     if (!player || player.finished || player.gaveUp) return null;
 
     player.gaveUp = true;
+    // Track the name so a reconnect doesn't revive the player in the same game
+    (room.gaveUpNames ??= new Set()).add(player.name);
+
     return { player, room };
   }
 

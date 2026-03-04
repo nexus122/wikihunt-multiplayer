@@ -56,6 +56,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Path history modal
   showPath = false;
+  expandedPathPlayer: string | null = null;
 
   // Give up / spectator
   showGiveUpConfirm = false;
@@ -262,6 +263,8 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
         next: (data) => {
           if (data.success) {
             this.mySocketId = this.socketService.getSocketId();
+            // Re-sync timer with server's authoritative startTime
+            if (data.startTime) this.startTime = data.startTime;
           } else {
             this.router.navigate(['/']);
           }
@@ -271,6 +274,10 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     } catch {
       this.router.navigate(['/']);
     }
+  }
+
+  togglePath(socketId: string): void {
+    this.expandedPathPlayer = this.expandedPathPlayer === socketId ? null : socketId;
   }
 
   // Carga la página inicial (sin contar pasos)

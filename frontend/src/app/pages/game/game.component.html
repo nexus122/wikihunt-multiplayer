@@ -190,11 +190,25 @@
         <ul class="leaderboard">
           @for (e of leaderboard; track e.socketId; let i = $index) {
             <li class="lb-entry" [class.me]="e.socketId === mySocketId" [class.winner]="i === 0 && e.finished">
-              <span class="rank">{{ getRankEmoji(i) }}</span>
-              <div class="avatar sm" [style.background]="getAvatarColor(e.socketId)">{{ (e.name?.[0] || '?').toUpperCase() }}</div>
-              <span class="lb-name">{{ e.name }}@if (e.socketId === mySocketId) { <span class="you-tag">tú</span> }</span>
-              <span class="lb-steps">{{ e.steps }} pasos</span>
-              <span class="lb-time">{{ e.finished ? formatTime(e.time) : (e.gaveUp ? '🏳️ Rendido' : 'No terminó') }}</span>
+              <div class="lb-row">
+                <span class="rank">{{ getRankEmoji(i) }}</span>
+                <div class="avatar sm" [style.background]="getAvatarColor(e.socketId)">{{ (e.name?.[0] || '?').toUpperCase() }}</div>
+                <span class="lb-name">{{ e.name }}@if (e.socketId === mySocketId) { <span class="you-tag">tú</span> }</span>
+                <span class="lb-steps">{{ e.steps }} pasos</span>
+                <span class="lb-time">{{ e.finished ? formatTime(e.time) : (e.gaveUp ? '🏳️ Rendido' : 'No terminó') }}</span>
+                @if (e.path && e.path.length > 1) {
+                  <button class="lb-path-toggle" (click)="togglePath(e.socketId)">
+                    {{ expandedPathPlayer === e.socketId ? '▲' : '▼' }} ruta
+                  </button>
+                }
+              </div>
+              @if (expandedPathPlayer === e.socketId && e.path && e.path.length) {
+                <ol class="lb-path-list">
+                  @for (page of e.path; track $index) {
+                    <li>{{ page }}</li>
+                  }
+                </ol>
+              }
             </li>
           }
         </ul>

@@ -31,7 +31,7 @@
       <div class="tab-content">
         <div class="field">
           <label>Your name</label>
-          <input type="text" placeholder="Enter your name" [(ngModel)]="createName" maxlength="20" (keydown.enter)="createRoom()" autofocus />
+          <input type="text" placeholder="Enter your name" [(ngModel)]="createName" maxlength="20" (keydown.enter)="createRoom()" />
         </div>
         <button class="btn-primary" (click)="createRoom()" [disabled]="creating">
           {{ creating ? 'Creating...' : '🚀 Create Room' }}

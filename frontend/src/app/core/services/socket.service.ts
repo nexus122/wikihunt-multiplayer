@@ -80,6 +80,15 @@ export class SocketService {
     });
   }
 
+  getRoom(): Observable<{ success: boolean; room?: RoomInfo }> {
+    return new Observable(obs => {
+      this.socket.emit('get-room', {}, (data: { success: boolean; room?: RoomInfo }) => {
+        obs.next(data);
+        obs.complete();
+      });
+    });
+  }
+
   giveUp(): Observable<{ success: boolean }> {
     return new Observable(obs => {
       this.socket.emit('give-up', {}, (data: { success: boolean }) => {

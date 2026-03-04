@@ -2,9 +2,9 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
-import fetch from 'node-fetch';
 import wikipediaRouter from './wikipedia';
 import { roomManager } from './room.manager';
+import { getCanonicalTitle, getValidRandomPage, normalizePage } from './wiki.helpers';
 
 const app = express();
 const httpServer = createServer(app);
@@ -17,51 +17,13 @@ app.use(express.json());
 app.use('/api/wikipedia', wikipediaRouter);
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-// Returns the canonical Wikipedia title (after redirects) via Content-Location header, or null if invalid
-async function getCanonicalTitle(title: string): Promise<string | null> {
-  try {
-    const res = await fetch(
-      `https://es.wikipedia.org/api/rest_v1/page/html/${encodeURIComponent(title)}`,
-      { method: 'HEAD' }
-    );
-    if (!res.ok) return null;
-    const cl = res.headers.get('content-location');
-    const encoded = cl?.split('/page/html/')[1]?.split('/')[0];
-    return encoded ? decodeURIComponent(encoded).replace(/_/g, ' ') : title;
-  } catch {
-    return null;
-  }
-}
+// Rate limiting for navigate events: max 1 per 200ms per socket
+const navigateLastTs = new Map<string, number>();
 
-async function getValidRandomPage(maxAttempts = 10): Promise<string> {
-  for (let i = 0; i < maxAttempts; i++) {
-    try {
-      const res = await fetch('https://es.wikipedia.org/api/rest_v1/page/random/summary');
-      if (!res.ok) continue;
-
-      const data = await res.json() as { title: string; extract?: string; type?: string };
-
-      // Descartar páginas de desambiguación y artículos muy cortos (stubs)
-      if (data.type === 'disambiguation') continue;
-      if (!data.extract || data.extract.length < 150) continue;
-
-      // Obtener el título canónico real (el que Wikipedia usa en sus propios links)
-      const canonical = await getCanonicalTitle(data.title);
-      if (!canonical) continue;
-
-      console.log(`[Page] Valid page found: "${canonical}" (attempt ${i + 1})`);
-      return canonical;
-    } catch {
-      continue;
-    }
-  }
-
-  console.warn('[Page] Could not find valid page after max attempts, using fallback');
-  return 'España';
-}
-
-function normalizePage(page: string): string {
-  return page.toLowerCase().replace(/_/g, ' ').trim();
+function emitGameFinished(roomCode: string, room: ReturnType<typeof roomManager.getRoomByCode>): void {
+  if (!room) return;
+  roomManager.finishGame(roomCode);
+  io.to(roomCode).emit('game-finished', { leaderboard: roomManager.getLeaderboard(room) });
 }
 
 io.on('connection', (socket) => {
@@ -105,13 +67,24 @@ io.on('connection', (socket) => {
         if (!room) { callback({ success: false, error: 'Room not found' }); return; }
         if (room.hostId !== socket.id) { callback({ success: false, error: 'Only the host can start' }); return; }
 
-        const start = startPage || (await getValidRandomPage());
-        let target = targetPage || (await getValidRandomPage());
+        // Resolve start page: random or canonicalize custom
+        let start: string;
+        if (startPage) {
+          const canonical = await getCanonicalTitle(startPage);
+          if (!canonical) { callback({ success: false, error: 'Start page not found on Wikipedia' }); return; }
+          start = canonical;
+        } else {
+          start = await getValidRandomPage();
+        }
 
-        let attempts = 0;
-        while (normalizePage(target) === normalizePage(start) && attempts < 5) {
-          target = await getValidRandomPage();
-          attempts++;
+        // Resolve target page: random (excluding start) or canonicalize custom
+        let target: string;
+        if (targetPage) {
+          const canonical = await getCanonicalTitle(targetPage);
+          if (!canonical) { callback({ success: false, error: 'Target page not found on Wikipedia' }); return; }
+          target = canonical;
+        } else {
+          target = await getValidRandomPage(10, start);
         }
 
         const grace = typeof graceTime === 'number' && graceTime > 0 ? graceTime : 60;
@@ -158,8 +131,25 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Returns current room state for the calling socket (used after play-again to sync fresh state)
+  socket.on('get-room', (_: unknown, callback: Function) => {
+    try {
+      const room = roomManager.getRoomBySocketId(socket.id);
+      if (!room) { callback({ success: false }); return; }
+      callback({ success: true, room: roomManager.getRoomInfo(room) });
+    } catch {
+      callback({ success: false });
+    }
+  });
+
   socket.on('navigate', ({ page }: { page: string }, callback: Function) => {
     try {
+      // Rate limit: 1 navigate per 200ms
+      const now = Date.now();
+      const last = navigateLastTs.get(socket.id) ?? 0;
+      if (now - last < 200) { callback({ success: false, won: false }); return; }
+      navigateLastTs.set(socket.id, now);
+
       const result = roomManager.navigate(socket.id, page);
       if (!result) { callback({ success: false, won: false }); return; }
 
@@ -183,10 +173,19 @@ io.on('connection', (socket) => {
           time,
         });
 
-        const isFirstWinner = !room.firstWinnerId;
+        // Check if all players are done before starting countdown
+        const allFinished = Array.from(room.players.values()).every(p => p.finished || p.gaveUp);
 
-        if (isFirstWinner) {
-          // Primer ganador: arrancar el countdown de gracia
+        if (allFinished) {
+          // Everyone done — skip countdown and end immediately
+          if (room.graceTimeoutId) {
+            clearTimeout(room.graceTimeoutId);
+            room.graceTimeoutId = undefined;
+          }
+          console.log(`[Game] All finished in ${room.code} — ending immediately`);
+          emitGameFinished(room.code, room);
+        } else if (!room.firstWinnerId) {
+          // First winner, others still playing — start grace countdown
           room.firstWinnerId = socket.id;
           console.log(`[Countdown] ${room.graceTime}s grace period started in ${room.code}`);
 
@@ -197,21 +196,8 @@ io.on('connection', (socket) => {
 
           room.graceTimeoutId = setTimeout(() => {
             console.log(`[Countdown] Grace period ended in ${room.code} — sending leaderboard`);
-            io.to(room.code).emit('game-finished', {
-              leaderboard: roomManager.getLeaderboard(room),
-            });
+            emitGameFinished(room.code, room);
           }, room.graceTime * 1000);
-        }
-
-        // Si ya terminaron todos (o se rindieron), cancelar el countdown y terminar ya
-        const allFinished = Array.from(room.players.values()).every(p => p.finished || p.gaveUp);
-        if (allFinished && room.graceTimeoutId) {
-          clearTimeout(room.graceTimeoutId);
-          room.graceTimeoutId = undefined;
-          console.log(`[Countdown] All finished early in ${room.code}`);
-          io.to(room.code).emit('game-finished', {
-            leaderboard: roomManager.getLeaderboard(room),
-          });
         }
       }
 
@@ -231,14 +217,13 @@ io.on('connection', (socket) => {
 
       io.to(room.code).emit('player-gave-up', { playerId: socket.id, name: player.name });
 
-      // Si ya no quedan jugadores activos, terminar la partida
       const allDone = Array.from(room.players.values()).every(p => p.finished || p.gaveUp);
       if (allDone) {
         if (room.graceTimeoutId) {
           clearTimeout(room.graceTimeoutId);
           room.graceTimeoutId = undefined;
         }
-        io.to(room.code).emit('game-finished', { leaderboard: roomManager.getLeaderboard(room) });
+        emitGameFinished(room.code, room);
       }
 
       callback({ success: true });
@@ -249,6 +234,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`[-] Disconnected: ${socket.id}`);
+    navigateLastTs.delete(socket.id);
     const { room } = roomManager.removePlayer(socket.id);
     if (room) {
       io.to(room.code).emit('room-updated', roomManager.getRoomInfo(room));

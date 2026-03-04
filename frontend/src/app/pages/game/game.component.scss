@@ -376,21 +376,50 @@
 
 .lb-entry {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
   padding: 10px 12px;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 14px;
+  gap: 0;
   &.me { border-color: var(--accent); }
   &.winner { border-color: #ffd700; background: rgba(255,215,0,.05); }
+}
+
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .rank { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
 .lb-name { flex: 1; font-weight: 600; }
 .lb-steps { color: var(--accent); font-weight: 700; }
 .lb-time { color: var(--text-secondary); font-size: 13px; min-width: 48px; text-align: right; }
+
+.lb-path-toggle {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  &:hover { background: var(--bg-secondary); color: var(--text-primary); }
+}
+
+.lb-path-list {
+  margin: 8px 0 0 38px;
+  padding: 0;
+  list-style: decimal;
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  li { padding: 1px 0; }
+}
 
 .lb-actions {
   display: flex;

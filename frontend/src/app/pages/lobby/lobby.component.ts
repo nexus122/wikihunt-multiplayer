@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -16,7 +16,7 @@ import { RoomInfo, WikiPage } from '../../core/models/types';
 })
 export class LobbyComponent implements OnInit, OnDestroy {
   room: RoomInfo | null = null;
-  isHost = false;
+  get isHost(): boolean { return !!this.room && this.room.hostId === this.mySocketId; }
   mySocketId = '';
   codeCopied = false;
 
@@ -53,14 +53,18 @@ export class LobbyComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.mySocketId = this.socketService.getSocketId();
 
-    const state = history.state as { room: RoomInfo; isHost: boolean } | undefined;
+    const state = history.state as { room: RoomInfo } | undefined;
     if (state?.room) {
       this.room = state.room;
-      this.isHost = state.isHost;
     } else {
       this.router.navigate(['/']);
       return;
     }
+
+    // Refresh room state from server (handles stale state after play-again)
+    this.socketService.getRoom().subscribe(data => {
+      if (data.success && data.room) this.room = data.room;
+    });
 
     this.subs.push(
       this.socketService.onRoomUpdated().subscribe(room => { this.room = room; })
@@ -83,6 +87,14 @@ export class LobbyComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!(event.target as HTMLElement).closest('.search-wrap')) {
+      this.startResults = [];
+      this.targetResults = [];
+    }
   }
 
   get roomCode(): string {

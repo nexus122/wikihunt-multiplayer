@@ -1,23 +1,40 @@
 import { Router, Request, Response } from 'express';
 import fetch from 'node-fetch';
+import { getCanonicalTitle, getValidRandomPage } from './wiki.helpers';
 
 const router = Router();
 
-router.get('/random', async (_req: Request, res: Response) => {
-  for (let i = 0; i < 10; i++) {
-    try {
-      const response = await fetch('https://es.wikipedia.org/api/rest_v1/page/random/summary');
-      if (!response.ok) continue;
-      const data = await response.json() as any;
-      if (data.type === 'disambiguation') continue;
-      if (!data.extract || data.extract.length < 150) continue;
-      res.json({ title: data.title, extract: data.extract, thumbnail: data.thumbnail });
-      return;
-    } catch {
-      continue;
-    }
+// Simple in-memory cache for page HTML (avoids re-fetching the same article multiple times in a session)
+const contentCache = new Map<string, { html: string; title: string; ts: number }>();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_ENTRIES = 50;
+
+function getCached(title: string): { html: string; title: string } | null {
+  const entry = contentCache.get(title);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > CACHE_TTL_MS) { contentCache.delete(title); return null; }
+  return { html: entry.html, title: entry.title };
+}
+
+function setCached(key: string, html: string, title: string): void {
+  if (contentCache.size >= MAX_CACHE_ENTRIES) {
+    // Evict oldest entry
+    const oldest = contentCache.keys().next().value;
+    if (oldest) contentCache.delete(oldest);
   }
-  res.status(500).json({ error: 'Failed to fetch a valid random page' });
+  contentCache.set(key, { html, title, ts: Date.now() });
+}
+
+router.get('/random', async (_req: Request, res: Response) => {
+  try {
+    const title = await getValidRandomPage();
+    const summary = await fetch(`https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+    if (!summary.ok) { res.status(500).json({ error: 'Failed to fetch summary' }); return; }
+    const data = await summary.json() as any;
+    res.json({ title, extract: data.extract, thumbnail: data.thumbnail });
+  } catch {
+    res.status(500).json({ error: 'Failed to fetch a valid random page' });
+  }
 });
 
 router.get('/summary/:title', async (req: Request, res: Response) => {
@@ -55,28 +72,44 @@ router.get('/search', async (req: Request, res: Response) => {
 });
 
 router.get('/content/:title', async (req: Request, res: Response) => {
+  const { title } = req.params;
+
+  // Return cached version if still fresh
+  const cached = getCached(title);
+  if (cached) {
+    res.json(cached);
+    return;
+  }
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 15_000);
+
   try {
-    const { title } = req.params;
     const response = await fetch(
       `https://es.wikipedia.org/api/rest_v1/page/html/${encodeURIComponent(title)}`,
       { headers: { Accept: 'text/html; charset=utf-8' }, signal: controller.signal as any }
     );
     clearTimeout(timer);
+
     if (!response.ok) {
       res.status(404).json({ error: 'Page not found' });
       return;
     }
+
     const html = await response.text();
 
     // Extract canonical title from Content-Location header (e.g. "Highland City" → "Highland City (Florida)")
-    // This ensures win detection uses the same title Wikipedia uses in its own links
     const cl = response.headers.get('content-location');
     const encoded = cl?.split('/page/html/')[1]?.split('/')[0];
     const canonicalTitle = encoded
       ? decodeURIComponent(encoded).replace(/_/g, ' ')
       : decodeURIComponent(title);
+
+    setCached(title, html, canonicalTitle);
+    // Also cache under canonical title so future requests hit the cache
+    if (canonicalTitle !== decodeURIComponent(title)) {
+      setCached(canonicalTitle, html, canonicalTitle);
+    }
 
     res.json({ html, title: canonicalTitle });
   } catch (err: any) {

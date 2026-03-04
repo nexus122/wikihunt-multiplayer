@@ -21,6 +21,7 @@ export interface Room {
   firstWinnerId?: string;     // socket id del primer ganador
   graceTimeoutId?: ReturnType<typeof setTimeout>;
   cleanupTimeoutId?: ReturnType<typeof setTimeout>; // delay antes de borrar sala vacía
+  gaveUpNames?: Set<string>;  // nombres que se rindieron en la partida actual
 }
 
 export interface RoomInfo {
