@@ -2,7 +2,7 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
-import wikipediaRouter from './wikipedia';
+import wikipediaRouter, { preWarmCache } from './wikipedia';
 import { roomManager } from './room.manager';
 import { getCanonicalTitle, getValidRandomPage, normalizePage } from './wiki.helpers';
 
@@ -92,6 +92,10 @@ io.on('connection', (socket) => {
         const updatedRoom = roomManager.getRoomByCode(room.code)!;
 
         console.log(`[Game] Started in ${room.code}: "${start}" → "${target}"`);
+
+        // Pre-fetch both pages into cache so client requests are instant
+        preWarmCache(start).catch(() => {});
+        preWarmCache(target).catch(() => {});
 
         io.to(room.code).emit('game-started', {
           startPage: start,

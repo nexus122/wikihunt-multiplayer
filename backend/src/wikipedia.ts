@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import fetch from 'node-fetch';
-import { getCanonicalTitle, getValidRandomPage } from './wiki.helpers';
+import { getValidRandomPage } from './wiki.helpers';
 
 const router = Router();
 
@@ -18,11 +18,56 @@ function getCached(title: string): { html: string; title: string } | null {
 
 function setCached(key: string, html: string, title: string): void {
   if (contentCache.size >= MAX_CACHE_ENTRIES) {
-    // Evict oldest entry
     const oldest = contentCache.keys().next().value;
     if (oldest) contentCache.delete(oldest);
   }
   contentCache.set(key, { html, title, ts: Date.now() });
+}
+
+// Shared fetch-and-cache logic. Throws on AbortError so callers can return 504.
+async function fetchAndCachePage(title: string): Promise<{ html: string; title: string } | null> {
+  const cached = getCached(title);
+  if (cached) return cached;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 20_000);
+
+  try {
+    const response = await fetch(
+      `https://es.wikipedia.org/api/rest_v1/page/html/${encodeURIComponent(title)}`,
+      { headers: { Accept: 'text/html; charset=utf-8' }, signal: controller.signal as any }
+    );
+    clearTimeout(timer);
+
+    if (!response.ok) return null;
+
+    const html = await response.text();
+    const cl = response.headers.get('content-location');
+    const encoded = cl?.split('/page/html/')[1]?.split('/')[0];
+    const canonicalTitle = encoded
+      ? decodeURIComponent(encoded).replace(/_/g, ' ')
+      : decodeURIComponent(title);
+
+    setCached(title, html, canonicalTitle);
+    if (canonicalTitle !== decodeURIComponent(title)) {
+      setCached(canonicalTitle, html, canonicalTitle);
+    }
+
+    return { html, title: canonicalTitle };
+  } catch (err) {
+    clearTimeout(timer);
+    throw err;
+  }
+}
+
+// Pre-fetches a page into cache in the background. Silently ignores failures.
+export async function preWarmCache(title: string): Promise<void> {
+  try {
+    await fetchAndCachePage(title);
+    console.log(`[Cache] Pre-warmed: "${title}"`);
+  } catch {
+    // pre-warm failures are non-critical
+  }
 }
 
 router.get('/random', async (_req: Request, res: Response) => {
@@ -43,10 +88,7 @@ router.get('/summary/:title', async (req: Request, res: Response) => {
     const response = await fetch(
       `https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`
     );
-    if (!response.ok) {
-      res.status(404).json({ error: 'Page not found' });
-      return;
-    }
+    if (!response.ok) { res.status(404).json({ error: 'Page not found' }); return; }
     const data = await response.json() as any;
     res.json({ title: data.title, extract: data.extract, thumbnail: data.thumbnail });
   } catch {
@@ -73,47 +115,11 @@ router.get('/search', async (req: Request, res: Response) => {
 
 router.get('/content/:title', async (req: Request, res: Response) => {
   const { title } = req.params;
-
-  // Return cached version if still fresh
-  const cached = getCached(title);
-  if (cached) {
-    res.json(cached);
-    return;
-  }
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15_000);
-
   try {
-    const response = await fetch(
-      `https://es.wikipedia.org/api/rest_v1/page/html/${encodeURIComponent(title)}`,
-      { headers: { Accept: 'text/html; charset=utf-8' }, signal: controller.signal as any }
-    );
-    clearTimeout(timer);
-
-    if (!response.ok) {
-      res.status(404).json({ error: 'Page not found' });
-      return;
-    }
-
-    const html = await response.text();
-
-    // Extract canonical title from Content-Location header (e.g. "Highland City" → "Highland City (Florida)")
-    const cl = response.headers.get('content-location');
-    const encoded = cl?.split('/page/html/')[1]?.split('/')[0];
-    const canonicalTitle = encoded
-      ? decodeURIComponent(encoded).replace(/_/g, ' ')
-      : decodeURIComponent(title);
-
-    setCached(title, html, canonicalTitle);
-    // Also cache under canonical title so future requests hit the cache
-    if (canonicalTitle !== decodeURIComponent(title)) {
-      setCached(canonicalTitle, html, canonicalTitle);
-    }
-
-    res.json({ html, title: canonicalTitle });
+    const result = await fetchAndCachePage(title);
+    if (!result) { res.status(404).json({ error: 'Page not found' }); return; }
+    res.json(result);
   } catch (err: any) {
-    clearTimeout(timer);
     if (err.name === 'AbortError') {
       res.status(504).json({ error: 'Wikipedia request timed out' });
     } else {

@@ -280,8 +280,8 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     this.expandedPathPlayer = this.expandedPathPlayer === socketId ? null : socketId;
   }
 
-  // Carga la página inicial (sin contar pasos)
-  loadPage(title: string): void {
+  // Carga la página inicial (sin contar pasos). Retries automatically on initial load failure.
+  loadPage(title: string, attempt = 1): void {
     this.loading = true;
     this.loadError = '';
     this.initialLoadFailed = false;
@@ -299,6 +299,11 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
       },
       error: () => {
         const isInitial = this.mySteps === 0;
+        // Auto-retry initial page load silently (backend may still be warming up)
+        if (isInitial && attempt <= 3) {
+          setTimeout(() => this.loadPage(title, attempt + 1), 2000 * attempt);
+          return;
+        }
         this.loadError = isInitial
           ? `No se pudo cargar la página inicial "${title}".`
           : `No se pudo cargar "${title}". Prueba otro enlace.`;
