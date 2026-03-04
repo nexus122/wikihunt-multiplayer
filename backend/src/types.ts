@@ -20,6 +20,7 @@ export interface Room {
   graceTime: number;          // segundos de gracia tras el primer ganador
   firstWinnerId?: string;     // socket id del primer ganador
   graceTimeoutId?: ReturnType<typeof setTimeout>;
+  cleanupTimeoutId?: ReturnType<typeof setTimeout>; // delay antes de borrar sala vacía
 }
 
 export interface RoomInfo {

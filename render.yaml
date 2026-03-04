@@ -6,3 +6,4 @@ services:
     buildCommand: npm install && npm run build
     startCommand: npm run start
     plan: free
+    healthCheckPath: /health

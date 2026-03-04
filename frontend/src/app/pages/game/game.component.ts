@@ -60,6 +60,9 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
   showGiveUpConfirm = false;
   isSpectating = false;
 
+  // True when the very first page failed to load (shows a retry button)
+  initialLoadFailed = false;
+
   // Mobile drawer
   mobileMenuOpen = false;
 
@@ -241,6 +244,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
   loadPage(title: string): void {
     this.loading = true;
     this.loadError = '';
+    this.initialLoadFailed = false;
     this.wikiService.getPageContent(title).subscribe({
       next: (data) => {
         // Use canonical title returned by API (follows Wikipedia redirects)
@@ -254,10 +258,18 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
         setTimeout(() => this.scrollToTop(), 50);
       },
       error: () => {
-        this.loadError = `No se pudo cargar "${title}". Prueba otro enlace.`;
+        const isInitial = this.mySteps === 0;
+        this.loadError = isInitial
+          ? `No se pudo cargar la página inicial "${title}".`
+          : `No se pudo cargar "${title}". Prueba otro enlace.`;
+        this.initialLoadFailed = isInitial;
         this.loading = false;
       },
     });
+  }
+
+  retryInitialLoad(): void {
+    this.loadPage(this.startPage);
   }
 
   private processHtml(html: string): string {

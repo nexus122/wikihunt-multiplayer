@@ -55,12 +55,15 @@ router.get('/search', async (req: Request, res: Response) => {
 });
 
 router.get('/content/:title', async (req: Request, res: Response) => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15_000);
   try {
     const { title } = req.params;
     const response = await fetch(
       `https://es.wikipedia.org/api/rest_v1/page/html/${encodeURIComponent(title)}`,
-      { headers: { Accept: 'text/html; charset=utf-8' } }
+      { headers: { Accept: 'text/html; charset=utf-8' }, signal: controller.signal as any }
     );
+    clearTimeout(timer);
     if (!response.ok) {
       res.status(404).json({ error: 'Page not found' });
       return;
@@ -76,8 +79,13 @@ router.get('/content/:title', async (req: Request, res: Response) => {
       : decodeURIComponent(title);
 
     res.json({ html, title: canonicalTitle });
-  } catch {
-    res.status(500).json({ error: 'Failed to fetch page content' });
+  } catch (err: any) {
+    clearTimeout(timer);
+    if (err.name === 'AbortError') {
+      res.status(504).json({ error: 'Wikipedia request timed out' });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch page content' });
+    }
   }
 });
 

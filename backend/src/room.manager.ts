@@ -87,8 +87,22 @@ class RoomManager {
     this.socketToRoom.delete(socketId);
 
     if (room.players.size === 0) {
+      if (room.status === 'playing') {
+        // Keep room alive for 60s so players can rejoin
+        if (room.cleanupTimeoutId) clearTimeout(room.cleanupTimeoutId);
+        room.cleanupTimeoutId = setTimeout(() => {
+          this.rooms.delete(code);
+        }, 60_000);
+        return { room: null, wasHost };
+      }
       this.rooms.delete(code);
       return { room: null, wasHost };
+    }
+
+    // Cancel any pending cleanup now that a player is still connected
+    if (room.cleanupTimeoutId) {
+      clearTimeout(room.cleanupTimeoutId);
+      room.cleanupTimeoutId = undefined;
     }
 
     if (wasHost) {
@@ -116,6 +130,12 @@ class RoomManager {
     const room = this.rooms.get(code);
     if (!room || room.status !== 'playing') return null;
 
+    // Cancel pending room deletion now that someone is reconnecting
+    if (room.cleanupTimeoutId) {
+      clearTimeout(room.cleanupTimeoutId);
+      room.cleanupTimeoutId = undefined;
+    }
+
     const player: Player = {
       socketId,
       name,
@@ -132,7 +152,13 @@ class RoomManager {
 
   startGame(code: string, startPage: string, targetPage: string, graceTime: number = 60): boolean {
     const room = this.rooms.get(code);
-    if (!room || room.status !== 'waiting') return false;
+    if (!room) return false;
+
+    // Clear any leftover grace-period timer from a previous game
+    if (room.graceTimeoutId) {
+      clearTimeout(room.graceTimeoutId);
+      room.graceTimeoutId = undefined;
+    }
 
     room.status = 'playing';
     room.startPage = startPage;
@@ -140,13 +166,14 @@ class RoomManager {
     room.startTime = Date.now();
     room.graceTime = graceTime;
     room.firstWinnerId = undefined;
-    room.graceTimeoutId = undefined;
 
     for (const player of room.players.values()) {
       player.currentPage = startPage;
       player.path = [startPage];
       player.steps = 0;
       player.finished = false;
+      player.gaveUp = undefined;
+      player.finishTime = undefined;
     }
 
     return true;

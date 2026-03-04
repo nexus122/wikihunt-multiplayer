@@ -104,6 +104,9 @@
     } @else if (loadError) {
       <div class="load-error">
         <p>{{ loadError }}</p>
+        @if (initialLoadFailed) {
+          <button class="btn-secondary" style="margin-top:12px" (click)="retryInitialLoad()">Reintentar</button>
+        }
       </div>
     } @else {
       <div
