@@ -50,7 +50,8 @@ async function emitGameFinished(roomCode: string, room: ReturnType<typeof roomMa
       time_ms: entry.time!,
       path: entry.path,
       is_daily: room.isDaily || false,
-    }).catch(() => {});
+    }).then(() => console.log(`[Supabase] Hall of fame saved: ${entry.name}`))
+      .catch((e) => console.error('[Supabase] Hall of fame error:', e.message));
 
     // Daily results: only daily challenge games
     if (room.isDaily) {
@@ -61,7 +62,8 @@ async function emitGameFinished(roomCode: string, room: ReturnType<typeof roomMa
         time_ms: entry.time!,
         finished: true,
         path: entry.path,
-      }).catch(() => {});
+      }).then(() => console.log(`[Supabase] Daily result saved: ${entry.name}`))
+        .catch((e) => console.error('[Supabase] Daily result error:', e.message));
     }
   }
 }
