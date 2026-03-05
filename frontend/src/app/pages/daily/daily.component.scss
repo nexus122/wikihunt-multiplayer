@@ -1,0 +1,132 @@
+.daily-page {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  align-self: flex-start;
+
+  &:hover { color: var(--text-primary); }
+}
+
+.hero {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.daily-badge {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.daily-date {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 0;
+}
+
+.loading-card {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 32px;
+}
+
+.challenge-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.route {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-tertiary);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.route-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &.target .route-title { color: var(--accent); }
+}
+
+.route-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.route-title {
+  font-size: 15px;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.route-arrow {
+  font-size: 20px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.no-challenge {
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-align: center;
+  margin: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+
+  input {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 15px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color .15s;
+
+    &:focus { border-color: var(--accent); }
+  }
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 13px;
+}
+
+.leaderboard-link {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-decoration: none;
+
+  &:hover { color: var(--accent); }
+}

@@ -96,6 +96,16 @@ export class SocketService {
     });
   }
 
+  joinDaily(name: string): Observable<{ success: boolean; roomCode?: string; startPage?: string; targetPage?: string; startTime?: number; date?: string; error?: string }> {
+    this.connect();
+    return new Observable(obs => {
+      this.socket.emit('join-daily', { name }, (data: any) => {
+        obs.next(data);
+        obs.complete();
+      });
+    });
+  }
+
   giveUp(): Observable<{ success: boolean }> {
     return new Observable(obs => {
       this.socket.emit('give-up', {}, (data: { success: boolean }) => {

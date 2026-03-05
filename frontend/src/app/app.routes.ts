@@ -13,5 +13,13 @@ export const routes: Routes = [
     path: 'game/:code',
     loadComponent: () => import('./pages/game/game.component').then(m => m.GameComponent),
   },
+  {
+    path: 'daily',
+    loadComponent: () => import('./pages/daily/daily.component').then(m => m.DailyComponent),
+  },
+  {
+    path: 'leaderboard',
+    loadComponent: () => import('./pages/leaderboard/leaderboard.component').then(m => m.LeaderboardComponent),
+  },
   { path: '**', redirectTo: '' },
 ];

@@ -1,0 +1,51 @@
+<div class="daily-page">
+  <button class="back-btn" (click)="goHome()">← Volver</button>
+
+  <div class="hero">
+    <div class="daily-badge">☀️ Reto del día</div>
+    <p class="daily-date">{{ challenge?.date || (loadingChallenge ? '...' : 'Hoy') }}</p>
+  </div>
+
+  @if (loadingChallenge) {
+    <div class="card loading-card">Cargando reto de hoy...</div>
+  } @else {
+    <div class="card challenge-card">
+      @if (challenge) {
+        <div class="route">
+          <div class="route-page start">
+            <span class="route-label">Inicio</span>
+            <span class="route-title">{{ challenge.start_page }}</span>
+          </div>
+          <span class="route-arrow">→</span>
+          <div class="route-page target">
+            <span class="route-label">Destino</span>
+            <span class="route-title">{{ challenge.target_page }}</span>
+          </div>
+        </div>
+      } @else {
+        <p class="no-challenge">El reto de hoy se generará cuando empieces.</p>
+      }
+
+      <div class="field">
+        <label>Tu nombre</label>
+        <input
+          type="text"
+          placeholder="Introduce tu nombre"
+          [(ngModel)]="name"
+          maxlength="20"
+          (keydown.enter)="start()"
+        />
+      </div>
+
+      @if (error) {
+        <div class="error-message">{{ error }}</div>
+      }
+
+      <button class="btn-primary" (click)="start()" [disabled]="loading">
+        {{ loading ? 'Cargando...' : '⚡ Empezar reto' }}
+      </button>
+    </div>
+
+    <a class="leaderboard-link" routerLink="/leaderboard">🏆 Ver clasificación de hoy</a>
+  }
+</div>

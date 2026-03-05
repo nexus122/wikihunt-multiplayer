@@ -5,6 +5,7 @@ import cors from 'cors';
 import wikipediaRouter, { preWarmCache } from './wikipedia';
 import { roomManager } from './room.manager';
 import { getCanonicalTitle, getValidRandomPage, normalizePage } from './wiki.helpers';
+import { getDailyChallenge, saveDailyResult, saveHallOfFame } from './supabase';
 
 const app = express();
 const httpServer = createServer(app);
@@ -16,14 +17,52 @@ app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use('/api/wikipedia', wikipediaRouter);
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/api/daily', async (_req, res) => {
+  try {
+    const challenge = await getDailyChallenge();
+    res.json(challenge);
+  } catch {
+    res.status(500).json({ error: 'Failed to get daily challenge' });
+  }
+});
 
 // Rate limiting for navigate events: max 1 per 200ms per socket
 const navigateLastTs = new Map<string, number>();
 
-function emitGameFinished(roomCode: string, room: ReturnType<typeof roomManager.getRoomByCode>): void {
+async function emitGameFinished(roomCode: string, room: ReturnType<typeof roomManager.getRoomByCode>): Promise<void> {
   if (!room) return;
   roomManager.finishGame(roomCode);
-  io.to(roomCode).emit('game-finished', { leaderboard: roomManager.getLeaderboard(room) });
+  const leaderboard = roomManager.getLeaderboard(room);
+  io.to(roomCode).emit('game-finished', { leaderboard });
+
+  // Persist results to Supabase (non-blocking)
+  const today = new Date().toISOString().slice(0, 10);
+  const finishedPlayers = leaderboard.filter(e => e.finished && e.time != null);
+
+  for (const entry of finishedPlayers) {
+    // Hall of fame: all finished games
+    saveHallOfFame({
+      player_name: entry.name,
+      start_page: room.startPage || '',
+      target_page: room.targetPage || '',
+      steps: entry.steps,
+      time_ms: entry.time!,
+      path: entry.path,
+      is_daily: room.isDaily || false,
+    }).catch(() => {});
+
+    // Daily results: only daily challenge games
+    if (room.isDaily) {
+      saveDailyResult({
+        date: today,
+        player_name: entry.name,
+        steps: entry.steps,
+        time_ms: entry.time!,
+        finished: true,
+        path: entry.path,
+      }).catch(() => {});
+    }
+  }
 }
 
 io.on('connection', (socket) => {
@@ -233,6 +272,28 @@ io.on('connection', (socket) => {
       callback({ success: true });
     } catch {
       callback({ success: false });
+    }
+  });
+
+  socket.on('join-daily', async ({ name }: { name: string }, callback: Function) => {
+    try {
+      const challenge = await getDailyChallenge();
+      const room = roomManager.createRoom(socket.id, name, true);
+      socket.join(room.code);
+      roomManager.startGame(room.code, challenge.start_page, challenge.target_page, 0);
+      preWarmCache(challenge.start_page).catch(() => {});
+      preWarmCache(challenge.target_page).catch(() => {});
+      console.log(`[Daily] ${name} started daily: "${challenge.start_page}" → "${challenge.target_page}"`);
+      callback({
+        success: true,
+        roomCode: room.code,
+        startPage: challenge.start_page,
+        targetPage: challenge.target_page,
+        startTime: roomManager.getRoomByCode(room.code)?.startTime,
+        date: challenge.date,
+      });
+    } catch {
+      callback({ success: false, error: 'Failed to start daily challenge' });
     }
   });
 

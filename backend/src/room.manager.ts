@@ -14,7 +14,7 @@ class RoomManager {
   private rooms = new Map<string, Room>();
   private socketToRoom = new Map<string, string>();
 
-  createRoom(hostSocketId: string, hostName: string): Room {
+  createRoom(hostSocketId: string, hostName: string, isDaily = false): Room {
     let code = generateCode();
     while (this.rooms.has(code)) {
       code = generateCode();
@@ -37,6 +37,7 @@ class RoomManager {
       targetPage: null,
       players: new Map([[hostSocketId, host]]),
       graceTime: 60,
+      isDaily,
     };
 
     this.rooms.set(code, room);

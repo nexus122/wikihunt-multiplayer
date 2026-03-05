@@ -1,0 +1,85 @@
+<div class="lb-page">
+  <div class="lb-header">
+    <button class="back-btn" (click)="goHome()">← Volver</button>
+    <h1 class="lb-title">🏆 Clasificaciones</h1>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn" [class.active]="activeTab === 'today'" (click)="loadTab('today')">☀️ Hoy</button>
+    <button class="tab-btn" [class.active]="activeTab === 'alltime'" (click)="loadTab('alltime')">⭐ Hall of Fame</button>
+    <button class="tab-btn" [class.active]="activeTab === 'mine'" (click)="loadTab('mine')">👤 Mis partidas</button>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Cargando...</div>
+  }
+
+  <!-- HOY -->
+  @if (!loading && activeTab === 'today') {
+    @if (todayChallenge) {
+      <div class="challenge-info">
+        <span class="challenge-route">{{ todayChallenge.start_page }} → {{ todayChallenge.target_page }}</span>
+        <a class="play-link" routerLink="/daily">Jugar ↗</a>
+      </div>
+    }
+
+    @if (todayPodio.length === 0) {
+      <div class="empty">Nadie ha completado el reto de hoy todavía.<br>¡Sé el primero!</div>
+    } @else {
+      <ul class="entries">
+        @for (entry of todayPodio; track entry.id; let i = $index) {
+          <li class="entry" [class.top]="i < 3">
+            <span class="rank">{{ rankEmoji(i) }}</span>
+            <span class="entry-name">{{ entry.player_name }}</span>
+            <span class="entry-steps">{{ entry.steps }} pasos</span>
+            <span class="entry-time">{{ formatTime(entry.time_ms) }}</span>
+          </li>
+        }
+      </ul>
+    }
+  }
+
+  <!-- HALL OF FAME -->
+  @if (!loading && activeTab === 'alltime') {
+    @if (hallOfFame.length === 0) {
+      <div class="empty">Todavía no hay resultados.<br>¡Completa una partida para aparecer aquí!</div>
+    } @else {
+      <ul class="entries">
+        @for (entry of hallOfFame; track entry.id; let i = $index) {
+          <li class="entry" [class.top]="i < 3">
+            <span class="rank">{{ rankEmoji(i) }}</span>
+            <div class="entry-info">
+              <span class="entry-name">{{ entry.player_name }}</span>
+              <span class="entry-route">{{ entry.start_page }} → {{ entry.target_page }}</span>
+            </div>
+            <span class="entry-steps">{{ entry.steps }} pasos</span>
+            <span class="entry-time">{{ formatTime(entry.time_ms) }}</span>
+          </li>
+        }
+      </ul>
+    }
+  }
+
+  <!-- MIS PARTIDAS -->
+  @if (!loading && activeTab === 'mine') {
+    @if (!myName) {
+      <div class="empty">No hay nombre guardado. Juega una partida primero.</div>
+    } @else if (myHistory.length === 0) {
+      <div class="empty">No hay partidas registradas para <strong>{{ myName }}</strong>.</div>
+    } @else {
+      <p class="my-name-hint">Mostrando historial de <strong>{{ myName }}</strong></p>
+      <ul class="entries">
+        @for (entry of myHistory; track entry.id; let i = $index) {
+          <li class="entry">
+            <div class="entry-info">
+              <span class="entry-route">{{ entry.start_page }} → {{ entry.target_page }}</span>
+              <span class="entry-date">{{ entry.created_at | date:'d MMM yyyy' }}</span>
+            </div>
+            <span class="entry-steps">{{ entry.steps }} pasos</span>
+            <span class="entry-time">{{ formatTime(entry.time_ms) }}</span>
+          </li>
+        }
+      </ul>
+    }
+  }
+</div>

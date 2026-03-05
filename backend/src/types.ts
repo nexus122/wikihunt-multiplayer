@@ -23,6 +23,7 @@ export interface Room {
   graceTimeoutId?: ReturnType<typeof setTimeout>;
   cleanupTimeoutId?: ReturnType<typeof setTimeout>; // delay antes de borrar sala vacía
   gaveUpNames?: Set<string>;  // nombres que se rindieron en la partida actual
+  isDaily?: boolean;          // true si es el reto del día
 }
 
 export interface RoomInfo {
