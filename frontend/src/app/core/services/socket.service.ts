@@ -20,12 +20,16 @@ export class SocketService {
     const url = environment.backendUrl || `http://${window.location.hostname}:3001`;
     this.socket = io(url, {
       transports: ['websocket'],
-      autoConnect: true,
+      autoConnect: false,
     });
 
     this.socket.on('connect', () => console.log('[Socket] Connected:', this.socket.id));
     this.socket.on('disconnect', () => console.log('[Socket] Disconnected'));
     this.socket.on('connect_error', (err) => console.error('[Socket] Error:', err.message));
+  }
+
+  connect(): void {
+    if (!this.socket.connected) this.socket.connect();
   }
 
   getSocketId(): string {
@@ -39,6 +43,7 @@ export class SocketService {
   // ── Emit helpers ──────────────────────────────────────────────────────────
 
   createRoom(name: string): Observable<{ code: string; room: RoomInfo }> {
+    this.connect();
     return new Observable(obs => {
       this.socket.emit('create-room', { name }, (data: { code: string; room: RoomInfo }) => {
         obs.next(data);
@@ -48,6 +53,7 @@ export class SocketService {
   }
 
   joinRoom(code: string, name: string): Observable<{ success: boolean; room?: RoomInfo; error?: string }> {
+    this.connect();
     return new Observable(obs => {
       this.socket.emit('join-room', { code, name }, (data: { success: boolean; room?: RoomInfo; error?: string }) => {
         obs.next(data);
@@ -72,6 +78,7 @@ export class SocketService {
     currentPage?: string,
     path?: string[],
   ): Observable<{ success: boolean; startPage?: string; targetPage?: string; startTime?: number; room?: RoomInfo; error?: string }> {
+    this.connect();
     return new Observable(obs => {
       this.socket.emit('rejoin-game', { code, name, steps, currentPage, path }, (data: any) => {
         obs.next(data);
