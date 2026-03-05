@@ -122,6 +122,7 @@
 
   &.me { border-color: var(--accent); }
   &.finished { opacity: .7; }
+  &.disconnected { opacity: .4; filter: grayscale(1); }
 }
 
 .avatar {

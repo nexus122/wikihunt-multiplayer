@@ -62,15 +62,16 @@
       <p class="label">Players</p>
       <ul class="players">
         @for (p of players; track p.socketId) {
-          <li class="player" [class.me]="p.socketId === mySocketId" [class.finished]="p.finished">
+          <li class="player" [class.me]="p.socketId === mySocketId" [class.finished]="p.finished" [class.disconnected]="p.disconnected">
             <div class="avatar sm" [style.background]="getAvatarColor(p.socketId)">{{ (p.name?.[0] || '?').toUpperCase() }}</div>
             <div class="player-info">
               <span class="player-name">{{ p.name }}</span>
-              <span class="player-page">{{ p.currentPage || '...' }}</span>
+              <span class="player-page">{{ p.disconnected ? 'Desconectado...' : (p.currentPage || '...') }}</span>
             </div>
             <span class="player-steps">{{ p.steps }}</span>
             @if (p.finished) { <span class="done">✓</span> }
             @if (p.gaveUp) { <span class="gave-up-icon">🏳️</span> }
+            @if (p.disconnected) { <span class="offline-icon">⚡</span> }
           </li>
         }
       </ul>

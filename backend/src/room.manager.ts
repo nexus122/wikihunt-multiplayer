@@ -80,31 +80,52 @@ class RoomManager {
     if (!room) return { room: null, wasHost: false };
 
     const wasHost = room.hostId === socketId;
-    room.players.delete(socketId);
     this.socketToRoom.delete(socketId);
 
-    if (room.players.size === 0) {
-      if (room.status === 'playing') {
-        // Keep room alive for 60s so players can rejoin
+    if (room.status === 'playing') {
+      // During a game: mark as disconnected instead of deleting so state is preserved
+      const player = room.players.get(socketId);
+      if (player) player.disconnected = true;
+
+      // If every player is now offline/done, schedule room cleanup
+      const allGone = Array.from(room.players.values()).every(
+        p => p.disconnected || p.finished || p.gaveUp,
+      );
+      if (allGone) {
         if (room.cleanupTimeoutId) clearTimeout(room.cleanupTimeoutId);
-        room.cleanupTimeoutId = setTimeout(() => {
-          this.rooms.delete(code);
-        }, 60_000);
+        room.cleanupTimeoutId = setTimeout(() => this.rooms.delete(code), 60_000);
         return { room: null, wasHost };
       }
+
+      // Cancel any pending cleanup — there are still active players
+      if (room.cleanupTimeoutId) {
+        clearTimeout(room.cleanupTimeoutId);
+        room.cleanupTimeoutId = undefined;
+      }
+
+      // Transfer host to a still-connected player if needed
+      if (wasHost) {
+        const active = Array.from(room.players.values()).find(p => !p.disconnected);
+        if (active) room.hostId = active.socketId;
+      }
+
+      return { room, wasHost };
+    }
+
+    // Waiting / finished: remove the player entirely
+    room.players.delete(socketId);
+
+    if (room.players.size === 0) {
       this.rooms.delete(code);
       return { room: null, wasHost };
     }
 
-    // Cancel any pending cleanup now that a player is still connected
     if (room.cleanupTimeoutId) {
       clearTimeout(room.cleanupTimeoutId);
       room.cleanupTimeoutId = undefined;
     }
 
-    if (wasHost) {
-      this.transferHost(room);
-    }
+    if (wasHost) this.transferHost(room);
 
     return { room, wasHost };
   }
@@ -133,14 +154,30 @@ class RoomManager {
       room.cleanupTimeoutId = undefined;
     }
 
-    // If the room was empty, the stored hostId points to a dead socket — first to rejoin becomes host
-    if (room.players.size === 0) {
-      room.hostId = socketId;
+    // Look for the player's existing entry (keyed by old socketId)
+    let oldSocketId: string | undefined;
+    let existingPlayer: Player | undefined;
+    for (const [sid, p] of room.players.entries()) {
+      if (p.name === name && p.disconnected) {
+        oldSocketId = sid;
+        existingPlayer = p;
+        break;
+      }
     }
 
-    // Preserve gave-up state: a player who surrendered this game cannot rejoin as active
-    const previouslyGaveUp = room.gaveUpNames?.has(name) ?? false;
+    if (existingPlayer && oldSocketId) {
+      // Reactivate: remap to new socketId, restore online state
+      room.players.delete(oldSocketId);
+      existingPlayer.socketId = socketId;
+      existingPlayer.disconnected = false;
+      room.players.set(socketId, existingPlayer);
+      this.socketToRoom.set(socketId, code);
+      if (room.hostId === oldSocketId) room.hostId = socketId;
+      return room;
+    }
 
+    // No existing disconnected slot — create fresh (gave-up state is preserved)
+    const previouslyGaveUp = room.gaveUpNames?.has(name) ?? false;
     const player: Player = {
       socketId,
       name,
@@ -153,6 +190,13 @@ class RoomManager {
 
     room.players.set(socketId, player);
     this.socketToRoom.set(socketId, code);
+
+    // If no one else is connected, this player becomes host
+    const hasOtherActive = Array.from(room.players.values()).some(
+      p => p.socketId !== socketId && !p.disconnected,
+    );
+    if (!hasOtherActive) room.hostId = socketId;
+
     return room;
   }
 
@@ -236,6 +280,7 @@ class RoomManager {
       finished: p.finished,
       finishTime: p.finishTime,
       gaveUp: p.gaveUp,
+      disconnected: p.disconnected,
     }));
 
     return {

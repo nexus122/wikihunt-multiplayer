@@ -7,6 +7,7 @@ export interface Player {
   finished: boolean;
   finishTime?: number;
   gaveUp?: boolean;
+  disconnected?: boolean;
 }
 
 export interface Room {
@@ -43,6 +44,7 @@ export interface PlayerPublicInfo {
   finished: boolean;
   finishTime?: number;
   gaveUp?: boolean;
+  disconnected?: boolean;
 }
 
 export interface LeaderboardEntry {

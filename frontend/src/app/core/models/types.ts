@@ -7,6 +7,7 @@ export interface PlayerPublicInfo {
   finished: boolean;
   finishTime?: number;
   gaveUp?: boolean;
+  disconnected?: boolean;
 }
 
 export interface RoomInfo {

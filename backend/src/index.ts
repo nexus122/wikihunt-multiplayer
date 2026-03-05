@@ -178,7 +178,7 @@ io.on('connection', (socket) => {
         });
 
         // Check if all players are done before starting countdown
-        const allFinished = Array.from(room.players.values()).every(p => p.finished || p.gaveUp);
+        const allFinished = Array.from(room.players.values()).every(p => p.finished || p.gaveUp || p.disconnected);
 
         if (allFinished) {
           // Everyone done — skip countdown and end immediately
@@ -221,7 +221,7 @@ io.on('connection', (socket) => {
 
       io.to(room.code).emit('player-gave-up', { playerId: socket.id, name: player.name });
 
-      const allDone = Array.from(room.players.values()).every(p => p.finished || p.gaveUp);
+      const allDone = Array.from(room.players.values()).every(p => p.finished || p.gaveUp || p.disconnected);
       if (allDone) {
         if (room.graceTimeoutId) {
           clearTimeout(room.graceTimeoutId);
