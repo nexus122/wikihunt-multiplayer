@@ -4,30 +4,44 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { SocketService } from '../../core/services/socket.service';
 import { SupabaseService, DailyChallenge } from '../../core/services/supabase.service';
+import { AuthService } from '../../core/services/auth.service';
+import { HeaderComponent } from '../../core/components/header.component';
 
 @Component({
   selector: 'app-daily',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, HeaderComponent],
   templateUrl: './daily.component.html',
   styleUrl: './daily.component.scss',
 })
 export class DailyComponent implements OnInit {
-  name = '';
+  guestName = '';
+  profileName = '';
   loading = false;
   loadingChallenge = true;
   error = '';
   challenge: DailyChallenge | null = null;
 
+  get activeName(): string {
+    return this.profileName || this.guestName;
+  }
+
   constructor(
     private socketService: SocketService,
     private supabaseService: SupabaseService,
+    private authService: AuthService,
     private router: Router,
   ) {}
 
   async ngOnInit(): Promise<void> {
     const saved = localStorage.getItem('wh_name');
-    if (saved) this.name = saved;
+    if (saved) this.guestName = saved;
+
+    const user = this.authService.currentUser;
+    if (user) {
+      const profile = await this.authService.getProfile();
+      if (profile) this.profileName = profile.display_name;
+    }
 
     try {
       this.challenge = await this.supabaseService.getDailyChallenge();
@@ -39,12 +53,12 @@ export class DailyComponent implements OnInit {
   }
 
   start(): void {
-    if (!this.name.trim()) { this.error = 'Introduce tu nombre'; return; }
+    if (!this.activeName.trim()) { this.error = 'Introduce tu nombre'; return; }
     this.loading = true;
     this.error = '';
-    localStorage.setItem('wh_name', this.name.trim());
+    if (!this.profileName) localStorage.setItem('wh_name', this.guestName.trim());
 
-    this.socketService.joinDaily(this.name.trim()).subscribe({
+    this.socketService.joinDaily(this.activeName.trim()).subscribe({
       next: (data) => {
         if (!data.success || !data.startPage) {
           this.error = data.error || 'No se pudo cargar el reto';

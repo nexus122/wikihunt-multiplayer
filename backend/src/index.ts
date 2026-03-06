@@ -6,7 +6,7 @@ import cors from 'cors';
 import wikipediaRouter, { preWarmCache } from './wikipedia';
 import { roomManager } from './room.manager';
 import { getCanonicalTitle, getValidRandomPage, normalizePage } from './wiki.helpers';
-import { getDailyChallenge, saveDailyResult, saveHallOfFame } from './supabase';
+import { getDailyChallenge, saveDailyResult, saveHallOfFame, verifyUserToken } from './supabase';
 
 const app = express();
 const httpServer = createServer(app);
@@ -27,6 +27,22 @@ app.get('/api/daily', async (_req, res) => {
   }
 });
 
+// JWT middleware — verify Supabase token if present
+io.use(async (socket, next) => {
+  const token = socket.handshake.auth?.token;
+  console.log(`[JWT] auth=${JSON.stringify(socket.handshake.auth)}, token length=${token?.length ?? 0}`);
+  if (token) {
+    const userId = await verifyUserToken(token);
+    if (userId) {
+      socket.data.userId = userId;
+      console.log(`[JWT] verified userId: ${userId}`);
+    } else {
+      console.log(`[JWT] token invalid or guest`);
+    }
+  }
+  next();
+});
+
 // Rate limiting for navigate events: max 1 per 200ms per socket
 const navigateLastTs = new Map<string, number>();
 
@@ -40,8 +56,15 @@ async function emitGameFinished(roomCode: string, room: ReturnType<typeof roomMa
   const today = new Date().toISOString().slice(0, 10);
   const finishedPlayers = leaderboard.filter(e => e.finished && e.time != null);
 
+  console.log(`[Debug] finishedPlayers: ${finishedPlayers.map(e => `${e.name}(userId=${e.userId})`).join(', ')}`);
+
   for (const entry of finishedPlayers) {
-    // Hall of fame: all finished games
+    if (!entry.userId) {
+      console.log(`[Supabase] Skipping guest: ${entry.name}`);
+      continue;
+    }
+
+    // Hall of fame: all finished games (registered users only)
     saveHallOfFame({
       player_name: entry.name,
       start_page: room.startPage || '',
@@ -50,6 +73,7 @@ async function emitGameFinished(roomCode: string, room: ReturnType<typeof roomMa
       time_ms: entry.time!,
       path: entry.path,
       is_daily: room.isDaily || false,
+      user_id: entry.userId,
     }).then(() => console.log(`[Supabase] Hall of fame saved: ${entry.name}`))
       .catch((e) => console.error('[Supabase] Hall of fame error:', e.message));
 
@@ -62,6 +86,7 @@ async function emitGameFinished(roomCode: string, room: ReturnType<typeof roomMa
         time_ms: entry.time!,
         finished: true,
         path: entry.path,
+        user_id: entry.userId,
       }).then(() => console.log(`[Supabase] Daily result saved: ${entry.name}`))
         .catch((e) => console.error('[Supabase] Daily result error:', e.message));
     }
@@ -73,7 +98,7 @@ io.on('connection', (socket) => {
 
   socket.on('create-room', ({ name }: { name: string }, callback: Function) => {
     try {
-      const room = roomManager.createRoom(socket.id, name);
+      const room = roomManager.createRoom(socket.id, name, false, socket.data.userId);
       socket.join(room.code);
       console.log(`[Room] Created: ${room.code} by ${name}`);
       callback({ code: room.code, room: roomManager.getRoomInfo(room) });
@@ -84,7 +109,7 @@ io.on('connection', (socket) => {
 
   socket.on('join-room', ({ code, name }: { code: string; name: string }, callback: Function) => {
     try {
-      const room = roomManager.joinRoom(code.toUpperCase().trim(), socket.id, name);
+      const room = roomManager.joinRoom(code.toUpperCase().trim(), socket.id, name, socket.data.userId);
       if (!room) {
         callback({ success: false, error: 'Room not found or game already started' });
         return;
@@ -157,7 +182,7 @@ io.on('connection', (socket) => {
     callback: Function
   ) => {
     try {
-      const room = roomManager.rejoinRoom(code.toUpperCase().trim(), socket.id, name, steps, currentPage, path);
+      const room = roomManager.rejoinRoom(code.toUpperCase().trim(), socket.id, name, steps, currentPage, path, socket.data.userId);
       if (!room) {
         callback({ success: false, error: 'La partida no existe o ya ha terminado' });
         return;
@@ -281,7 +306,7 @@ io.on('connection', (socket) => {
   socket.on('join-daily', async ({ name }: { name: string }, callback: Function) => {
     try {
       const challenge = await getDailyChallenge();
-      const room = roomManager.createRoom(socket.id, name, true);
+      const room = roomManager.createRoom(socket.id, name, true, socket.data.userId);
       socket.join(room.code);
       roomManager.startGame(room.code, challenge.start_page, challenge.target_page, 0);
       preWarmCache(challenge.start_page).catch(() => {});

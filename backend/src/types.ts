@@ -1,6 +1,7 @@
 export interface Player {
   socketId: string;
   name: string;
+  userId?: string;
   currentPage: string | null;
   steps: number;
   path: string[];
@@ -51,6 +52,7 @@ export interface PlayerPublicInfo {
 export interface LeaderboardEntry {
   socketId: string;
   name: string;
+  userId?: string;
   steps: number;
   time?: number;
   finished: boolean;

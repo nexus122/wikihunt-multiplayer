@@ -1,8 +1,7 @@
+<app-header backLabel="← Volver" (back)="goHome()" />
+
 <div class="lb-page">
-  <div class="lb-header">
-    <button class="back-btn" (click)="goHome()">← Volver</button>
-    <h1 class="lb-title">🏆 Clasificaciones</h1>
-  </div>
+  <h1 class="lb-title">🏆 Clasificaciones</h1>
 
   <div class="tabs">
     <button class="tab-btn" [class.active]="activeTab === 'today'" (click)="loadTab('today')">☀️ Hoy</button>

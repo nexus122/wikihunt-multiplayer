@@ -1,0 +1,104 @@
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wh-logo {
+  text-align: center;
+  font-size: 36px;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 8px;
+  border-radius: 6px;
+  font-weight: 500;
+  &.active { background: var(--bg-secondary); color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+  &:hover:not(.active) { color: var(--text-primary); }
+}
+
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color .15s;
+  &:hover { border-color: var(--accent); }
+  &:disabled { opacity: .6; cursor: not-allowed; }
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  &::before, &::after { content: ''; flex: 1; height: 1px; background: var(--border-color); }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  .btn-primary { width: 100%; padding: 12px; font-size: 15px; }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  padding: 0;
+  &:hover { text-decoration: underline; }
+}
+
+.success-message {
+  background: rgba(57, 197, 110, 0.1);
+  border: 1px solid rgba(57, 197, 110, 0.3);
+  color: #39c56e;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+}

@@ -1,0 +1,39 @@
+<div class="setup-page">
+  <div class="card setup-card">
+    <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
+    <h2>Elige tu nombre de jugador</h2>
+    <p class="hint">Este nombre aparecerá en el podio y el hall of fame.</p>
+
+    <div class="field">
+      <label>Nombre</label>
+      <div class="name-row">
+        <input type="text" placeholder="TuNombre" [(ngModel)]="displayName" maxlength="20"
+               (ngModelChange)="nameAvailable = null; suggestion = ''"
+               (keydown.enter)="save()" />
+        <button class="btn-secondary" (click)="checkName()" [disabled]="checking || saving">
+          {{ checking ? '...' : 'Comprobar' }}
+        </button>
+      </div>
+    </div>
+
+    @if (nameAvailable === true) {
+      <div class="status available">✓ Nombre disponible</div>
+    }
+    @if (nameAvailable === false) {
+      <div class="status taken">✗ Nombre ocupado</div>
+      @if (suggestion) {
+        <div class="suggestion">
+          Sugerencia: <button class="link-btn" (click)="useSuggestion()">{{ suggestion }}</button>
+        </div>
+      }
+    }
+
+    @if (error) {
+      <div class="error-message">{{ error }}</div>
+    }
+
+    <button class="btn-primary" (click)="save()" [disabled]="saving || checking">
+      {{ saving ? 'Guardando...' : 'Confirmar nombre' }}
+    </button>
+  </div>
+</div>

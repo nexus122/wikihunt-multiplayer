@@ -1,5 +1,6 @@
+<app-header backLabel="← Volver" (back)="goHome()" />
+
 <div class="daily-page">
-  <button class="back-btn" (click)="goHome()">← Volver</button>
 
   <div class="hero">
     <div class="daily-badge">☀️ Reto del día</div>
@@ -28,13 +29,11 @@
 
       <div class="field">
         <label>Tu nombre</label>
-        <input
-          type="text"
-          placeholder="Introduce tu nombre"
-          [(ngModel)]="name"
-          maxlength="20"
-          (keydown.enter)="start()"
-        />
+        @if (profileName) {
+          <div class="name-locked">{{ profileName }} <span class="name-locked-badge">cuenta</span></div>
+        } @else {
+          <input type="text" placeholder="Introduce tu nombre" [(ngModel)]="guestName" maxlength="20" (keydown.enter)="start()" />
+        }
       </div>
 
       @if (error) {

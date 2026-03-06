@@ -14,7 +14,7 @@ class RoomManager {
   private rooms = new Map<string, Room>();
   private socketToRoom = new Map<string, string>();
 
-  createRoom(hostSocketId: string, hostName: string, isDaily = false): Room {
+  createRoom(hostSocketId: string, hostName: string, isDaily = false, userId?: string): Room {
     let code = generateCode();
     while (this.rooms.has(code)) {
       code = generateCode();
@@ -23,6 +23,7 @@ class RoomManager {
     const host: Player = {
       socketId: hostSocketId,
       name: hostName,
+      userId,
       currentPage: null,
       steps: 0,
       path: [],
@@ -45,13 +46,14 @@ class RoomManager {
     return room;
   }
 
-  joinRoom(code: string, socketId: string, name: string): Room | null {
+  joinRoom(code: string, socketId: string, name: string, userId?: string): Room | null {
     const room = this.rooms.get(code);
     if (!room || room.status !== 'waiting') return null;
 
     const player: Player = {
       socketId,
       name,
+      userId,
       currentPage: null,
       steps: 0,
       path: [],
@@ -145,6 +147,7 @@ class RoomManager {
     steps = 0,
     currentPage?: string | null,
     path?: string[],
+    userId?: string,
   ): Room | null {
     const room = this.rooms.get(code);
     if (!room || room.status !== 'playing') return null;
@@ -182,6 +185,7 @@ class RoomManager {
     const player: Player = {
       socketId,
       name,
+      userId,
       currentPage: currentPage || room.startPage,
       steps,
       path: path?.length ? path : (room.startPage ? [room.startPage] : []),
@@ -304,6 +308,7 @@ class RoomManager {
       .map(p => ({
         socketId: p.socketId,
         name: p.name,
+        userId: p.userId,
         steps: p.steps,
         time: p.finishTime && room.startTime ? p.finishTime - room.startTime : undefined,
         finished: true,
@@ -316,6 +321,7 @@ class RoomManager {
       .map(p => ({
         socketId: p.socketId,
         name: p.name,
+        userId: p.userId,
         steps: p.steps,
         finished: false,
         gaveUp: p.gaveUp || false,

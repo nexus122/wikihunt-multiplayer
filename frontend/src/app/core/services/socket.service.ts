@@ -11,16 +11,20 @@ import {
   CountdownStartedEvent,
   PlayerGaveUpEvent,
 } from '../models/types';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class SocketService {
   private socket: Socket;
 
-  constructor() {
+  constructor(private authService: AuthService) {
     const url = environment.backendUrl || `http://${window.location.hostname}:3001`;
     this.socket = io(url, {
       transports: ['websocket'],
       autoConnect: false,
+      auth: (cb: (data: object) => void) => {
+        this.authService.getAccessToken().then(token => cb({ token }));
+      },
     });
 
     this.socket.on('connect', () => console.log('[Socket] Connected:', this.socket.id));

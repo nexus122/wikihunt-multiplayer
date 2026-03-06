@@ -1,25 +1,34 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { filter, take } from 'rxjs/operators';
 import { SocketService } from '../../core/services/socket.service';
+import { AuthService } from '../../core/services/auth.service';
+import { HeaderComponent } from '../../core/components/header.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, HeaderComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   activeTab: 'create' | 'join' = 'create';
-  createName = '';
-  joinName = '';
+  guestName = '';       // nombre libre para invitados
+  profileName = '';     // nombre bloqueado del perfil (solo registrados)
   joinCode = '';
   creating = false;
   joining = false;
   rejoining = false;
   error = '';
+  private authSub?: Subscription;
+
+  get activeName(): string {
+    return this.profileName || this.guestName;
+  }
 
   savedGame: { roomCode: string; playerName: string; isHost: boolean; startPage: string; targetPage: string; steps?: number; currentPage?: string; path?: string[] } | null = null;
 
@@ -30,11 +39,11 @@ export class HomeComponent implements OnInit {
     { n: 4, text: 'First to reach the target page wins!' },
   ];
 
-  constructor(private socketService: SocketService, private router: Router) {}
+  constructor(private socketService: SocketService, private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
     const saved = localStorage.getItem('wh_name');
-    if (saved) { this.createName = saved; this.joinName = saved; }
+    if (saved) this.guestName = saved;
 
     const savedGame = localStorage.getItem('wh_game');
     if (savedGame) {
@@ -44,7 +53,26 @@ export class HomeComponent implements OnInit {
         localStorage.removeItem('wh_game');
       }
     }
+
+    this.authSub = this.authService.user$.subscribe(async user => {
+      if (user) {
+        const profile = await this.authService.getProfile();
+        if (profile) {
+          this.profileName = profile.display_name;
+          localStorage.setItem('wh_name', profile.display_name);
+        }
+      } else if (user === null) {
+        this.profileName = '';
+      }
+    });
   }
+
+  ngOnDestroy(): void {
+    this.authSub?.unsubscribe();
+  }
+
+  // signOut is handled by HeaderComponent; reset local state on user$ null
+
 
   rejoinGame(): void {
     if (!this.savedGame) return;
@@ -86,12 +114,12 @@ export class HomeComponent implements OnInit {
   }
 
   createRoom(): void {
-    if (!this.createName.trim()) { this.error = 'Enter your name'; return; }
+    if (!this.activeName.trim()) { this.error = 'Enter your name'; return; }
     this.creating = true;
     this.error = '';
-    localStorage.setItem('wh_name', this.createName.trim());
+    if (!this.profileName) localStorage.setItem('wh_name', this.guestName.trim());
 
-    this.socketService.createRoom(this.createName.trim()).subscribe({
+    this.socketService.createRoom(this.activeName.trim()).subscribe({
       next: (data) => {
         this.router.navigate(['/lobby', data.code], {
           state: { room: data.room, isHost: true },
@@ -102,13 +130,13 @@ export class HomeComponent implements OnInit {
   }
 
   joinRoom(): void {
-    if (!this.joinName.trim()) { this.error = 'Enter your name'; return; }
+    if (!this.activeName.trim()) { this.error = 'Enter your name'; return; }
     if (!this.joinCode.trim()) { this.error = 'Enter a room code'; return; }
     this.joining = true;
     this.error = '';
-    localStorage.setItem('wh_name', this.joinName.trim());
+    if (!this.profileName) localStorage.setItem('wh_name', this.guestName.trim());
 
-    this.socketService.joinRoom(this.joinCode.trim().toUpperCase(), this.joinName.trim()).subscribe({
+    this.socketService.joinRoom(this.joinCode.trim().toUpperCase(), this.activeName.trim()).subscribe({
       next: (data) => {
         if (!data.success) { this.error = data.error || 'Failed to join room'; this.joining = false; return; }
         this.router.navigate(['/lobby', this.joinCode.trim().toUpperCase()], {

@@ -1,3 +1,5 @@
+<app-header />
+
 <div class="home">
 
   @if (savedGame) {
@@ -35,7 +37,11 @@
       <div class="tab-content">
         <div class="field">
           <label>Your name</label>
-          <input type="text" placeholder="Enter your name" [(ngModel)]="createName" maxlength="20" (keydown.enter)="createRoom()" />
+          @if (profileName) {
+            <div class="name-locked">{{ profileName }} <span class="name-locked-badge">cuenta</span></div>
+          } @else {
+            <input type="text" placeholder="Enter your name" [(ngModel)]="guestName" maxlength="20" (keydown.enter)="createRoom()" />
+          }
         </div>
         <button class="btn-primary" (click)="createRoom()" [disabled]="creating">
           {{ creating ? 'Creating...' : '🚀 Create Room' }}
@@ -47,7 +53,11 @@
       <div class="tab-content">
         <div class="field">
           <label>Your name</label>
-          <input type="text" placeholder="Enter your name" [(ngModel)]="joinName" maxlength="20" />
+          @if (profileName) {
+            <div class="name-locked">{{ profileName }} <span class="name-locked-badge">cuenta</span></div>
+          } @else {
+            <input type="text" placeholder="Enter your name" [(ngModel)]="guestName" maxlength="20" />
+          }
         </div>
         <div class="field">
           <label>Room code</label>

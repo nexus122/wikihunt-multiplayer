@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard, guestGuard, noProfileGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -20,6 +21,16 @@ export const routes: Routes = [
   {
     path: 'leaderboard',
     loadComponent: () => import('./pages/leaderboard/leaderboard.component').then(m => m.LeaderboardComponent),
+  },
+  {
+    path: 'auth',
+    canActivate: [guestGuard],
+    loadComponent: () => import('./pages/auth/auth.component').then(m => m.AuthComponent),
+  },
+  {
+    path: 'setup-profile',
+    canActivate: [noProfileGuard],
+    loadComponent: () => import('./pages/setup-profile/setup-profile.component').then(m => m.SetupProfileComponent),
   },
   { path: '**', redirectTo: '' },
 ];

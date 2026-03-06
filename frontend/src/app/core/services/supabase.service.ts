@@ -33,7 +33,7 @@ export interface HallOfFameEntry {
 
 @Injectable({ providedIn: 'root' })
 export class SupabaseService {
-  private client: SupabaseClient;
+  readonly client: SupabaseClient;
 
   constructor() {
     this.client = createClient(environment.supabaseUrl, environment.supabaseAnonKey);

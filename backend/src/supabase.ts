@@ -25,6 +25,7 @@ export interface DailyResultInput {
   time_ms: number | null;
   finished: boolean;
   path: string[];
+  user_id?: string;
 }
 
 export interface HallOfFameInput {
@@ -35,6 +36,7 @@ export interface HallOfFameInput {
   time_ms: number;
   path: string[];
   is_daily: boolean;
+  user_id?: string;
 }
 
 // Returns today's challenge, creating it if it doesn't exist yet
@@ -80,4 +82,11 @@ export async function saveHallOfFame(entry: HallOfFameInput): Promise<void> {
   if (!supabase) return;
   const { error } = await supabase.from('hall_of_fame').insert(entry);
   if (error) console.error('[Supabase] Error saving hall of fame:', error.message);
+}
+
+export async function verifyUserToken(token: string): Promise<string | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data.user) return null;
+  return data.user.id;
 }
