@@ -32,5 +32,9 @@ export const routes: Routes = [
     canActivate: [noProfileGuard],
     loadComponent: () => import('./pages/setup-profile/setup-profile.component').then(m => m.SetupProfileComponent),
   },
+  {
+    path: 'join/:code',
+    loadComponent: () => import('./pages/join/join.component').then(m => m.JoinComponent),
+  },
   { path: '**', redirectTo: '' },
 ];

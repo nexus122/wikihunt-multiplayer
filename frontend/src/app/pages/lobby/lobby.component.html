@@ -12,7 +12,16 @@
       <div class="code-row">
         <span class="code">{{ roomCode }}</span>
         <button class="btn-secondary" (click)="copyCode()">{{ codeCopied ? t('lobby_copied') : t('lobby_copy') }}</button>
+        <button class="btn-secondary" (click)="copyLink()">{{ linkCopied ? t('lobby_link_copied') : t('lobby_copy_link') }}</button>
+        <button class="btn-secondary qr-toggle-btn" (click)="showQr = !showQr" [title]="t('lobby_show_qr')">
+          <span class="qr-icon">&#9638;</span>
+        </button>
       </div>
+      @if (showQr) {
+        <div class="qr-wrap">
+          <img [src]="qrUrl" alt="QR" width="160" height="160" />
+        </div>
+      }
       <p class="hint">{{ t('lobby_share') }}</p>
     </div>
 

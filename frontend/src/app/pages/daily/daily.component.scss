@@ -53,6 +53,19 @@
   margin: 0;
 }
 
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 149, 0, 0.12);
+  border: 1px solid rgba(255, 149, 0, 0.3);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 13px;
+  color: #ff9500;
+  margin-top: 4px;
+}
+
 .loading-card {
   text-align: center;
   color: var(--text-secondary);

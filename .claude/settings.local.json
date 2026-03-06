@@ -12,7 +12,8 @@
       "mcp__render__list_services",
       "mcp__render__list_workspaces",
       "mcp__render__list_logs",
-      "mcp__claude_ai_Supabase__list_projects"
+      "mcp__claude_ai_Supabase__list_projects",
+      "mcp__claude_ai_Supabase__apply_migration"
     ]
   }
 }

@@ -32,6 +32,10 @@ export const translations = {
     step3: 'Navega haciendo clic en los enlaces — ve al destino',
     step4: '¡El primero en llegar a la página destino gana!',
 
+    // Challenge invite
+    challenge_title: '¡Alguien te ha retado!',
+    challenge_play: '⚔️ Aceptar reto',
+
     // Daily
     daily_title: 'Reto del día',
     daily_loading: 'Cargando reto...',
@@ -42,13 +46,18 @@ export const translations = {
     daily_loading_btn: 'Cargando...',
     daily_leaderboard: 'Ver clasificación del día',
     daily_name_required: 'Introduce tu nombre',
+    daily_streak: '🔥 Racha',
+    daily_streak_days: 'días',
 
     // Lobby
     lobby_leave: '← Salir',
     lobby_room_code: 'Código de sala',
-    lobby_copy: 'Copiar',
+    lobby_copy: 'Copiar código',
     lobby_copied: '✓ Copiado!',
-    lobby_share: 'Comparte este código con tus amigos',
+    lobby_copy_link: 'Copiar enlace',
+    lobby_link_copied: '✓ Enlace copiado!',
+    lobby_show_qr: 'Código QR',
+    lobby_share: 'Comparte este código o enlace con tus amigos',
     lobby_players: 'Jugadores',
     lobby_waiting_players: 'Esperando jugadores...',
     lobby_host_tag: 'Host',
@@ -99,6 +108,7 @@ export const translations = {
     game_path_route: 'ruta',
     game_reconnecting: 'Reconectando…',
     game_initial_failed_retry: 'Reintentar',
+    game_share: '↗ Compartir resultado',
 
     // Leaderboard
     lb_title: '🏆 Clasificaciones',
@@ -173,6 +183,10 @@ export const translations = {
     step3: 'Navigate by clicking links — race to the target',
     step4: 'First to reach the target page wins!',
 
+    // Challenge invite
+    challenge_title: 'Someone challenged you!',
+    challenge_play: '⚔️ Accept challenge',
+
     // Daily
     daily_title: 'Daily Challenge',
     daily_loading: 'Loading challenge...',
@@ -183,13 +197,18 @@ export const translations = {
     daily_loading_btn: 'Loading...',
     daily_leaderboard: 'View daily leaderboard',
     daily_name_required: 'Enter your name',
+    daily_streak: '🔥 Streak',
+    daily_streak_days: 'days',
 
     // Lobby
     lobby_leave: '← Leave',
     lobby_room_code: 'Room Code',
-    lobby_copy: 'Copy',
+    lobby_copy: 'Copy code',
     lobby_copied: '✓ Copied!',
-    lobby_share: 'Share this code with friends',
+    lobby_copy_link: 'Copy link',
+    lobby_link_copied: '✓ Link copied!',
+    lobby_show_qr: 'QR Code',
+    lobby_share: 'Share this code or link with friends',
     lobby_players: 'Players',
     lobby_waiting_players: 'Waiting for players...',
     lobby_host_tag: 'Host',
@@ -240,6 +259,7 @@ export const translations = {
     game_path_route: 'path',
     game_reconnecting: 'Reconnecting…',
     game_initial_failed_retry: 'Retry',
+    game_share: '↗ Share result',
 
     // Leaderboard
     lb_title: '🏆 Leaderboard',

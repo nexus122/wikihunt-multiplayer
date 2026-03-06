@@ -88,6 +88,32 @@ export async function saveHallOfFame(entry: HallOfFameInput): Promise<void> {
   if (error) console.error('[Supabase] Error saving hall of fame:', error.message);
 }
 
+export async function updateUserStreak(userId: string, date: string): Promise<void> {
+  if (!supabase) return;
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('streak, last_daily_date')
+    .eq('user_id', userId)
+    .single();
+  if (error || !data) return;
+
+  const lastDate: string | null = data.last_daily_date;
+  if (lastDate === date) return; // already counted today
+
+  const yesterday = new Date(date);
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+  const newStreak = lastDate === yesterdayStr ? (data.streak || 0) + 1 : 1;
+
+  const { error: updateError } = await supabase
+    .from('user_profiles')
+    .update({ streak: newStreak, last_daily_date: date })
+    .eq('user_id', userId);
+  if (updateError) console.error('[Supabase] Streak update error:', updateError.message);
+  else console.log(`[Supabase] Streak updated for ${userId}: ${newStreak}`);
+}
+
 export async function verifyUserToken(token: string): Promise<string | null> {
   if (!supabase) return null;
   const { data, error } = await supabase.auth.getUser(token);

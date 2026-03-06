@@ -21,6 +21,8 @@ export class LobbyComponent implements OnInit, OnDestroy {
   get isHost(): boolean { return !!this.room && this.room.hostId === this.mySocketId; }
   mySocketId = '';
   codeCopied = false;
+  linkCopied = false;
+  showQr = false;
 
   customStart = false;
   customTarget = false;
@@ -72,12 +74,21 @@ export class LobbyComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.mySocketId = this.socketService.getSocketId();
 
-    const state = history.state as { room: RoomInfo } | undefined;
+    const state = history.state as { room: RoomInfo; challengeStart?: string; challengeTarget?: string; challengeLang?: string } | undefined;
     if (state?.room) {
       this.room = state.room;
     } else {
       this.router.navigate(['/']);
       return;
+    }
+
+    if (state?.challengeStart) {
+      this.customStart = true;
+      this.selectedStart = { title: state.challengeStart, extract: '' };
+    }
+    if (state?.challengeTarget) {
+      this.customTarget = true;
+      this.selectedTarget = { title: state.challengeTarget, extract: '' };
     }
 
     // Refresh room state from server (handles stale state after play-again)
@@ -132,10 +143,25 @@ export class LobbyComponent implements OnInit, OnDestroy {
     return colors[Math.abs(h) % colors.length];
   }
 
+  get joinUrl(): string {
+    return `${window.location.origin}/join/${this.roomCode}`;
+  }
+
+  get qrUrl(): string {
+    return `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(this.joinUrl)}`;
+  }
+
   copyCode(): void {
     navigator.clipboard.writeText(this.roomCode).then(() => {
       this.codeCopied = true;
       setTimeout(() => (this.codeCopied = false), 2000);
+    });
+  }
+
+  copyLink(): void {
+    navigator.clipboard.writeText(this.joinUrl).then(() => {
+      this.linkCopied = true;
+      setTimeout(() => (this.linkCopied = false), 2000);
     });
   }
 

@@ -2,6 +2,29 @@
 
 <div class="home">
 
+  @if (challengingStart && challengingTarget) {
+    <div class="card challenge-invite-card">
+      <p class="challenge-invite-title">{{ t('challenge_title') }}</p>
+      <div class="challenge-invite-route">
+        <span class="route-page">{{ challengingStart }}</span>
+        <span class="route-arrow">→</span>
+        <span class="route-page accent">{{ challengingTarget }}</span>
+      </div>
+      <div class="field">
+        <label>{{ t('your_name') }}</label>
+        @if (profileName) {
+          <div class="name-locked">{{ profileName }} <span class="name-locked-badge">{{ t('name_badge') }}</span></div>
+        } @else {
+          <input type="text" [placeholder]="t('name_placeholder')" [(ngModel)]="guestName" maxlength="20" (keydown.enter)="playChallenge()" />
+        }
+      </div>
+      @if (error) { <div class="error-message">{{ error }}</div> }
+      <button class="btn-primary" (click)="playChallenge()" [disabled]="creating">
+        {{ creating ? t('creating') : t('challenge_play') }}
+      </button>
+    </div>
+  }
+
   @if (savedGame) {
     <div class="card rejoin-card">
       <div class="rejoin-info">

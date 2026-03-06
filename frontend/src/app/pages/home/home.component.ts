@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SocketService } from '../../core/services/socket.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -24,6 +24,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   creating = false;
   joining = false;
   rejoining = false;
+  challengingStart = '';
+  challengingTarget = '';
+  challengeLang = '';
   error = '';
   private authSub?: Subscription;
   private langSub?: Subscription;
@@ -47,6 +50,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(
     private socketService: SocketService,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService,
     public lang: LanguageService,
   ) {}
@@ -58,6 +62,22 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const saved = localStorage.getItem('wh_name');
     if (saved) this.guestName = saved;
+
+    // Pre-fill join tab when coming from a /join/:code link
+    const joinCode = this.route.snapshot.queryParamMap.get('join');
+    if (joinCode) {
+      this.activeTab = 'join';
+      this.joinCode = joinCode.toUpperCase();
+    }
+
+    // Challenge invite: ?start=X&target=Y
+    const start = this.route.snapshot.queryParamMap.get('start');
+    const target = this.route.snapshot.queryParamMap.get('target');
+    if (start && target) {
+      this.challengingStart = start;
+      this.challengingTarget = target;
+      this.challengeLang = this.route.snapshot.queryParamMap.get('lang') || 'es';
+    }
 
     const savedGame = localStorage.getItem('wh_game');
     if (savedGame) {
@@ -125,6 +145,28 @@ export class HomeComponent implements OnInit, OnDestroy {
   dismissSavedGame(): void {
     localStorage.removeItem('wh_game');
     this.savedGame = null;
+  }
+
+  playChallenge(): void {
+    if (!this.activeName.trim()) { this.error = this.t('name_placeholder'); return; }
+    this.creating = true;
+    this.error = '';
+    if (!this.profileName) localStorage.setItem('wh_name', this.guestName.trim());
+
+    this.socketService.createRoom(this.activeName.trim()).subscribe({
+      next: (data) => {
+        this.router.navigate(['/lobby', data.code], {
+          state: {
+            room: data.room,
+            isHost: true,
+            challengeStart: this.challengingStart,
+            challengeTarget: this.challengingTarget,
+            challengeLang: this.challengeLang,
+          },
+        });
+      },
+      error: () => { this.error = 'Failed to create room.'; this.creating = false; },
+    });
   }
 
   createRoom(): void {

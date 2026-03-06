@@ -70,6 +70,9 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
   // Mobile drawer
   mobileMenuOpen = false;
 
+  // Share result
+  readonly canShare = !!navigator.share;
+
   // Language
   gameLang = 'es';
 
@@ -141,7 +144,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     this.setupSocketListeners();
 
     // Fetch brief description of the target page
-    this.wikiService.getPageSummary(this.targetPage).subscribe({
+    this.wikiService.getPageSummary(this.targetPage, this.gameLang).subscribe({
       next: (s) => { this.targetSummary = s; },
       error: () => {},
     });
@@ -301,7 +304,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loading = true;
     this.loadError = '';
     this.initialLoadFailed = false;
-    this.wikiService.getPageContent(title).subscribe({
+    this.wikiService.getPageContent(title, this.gameLang).subscribe({
       next: (data) => {
         // Use canonical title returned by API (follows Wikipedia redirects)
         this.pageTitle = data.title;
@@ -397,7 +400,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loading = true;
     this.loadError = '';
 
-    this.wikiService.getPageContent(title).subscribe({
+    this.wikiService.getPageContent(title, this.gameLang).subscribe({
       next: (data) => {
         // Solo contamos el paso si la página existe
         this.mySteps++;
@@ -478,6 +481,34 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
 
   getRankEmoji(i: number): string {
     return ['🥇', '🥈', '🥉'][i] || `${i + 1}.`;
+  }
+
+  private readonly siteUrl = 'https://wikihunt-multiplayer-dt76.vercel.app';
+
+  private buildShareText(): string {
+    const me = this.leaderboard.find(e => e.socketId === this.mySocketId);
+    const rank = me ? this.leaderboard.findIndex(e => e.socketId === this.mySocketId) + 1 : null;
+    const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+    const stepsLabel = this.gameLang === 'en' ? 'steps' : 'pasos';
+    const pathLabel = this.gameLang === 'en' ? 'path' : 'ruta';
+    const lines: string[] = [`WikiHunt`, `${this.startPage} → ${this.targetPage}`, ''];
+    if (me?.finished) {
+      lines.push(`${rankEmoji} ${me.steps} ${stepsLabel} · ${this.formatTime(me.time)}`);
+    } else if (me?.gaveUp) {
+      lines.push(`🏳️ ${this.gameLang === 'en' ? 'Gave up' : 'Me rendí'}`);
+    } else {
+      lines.push(`⏱️ ${this.gameLang === 'en' ? 'Did not finish' : 'No terminé'}`);
+    }
+    if (me?.path && me.path.length > 1) {
+      lines.push(`📍 ${pathLabel}: ${me.path.join(' → ')}`);
+    }
+    const challengeUrl = `${this.siteUrl}/?start=${encodeURIComponent(this.startPage)}&target=${encodeURIComponent(this.targetPage)}&lang=${this.gameLang}`;
+    lines.push('', challengeUrl);
+    return lines.join('\n');
+  }
+
+  shareResult(): void {
+    navigator.share({ text: this.buildShareText() }).catch(() => {});
   }
 
   playAgain(): void {

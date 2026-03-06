@@ -76,6 +76,25 @@ export class AuthService {
     return (count ?? 0) === 0;
   }
 
+  async getStreak(): Promise<number> {
+    const user = this.currentUser;
+    if (!user) return 0;
+    const { data } = await this.supabaseService.client
+      .from('user_profiles')
+      .select('streak, last_daily_date')
+      .eq('user_id', user.id)
+      .single();
+    if (!data) return 0;
+    // If streak was last updated more than 1 day ago, it's broken
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date();
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+    const yesterdayStr = yesterday.toISOString().slice(0, 10);
+    const last = data.last_daily_date;
+    if (last !== today && last !== yesterdayStr) return 0;
+    return data.streak || 0;
+  }
+
   async createProfile(displayName: string): Promise<{ error?: string }> {
     const user = this.currentUser;
     if (!user) return { error: 'No user session' };

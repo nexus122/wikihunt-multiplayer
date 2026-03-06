@@ -24,6 +24,7 @@ export class DailyComponent implements OnInit, OnDestroy {
   loadingChallenge = true;
   error = '';
   challenge: DailyChallenge | null = null;
+  streak = 0;
   private langSub?: Subscription;
 
   get activeName(): string {
@@ -50,6 +51,7 @@ export class DailyComponent implements OnInit, OnDestroy {
     if (user) {
       const profile = await this.authService.getProfile();
       if (profile) this.profileName = profile.display_name;
+      this.streak = await this.authService.getStreak();
     }
 
     this.langSub = this.lang.lang$.subscribe(async () => {

@@ -5,6 +5,9 @@
   <div class="hero">
     <div class="daily-badge">{{ t('daily_title') }}</div>
     <p class="daily-date">{{ challenge?.date || (loadingChallenge ? '...' : 'Hoy') }}</p>
+    @if (streak > 0) {
+      <div class="streak-badge">{{ t('daily_streak') }} <strong>{{ streak }}</strong> {{ t('daily_streak_days') }}</div>
+    }
   </div>
 
   @if (loadingChallenge) {

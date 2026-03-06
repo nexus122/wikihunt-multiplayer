@@ -19,17 +19,17 @@ export class WikipediaService {
     return this.http.get<WikiPage>(`${this.base}/random?lang=${this.l}`);
   }
 
-  getPageSummary(title: string): Observable<WikiPage> {
-    return this.http.get<WikiPage>(`${this.base}/summary/${encodeURIComponent(title)}?lang=${this.l}`);
+  getPageSummary(title: string, lang?: string): Observable<WikiPage> {
+    return this.http.get<WikiPage>(`${this.base}/summary/${encodeURIComponent(title)}?lang=${lang ?? this.l}`);
   }
 
   searchPages(query: string): Observable<WikiPage[]> {
     return this.http.get<WikiPage[]>(`${this.base}/search?q=${encodeURIComponent(query)}&lang=${this.l}`);
   }
 
-  getPageContent(title: string): Observable<{ html: string; title: string }> {
+  getPageContent(title: string, lang?: string): Observable<{ html: string; title: string }> {
     return this.http.get<{ html: string; title: string }>(
-      `${this.base}/content/${encodeURIComponent(title)}?lang=${this.l}`
+      `${this.base}/content/${encodeURIComponent(title)}?lang=${lang ?? this.l}`
     );
   }
 }

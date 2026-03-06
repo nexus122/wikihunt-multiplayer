@@ -6,7 +6,7 @@ import cors from 'cors';
 import wikipediaRouter, { preWarmCache } from './wikipedia';
 import { roomManager } from './room.manager';
 import { getCanonicalTitle, getValidRandomPage, normalizePage } from './wiki.helpers';
-import { getDailyChallenge, saveDailyResult, saveHallOfFame, verifyUserToken } from './supabase';
+import { getDailyChallenge, saveDailyResult, saveHallOfFame, updateUserStreak, verifyUserToken } from './supabase';
 
 const app = express();
 const httpServer = createServer(app);
@@ -83,8 +83,10 @@ async function emitGameFinished(roomCode: string, room: ReturnType<typeof roomMa
         path: entry.path,
         user_id: entry.userId,
         language: lang,
-      }).then(() => console.log(`[Supabase] Daily result saved: ${entry.name}`))
-        .catch((e) => console.error('[Supabase] Daily result error:', e.message));
+      }).then(() => {
+        console.log(`[Supabase] Daily result saved: ${entry.name}`);
+        return updateUserStreak(entry.userId!, today);
+      }).catch((e) => console.error('[Supabase] Daily result error:', e.message));
     }
   }
 }
