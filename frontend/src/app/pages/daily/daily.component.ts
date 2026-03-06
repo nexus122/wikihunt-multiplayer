@@ -26,6 +26,7 @@ export class DailyComponent implements OnInit, OnDestroy {
   challenge: DailyChallenge | null = null;
   streak = 0;
   private langSub?: Subscription;
+  private authSub?: Subscription;
 
   get activeName(): string {
     return this.profileName || this.guestName;
@@ -47,12 +48,19 @@ export class DailyComponent implements OnInit, OnDestroy {
     const saved = localStorage.getItem('wh_name');
     if (saved) this.guestName = saved;
 
-    const user = this.authService.currentUser;
-    if (user) {
-      const profile = await this.authService.getProfile();
-      if (profile) this.profileName = profile.display_name;
-      this.streak = await this.authService.getStreak();
-    }
+    this.authSub = this.authService.user$.subscribe(async user => {
+      if (user) {
+        const profile = await this.authService.getProfile();
+        if (profile) {
+          this.profileName = profile.display_name;
+          localStorage.setItem('wh_name', profile.display_name);
+        }
+        this.streak = await this.authService.getStreak();
+      } else if (user === null) {
+        this.profileName = '';
+        this.streak = 0;
+      }
+    });
 
     this.langSub = this.lang.lang$.subscribe(async () => {
       // Reload challenge when language changes
@@ -77,6 +85,7 @@ export class DailyComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.langSub?.unsubscribe();
+    this.authSub?.unsubscribe();
   }
 
   start(): void {

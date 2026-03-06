@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SupabaseService, DailyResult, HallOfFameEntry, DailyChallenge } from '../../core/services/supabase.service';
+import { AuthService } from '../../core/services/auth.service';
 import { HeaderComponent } from '../../core/components/header.component';
 import { LanguageService } from '../../core/services/language.service';
 import { TranslationKey } from '../../core/i18n/translations';
@@ -25,9 +26,11 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
   myName = '';
 
   private langSub?: Subscription;
+  private authSub?: Subscription;
 
   constructor(
     private supabaseService: SupabaseService,
+    private authService: AuthService,
     private router: Router,
     public lang: LanguageService,
   ) {}
@@ -38,6 +41,17 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     this.myName = localStorage.getItem('wh_name') || '';
+
+    // Override with authenticated profile name if available
+    this.authSub = this.authService.user$.subscribe(async user => {
+      if (user) {
+        const profile = await this.authService.getProfile();
+        if (profile) this.myName = profile.display_name;
+      } else if (user === null) {
+        this.myName = localStorage.getItem('wh_name') || '';
+      }
+    });
+
     await this.loadTab('today');
     this.langSub = this.lang.lang$.subscribe(async () => {
       await this.loadTab(this.activeTab);
@@ -46,6 +60,7 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.langSub?.unsubscribe();
+    this.authSub?.unsubscribe();
   }
 
   async loadTab(tab: 'today' | 'alltime' | 'mine'): Promise<void> {

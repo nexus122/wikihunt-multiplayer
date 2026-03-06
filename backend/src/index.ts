@@ -184,6 +184,7 @@ io.on('connection', (socket) => {
     callback: Function
   ) => {
     try {
+      navigateLastTs.delete(socket.id); // reset rate-limit for new socket ID
       const room = roomManager.rejoinRoom(code.toUpperCase().trim(), socket.id, name, steps, currentPage, path, socket.data.userId);
       if (!room) {
         callback({ success: false, error: 'La partida no existe o ya ha terminado' });

@@ -24,16 +24,16 @@ import { TranslationKey } from '../i18n/translations';
 
         @if (backLabel) {
           <button class="btn-secondary" (click)="back.emit()">{{ backLabel }}</button>
-        } @else {
-          <div class="session">
-            @if (currentUser) {
-              <span class="session-name">{{ profileName }}</span>
-              <button class="btn-signout" (click)="signOut()">{{ t('sign_out') }}</button>
-            } @else if (currentUser === null) {
-              <a class="btn-signin" routerLink="/auth">{{ t('sign_in') }}</a>
-            }
-          </div>
         }
+
+        <div class="session">
+          @if (currentUser) {
+            <span class="session-name">{{ profileName }}</span>
+            <button class="btn-signout" (click)="signOut()">{{ t('sign_out') }}</button>
+          } @else if (currentUser === null) {
+            <a class="btn-signin" routerLink="/auth">{{ t('sign_in') }}</a>
+          }
+        </div>
       </div>
     </header>
   `,

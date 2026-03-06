@@ -159,13 +159,17 @@ class RoomManager {
     }
 
     // Look for the player's existing entry (keyed by old socketId)
+    // If multiple disconnected players share a name, prefer the one whose
+    // step count matches what the client reported (more precise match).
     let oldSocketId: string | undefined;
     let existingPlayer: Player | undefined;
     for (const [sid, p] of room.players.entries()) {
       if (p.name === name && p.disconnected) {
-        oldSocketId = sid;
-        existingPlayer = p;
-        break;
+        if (!existingPlayer || p.steps === steps) {
+          oldSocketId = sid;
+          existingPlayer = p;
+          if (p.steps === steps) break; // exact match, stop looking
+        }
       }
     }
 

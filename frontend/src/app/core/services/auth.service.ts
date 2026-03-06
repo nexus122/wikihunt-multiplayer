@@ -44,11 +44,18 @@ export class AuthService {
   }
 
   signUpWithEmail(email: string, password: string): Promise<any> {
-    return this.supabaseService.client.auth.signUp({ email, password });
+    return this.supabaseService.client.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: window.location.origin },
+    });
   }
 
   signInWithMagicLink(email: string): Promise<any> {
-    return this.supabaseService.client.auth.signInWithOtp({ email });
+    return this.supabaseService.client.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin },
+    });
   }
 
   signOut(): Promise<any> {
