@@ -1,0 +1,25 @@
+{
+  "name": "WikiHunt",
+  "short_name": "WikiHunt",
+  "description": "El juego multijugador de Wikipedia. Salta de artículo en artículo y llega al destino antes que tus amigos.",
+  "theme_color": "#0d1117",
+  "background_color": "#0d1117",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
