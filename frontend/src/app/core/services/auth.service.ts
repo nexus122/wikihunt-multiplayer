@@ -29,9 +29,7 @@ export class AuthService {
 
   async getAccessToken(): Promise<string> {
     const { data } = await this.supabaseService.client.auth.getSession();
-    const token = data.session?.access_token ?? '';
-    console.log(`[Auth] getAccessToken: session=${!!data.session}, token length=${token.length}`);
-    return token;
+    return data.session?.access_token ?? '';
   }
 
   signInWithGoogle(redirectTo: string): Promise<any> {

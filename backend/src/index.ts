@@ -30,15 +30,9 @@ app.get('/api/daily', async (_req, res) => {
 // JWT middleware — verify Supabase token if present
 io.use(async (socket, next) => {
   const token = socket.handshake.auth?.token;
-  console.log(`[JWT] auth=${JSON.stringify(socket.handshake.auth)}, token length=${token?.length ?? 0}`);
   if (token) {
     const userId = await verifyUserToken(token);
-    if (userId) {
-      socket.data.userId = userId;
-      console.log(`[JWT] verified userId: ${userId}`);
-    } else {
-      console.log(`[JWT] token invalid or guest`);
-    }
+    if (userId) socket.data.userId = userId;
   }
   next();
 });
@@ -55,8 +49,6 @@ async function emitGameFinished(roomCode: string, room: ReturnType<typeof roomMa
   // Persist results to Supabase (non-blocking)
   const today = new Date().toISOString().slice(0, 10);
   const finishedPlayers = leaderboard.filter(e => e.finished && e.time != null);
-
-  console.log(`[Debug] finishedPlayers: ${finishedPlayers.map(e => `${e.name}(userId=${e.userId})`).join(', ')}`);
 
   for (const entry of finishedPlayers) {
     if (!entry.userId) {
