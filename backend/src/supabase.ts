@@ -16,6 +16,7 @@ export interface DailyChallenge {
   date: string;
   start_page: string;
   target_page: string;
+  language: string;
 }
 
 export interface DailyResultInput {
@@ -26,6 +27,7 @@ export interface DailyResultInput {
   finished: boolean;
   path: string[];
   user_id?: string;
+  language?: string;
 }
 
 export interface HallOfFameInput {
@@ -37,29 +39,31 @@ export interface HallOfFameInput {
   path: string[];
   is_daily: boolean;
   user_id?: string;
+  language?: string;
 }
 
-// Returns today's challenge, creating it if it doesn't exist yet
-export async function getDailyChallenge(): Promise<DailyChallenge> {
+// Returns today's challenge for the given language, creating it if it doesn't exist yet
+export async function getDailyChallenge(lang = 'es'): Promise<DailyChallenge> {
   const date = todayUTC();
 
   if (supabase) {
     const { data, error } = await supabase
       .from('daily_challenges')
-      .select('date, start_page, target_page')
+      .select('date, start_page, target_page, language')
       .eq('date', date)
+      .eq('language', lang)
       .single();
 
     if (data && !error) return data as DailyChallenge;
 
-    // Create today's challenge
-    const start = await getValidRandomPage();
-    const target = await getValidRandomPage(10, start);
+    // Create today's challenge for this language
+    const start = await getValidRandomPage(10, undefined, lang);
+    const target = await getValidRandomPage(10, start, lang);
 
     const { data: created, error: insertError } = await supabase
       .from('daily_challenges')
-      .insert({ date, start_page: start, target_page: target })
-      .select('date, start_page, target_page')
+      .insert({ date, start_page: start, target_page: target, language: lang })
+      .select('date, start_page, target_page, language')
       .single();
 
     if (created && !insertError) return created as DailyChallenge;
@@ -67,9 +71,9 @@ export async function getDailyChallenge(): Promise<DailyChallenge> {
   }
 
   // Fallback: generate random pages without persisting
-  const start = await getValidRandomPage();
-  const target = await getValidRandomPage(10, start);
-  return { date, start_page: start, target_page: target };
+  const start = await getValidRandomPage(10, undefined, lang);
+  const target = await getValidRandomPage(10, start, lang);
+  return { date, start_page: start, target_page: target, language: lang };
 }
 
 export async function saveDailyResult(result: DailyResultInput): Promise<void> {

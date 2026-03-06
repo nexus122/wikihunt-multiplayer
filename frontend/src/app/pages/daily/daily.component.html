@@ -1,38 +1,38 @@
-<app-header backLabel="← Volver" (back)="goHome()" />
+<app-header [backLabel]="t('lb_back')" (back)="goHome()" />
 
 <div class="daily-page">
 
   <div class="hero">
-    <div class="daily-badge">☀️ Reto del día</div>
+    <div class="daily-badge">{{ t('daily_title') }}</div>
     <p class="daily-date">{{ challenge?.date || (loadingChallenge ? '...' : 'Hoy') }}</p>
   </div>
 
   @if (loadingChallenge) {
-    <div class="card loading-card">Cargando reto de hoy...</div>
+    <div class="card loading-card">{{ t('daily_loading') }}</div>
   } @else {
     <div class="card challenge-card">
       @if (challenge) {
         <div class="route">
           <div class="route-page start">
-            <span class="route-label">Inicio</span>
+            <span class="route-label">{{ t('daily_start_label') }}</span>
             <span class="route-title">{{ challenge.start_page }}</span>
           </div>
           <span class="route-arrow">→</span>
           <div class="route-page target">
-            <span class="route-label">Destino</span>
+            <span class="route-label">{{ t('daily_target_label') }}</span>
             <span class="route-title">{{ challenge.target_page }}</span>
           </div>
         </div>
       } @else {
-        <p class="no-challenge">El reto de hoy se generará cuando empieces.</p>
+        <p class="no-challenge">{{ t('daily_no_challenge') }}</p>
       }
 
       <div class="field">
-        <label>Tu nombre</label>
+        <label>{{ t('your_name') }}</label>
         @if (profileName) {
-          <div class="name-locked">{{ profileName }} <span class="name-locked-badge">cuenta</span></div>
+          <div class="name-locked">{{ profileName }} <span class="name-locked-badge">{{ t('name_badge') }}</span></div>
         } @else {
-          <input type="text" placeholder="Introduce tu nombre" [(ngModel)]="guestName" maxlength="20" (keydown.enter)="start()" />
+          <input type="text" [placeholder]="t('name_placeholder')" [(ngModel)]="guestName" maxlength="20" (keydown.enter)="start()" />
         }
       </div>
 
@@ -41,10 +41,10 @@
       }
 
       <button class="btn-primary" (click)="start()" [disabled]="loading">
-        {{ loading ? 'Cargando...' : '⚡ Empezar reto' }}
+        {{ loading ? t('daily_loading_btn') : t('daily_play_btn') }}
       </button>
     </div>
 
-    <a class="leaderboard-link" routerLink="/leaderboard">🏆 Ver clasificación de hoy</a>
+    <a class="leaderboard-link" routerLink="/leaderboard">🏆 {{ t('daily_leaderboard') }}</a>
   }
 </div>

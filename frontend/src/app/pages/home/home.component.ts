@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
 import { SocketService } from '../../core/services/socket.service';
 import { AuthService } from '../../core/services/auth.service';
+import { LanguageService } from '../../core/services/language.service';
 import { HeaderComponent } from '../../core/components/header.component';
+import { TranslationKey } from '../../core/i18n/translations';
 
 @Component({
   selector: 'app-home',
@@ -25,6 +26,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   rejoining = false;
   error = '';
   private authSub?: Subscription;
+  private langSub?: Subscription;
 
   get activeName(): string {
     return this.profileName || this.guestName;
@@ -32,14 +34,26 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   savedGame: { roomCode: string; playerName: string; isHost: boolean; startPage: string; targetPage: string; steps?: number; currentPage?: string; path?: string[] } | null = null;
 
-  steps = [
-    { n: 1, text: 'Create a room and share the code with friends' },
-    { n: 2, text: 'Everyone starts on the same Wikipedia page' },
-    { n: 3, text: 'Navigate by clicking links — race to the target' },
-    { n: 4, text: 'First to reach the target page wins!' },
-  ];
+  get steps() {
+    const l = this.lang;
+    return [
+      { n: 1, text: l.t('step1') },
+      { n: 2, text: l.t('step2') },
+      { n: 3, text: l.t('step3') },
+      { n: 4, text: l.t('step4') },
+    ];
+  }
 
-  constructor(private socketService: SocketService, private router: Router, private authService: AuthService) {}
+  constructor(
+    private socketService: SocketService,
+    private router: Router,
+    private authService: AuthService,
+    public lang: LanguageService,
+  ) {}
+
+  t(key: TranslationKey): string {
+    return this.lang.t(key);
+  }
 
   ngOnInit(): void {
     const saved = localStorage.getItem('wh_name');
@@ -65,14 +79,14 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.profileName = '';
       }
     });
+
+    this.langSub = this.lang.lang$.subscribe(() => {});
   }
 
   ngOnDestroy(): void {
     this.authSub?.unsubscribe();
+    this.langSub?.unsubscribe();
   }
-
-  // signOut is handled by HeaderComponent; reset local state on user$ null
-
 
   rejoinGame(): void {
     if (!this.savedGame) return;
@@ -97,7 +111,7 @@ export class HomeComponent implements OnInit, OnDestroy {
             startPage: data.startPage,
             targetPage: data.targetPage,
             startTime: data.startTime,
-            // Restore client-side progress
+            lang: data.lang,
             rejoinSteps: steps || 0,
             rejoinCurrentPage: currentPage,
             rejoinPath: path,
@@ -114,7 +128,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   createRoom(): void {
-    if (!this.activeName.trim()) { this.error = 'Enter your name'; return; }
+    if (!this.activeName.trim()) { this.error = this.t('name_placeholder'); return; }
     this.creating = true;
     this.error = '';
     if (!this.profileName) localStorage.setItem('wh_name', this.guestName.trim());
@@ -130,8 +144,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   joinRoom(): void {
-    if (!this.activeName.trim()) { this.error = 'Enter your name'; return; }
-    if (!this.joinCode.trim()) { this.error = 'Enter a room code'; return; }
+    if (!this.activeName.trim()) { this.error = this.t('name_placeholder'); return; }
+    if (!this.joinCode.trim()) { this.error = this.t('room_code_label'); return; }
     this.joining = true;
     this.error = '';
     if (!this.profileName) localStorage.setItem('wh_name', this.guestName.trim());

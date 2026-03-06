@@ -5,7 +5,9 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
 import { SocketService } from '../../core/services/socket.service';
 import { WikipediaService } from '../../core/services/wikipedia.service';
+import { LanguageService } from '../../core/services/language.service';
 import { RoomInfo, PlayerPublicInfo, LeaderboardEntry, WikiPage } from '../../core/models/types';
+import { TranslationKey } from '../../core/i18n/translations';
 
 @Component({
   selector: 'app-game',
@@ -68,6 +70,9 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
   // Mobile drawer
   mobileMenuOpen = false;
 
+  // Language
+  gameLang = 'es';
+
   private subs: Subscription[] = [];
 
   // Intercept browser back button: navigate within the game instead of leaving it
@@ -89,13 +94,23 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     private route: ActivatedRoute,
     private socketService: SocketService,
     private wikiService: WikipediaService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    public langService: LanguageService,
   ) {}
+
+  t(key: TranslationKey): string {
+    return this.langService.t(key);
+  }
+
+  get wikiBaseUrl(): string {
+    return `https://${this.gameLang}.wikipedia.org/wiki/`;
+  }
 
   ngOnInit(): void {
     this.mySocketId = this.socketService.getSocketId();
     const state = history.state as {
       room: RoomInfo; isHost: boolean; startPage: string; targetPage: string; startTime: number;
+      lang?: string;
       rejoinSteps?: number; rejoinCurrentPage?: string; rejoinPath?: string[];
     } | undefined;
 
@@ -108,6 +123,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     this.startPage = state.startPage;
     this.targetPage = state.targetPage;
     this.startTime = state.startTime || Date.now();
+    this.gameLang = state.lang || this.langService.current;
     this.players = state.room?.players || [];
 
     // Restore progress if rejoining mid-game
@@ -305,8 +321,8 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
           return;
         }
         this.loadError = isInitial
-          ? `No se pudo cargar la página inicial "${title}".`
-          : `No se pudo cargar "${title}". Prueba otro enlace.`;
+          ? (this.gameLang === 'en' ? `Could not load the start page "${title}".` : `No se pudo cargar la página inicial "${title}".`)
+          : (this.gameLang === 'en' ? `Could not load "${title}". Try another link.` : `No se pudo cargar "${title}". Prueba otro enlace.`);
         this.initialLoadFailed = isInitial;
         this.loading = false;
       },
@@ -409,7 +425,9 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
         this.currentPage = prevPage;
         this.myPath = prevPath;
         this.loading = false;
-        this.loadError = `"${title}" no existe en Wikipedia en español. Elige otro enlace.`;
+        this.loadError = this.gameLang === 'en'
+          ? `"${title}" does not exist on English Wikipedia. Try another link.`
+          : `"${title}" no existe en Wikipedia en español. Elige otro enlace.`;
         setTimeout(() => { this.loadError = ''; }, 4000);
       },
     });

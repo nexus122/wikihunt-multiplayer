@@ -1,29 +1,29 @@
 <div class="setup-page">
   <div class="card setup-card">
     <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
-    <h2>Elige tu nombre de jugador</h2>
-    <p class="hint">Este nombre aparecerá en el podio y el hall of fame.</p>
+    <h2>{{ t('setup_title') }}</h2>
+    <p class="hint">{{ t('setup_subtitle') }}</p>
 
     <div class="field">
-      <label>Nombre</label>
+      <label>{{ t('setup_name_label') }}</label>
       <div class="name-row">
-        <input type="text" placeholder="TuNombre" [(ngModel)]="displayName" maxlength="20"
+        <input type="text" [placeholder]="t('setup_name_placeholder')" [(ngModel)]="displayName" maxlength="20"
                (ngModelChange)="nameAvailable = null; suggestion = ''"
                (keydown.enter)="save()" />
         <button class="btn-secondary" (click)="checkName()" [disabled]="checking || saving">
-          {{ checking ? '...' : 'Comprobar' }}
+          {{ checking ? '...' : t('setup_check') }}
         </button>
       </div>
     </div>
 
     @if (nameAvailable === true) {
-      <div class="status available">✓ Nombre disponible</div>
+      <div class="status available">{{ t('setup_available') }}</div>
     }
     @if (nameAvailable === false) {
-      <div class="status taken">✗ Nombre ocupado</div>
+      <div class="status taken">✗ {{ t('setup_taken_prefix') }}</div>
       @if (suggestion) {
         <div class="suggestion">
-          Sugerencia: <button class="link-btn" (click)="useSuggestion()">{{ suggestion }}</button>
+          <button class="link-btn" (click)="useSuggestion()">{{ suggestion }}</button>
         </div>
       }
     }
@@ -33,7 +33,7 @@
     }
 
     <button class="btn-primary" (click)="save()" [disabled]="saving || checking">
-      {{ saving ? 'Guardando...' : 'Confirmar nombre' }}
+      {{ saving ? t('daily_loading_btn') : t('setup_confirm') }}
     </button>
   </div>
 </div>

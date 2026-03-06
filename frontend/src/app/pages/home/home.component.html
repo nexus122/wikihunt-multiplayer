@@ -5,13 +5,13 @@
   @if (savedGame) {
     <div class="card rejoin-card">
       <div class="rejoin-info">
-        <span class="rejoin-label">Partida en curso</span>
+        <span class="rejoin-label">{{ t('rejoin_in_progress') }}</span>
         <p class="rejoin-route">{{ savedGame.startPage }} → {{ savedGame.targetPage }}</p>
-        <span class="rejoin-code">Sala {{ savedGame.roomCode }}</span>
+        <span class="rejoin-code">{{ t('rejoin_room') }} {{ savedGame.roomCode }}</span>
       </div>
       <div class="rejoin-actions">
         <button class="btn-primary" (click)="rejoinGame()" [disabled]="rejoining">
-          {{ rejoining ? 'Reconectando...' : '↩ Retomar' }}
+          {{ rejoining ? t('rejoin_resuming') : t('rejoin_resume') }}
         </button>
         <button class="btn-secondary" (click)="dismissSavedGame()">✕</button>
       </div>
@@ -20,31 +20,31 @@
 
   <div class="hero">
     <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
-    <p class="tagline">Race through Wikipedia. First to the target wins.</p>
+    <p class="tagline">{{ t('tagline') }}</p>
     <div class="hero-actions">
-      <a class="btn-daily" routerLink="/daily">☀️ Reto del día</a>
-      <a class="btn-leaderboard" routerLink="/leaderboard">🏆 Clasificaciones</a>
+      <a class="btn-daily" routerLink="/daily">{{ t('daily_btn') }}</a>
+      <a class="btn-leaderboard" routerLink="/leaderboard">{{ t('leaderboard_btn') }}</a>
     </div>
   </div>
 
   <div class="card form-card">
     <div class="tabs">
-      <button class="tab-btn" [class.active]="activeTab === 'create'" (click)="activeTab='create'; error=''">Create Room</button>
-      <button class="tab-btn" [class.active]="activeTab === 'join'" (click)="activeTab='join'; error=''">Join Room</button>
+      <button class="tab-btn" [class.active]="activeTab === 'create'" (click)="activeTab='create'; error=''">{{ t('create_tab') }}</button>
+      <button class="tab-btn" [class.active]="activeTab === 'join'" (click)="activeTab='join'; error=''">{{ t('join_tab') }}</button>
     </div>
 
     @if (activeTab === 'create') {
       <div class="tab-content">
         <div class="field">
-          <label>Your name</label>
+          <label>{{ t('your_name') }}</label>
           @if (profileName) {
-            <div class="name-locked">{{ profileName }} <span class="name-locked-badge">cuenta</span></div>
+            <div class="name-locked">{{ profileName }} <span class="name-locked-badge">{{ t('name_badge') }}</span></div>
           } @else {
-            <input type="text" placeholder="Enter your name" [(ngModel)]="guestName" maxlength="20" (keydown.enter)="createRoom()" />
+            <input type="text" [placeholder]="t('name_placeholder')" [(ngModel)]="guestName" maxlength="20" (keydown.enter)="createRoom()" />
           }
         </div>
         <button class="btn-primary" (click)="createRoom()" [disabled]="creating">
-          {{ creating ? 'Creating...' : '🚀 Create Room' }}
+          {{ creating ? t('creating') : t('create_room_btn') }}
         </button>
       </div>
     }
@@ -52,19 +52,19 @@
     @if (activeTab === 'join') {
       <div class="tab-content">
         <div class="field">
-          <label>Your name</label>
+          <label>{{ t('your_name') }}</label>
           @if (profileName) {
-            <div class="name-locked">{{ profileName }} <span class="name-locked-badge">cuenta</span></div>
+            <div class="name-locked">{{ profileName }} <span class="name-locked-badge">{{ t('name_badge') }}</span></div>
           } @else {
-            <input type="text" placeholder="Enter your name" [(ngModel)]="guestName" maxlength="20" />
+            <input type="text" [placeholder]="t('name_placeholder')" [(ngModel)]="guestName" maxlength="20" />
           }
         </div>
         <div class="field">
-          <label>Room code</label>
-          <input class="code-input" type="text" placeholder="ABC123" [(ngModel)]="joinCode" maxlength="6" (keydown.enter)="joinRoom()" />
+          <label>{{ t('room_code_label') }}</label>
+          <input class="code-input" type="text" [placeholder]="t('room_code_placeholder')" [(ngModel)]="joinCode" maxlength="6" (keydown.enter)="joinRoom()" />
         </div>
         <button class="btn-primary" (click)="joinRoom()" [disabled]="joining">
-          {{ joining ? 'Joining...' : '🎮 Join Room' }}
+          {{ joining ? t('joining') : t('join_room_btn') }}
         </button>
       </div>
     }
@@ -75,7 +75,7 @@
   </div>
 
   <div class="how-to-play">
-    <h3>How to play</h3>
+    <h3>{{ t('how_to_play') }}</h3>
     <div class="steps">
       @for (step of steps; track step.n) {
         <div class="step">

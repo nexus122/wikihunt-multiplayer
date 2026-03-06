@@ -2,52 +2,52 @@
 <div class="lobby">
   <header class="header">
     <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
-    <button class="btn-secondary" (click)="leaveRoom()">← Leave</button>
+    <button class="btn-secondary" (click)="leaveRoom()">{{ t('lobby_leave') }}</button>
   </header>
 
   <div class="content">
     <!-- Room Code -->
     <div class="card code-card">
-      <p class="label">Room Code</p>
+      <p class="label">{{ t('lobby_room_code') }}</p>
       <div class="code-row">
         <span class="code">{{ roomCode }}</span>
-        <button class="btn-secondary" (click)="copyCode()">{{ codeCopied ? '✓ Copied!' : 'Copy' }}</button>
+        <button class="btn-secondary" (click)="copyCode()">{{ codeCopied ? t('lobby_copied') : t('lobby_copy') }}</button>
       </div>
-      <p class="hint">Share this code with friends</p>
+      <p class="hint">{{ t('lobby_share') }}</p>
     </div>
 
     <div class="grid">
       <!-- Players -->
       <div class="card">
-        <h3>Players <span class="badge">{{ room.players.length }}</span></h3>
+        <h3>{{ t('lobby_players') }} <span class="badge">{{ room.players.length }}</span></h3>
         <ul class="player-list">
           @for (p of room.players; track p.socketId) {
             <li class="player-item">
               <div class="avatar" [style.background]="getAvatarColor(p.socketId)">{{ (p.name?.[0] || '?').toUpperCase() }}</div>
               <span class="name">{{ p.name }}</span>
-              @if (p.socketId === room.hostId) { <span class="tag host">Host</span> }
-              @if (p.socketId === mySocketId) { <span class="tag you">You</span> }
+              @if (p.socketId === room.hostId) { <span class="tag host">{{ t('lobby_host_tag') }}</span> }
+              @if (p.socketId === mySocketId) { <span class="tag you">{{ t('lobby_you_tag') }}</span> }
             </li>
           }
         </ul>
         @if (room.players.length === 1) {
-          <p class="waiting-hint">Waiting for players...</p>
+          <p class="waiting-hint">{{ t('lobby_waiting_players') }}</p>
         }
       </div>
 
       <!-- Host Controls / Waiting -->
       @if (isHost) {
         <div class="card host-card">
-          <h3>Game Setup</h3>
+          <h3>{{ t('lobby_setup') }}</h3>
 
           <div class="page-pickers">
             <!-- Start page picker -->
             <div class="picker">
               <div class="picker-row">
-                <label>Start page</label>
+                <label>{{ t('lobby_start_page') }}</label>
                 <div class="mode-pills">
-                  <button class="pill" [class.active]="!customStart" (click)="setStartMode(false)">🎲 Random</button>
-                  <button class="pill" [class.active]="customStart" (click)="setStartMode(true)">Custom</button>
+                  <button class="pill" [class.active]="!customStart" (click)="setStartMode(false)">{{ t('lobby_random') }}</button>
+                  <button class="pill" [class.active]="customStart" (click)="setStartMode(true)">{{ t('lobby_custom') }}</button>
                 </div>
               </div>
               @if (customStart) {
@@ -58,7 +58,7 @@
                   </div>
                 } @else {
                   <div class="search-wrap">
-                    <input type="text" placeholder="Search Wikipedia..." [(ngModel)]="searchStartQuery" (input)="searchStart()" />
+                    <input type="text" [placeholder]="t('lobby_search_placeholder')" [(ngModel)]="searchStartQuery" (input)="searchStart()" />
                     @if (startResults.length) {
                       <div class="results">
                         @for (r of startResults; track r.title) {
@@ -74,10 +74,10 @@
             <!-- Target page picker -->
             <div class="picker">
               <div class="picker-row">
-                <label>Target page</label>
+                <label>{{ t('lobby_target_page') }}</label>
                 <div class="mode-pills">
-                  <button class="pill" [class.active]="!customTarget" (click)="setTargetMode(false)">🎲 Random</button>
-                  <button class="pill" [class.active]="customTarget" (click)="setTargetMode(true)">Custom</button>
+                  <button class="pill" [class.active]="!customTarget" (click)="setTargetMode(false)">{{ t('lobby_random') }}</button>
+                  <button class="pill" [class.active]="customTarget" (click)="setTargetMode(true)">{{ t('lobby_custom') }}</button>
                 </div>
               </div>
               @if (customTarget) {
@@ -88,7 +88,7 @@
                   </div>
                 } @else {
                   <div class="search-wrap">
-                    <input type="text" placeholder="Search Wikipedia..." [(ngModel)]="searchTargetQuery" (input)="searchTarget()" />
+                    <input type="text" [placeholder]="t('lobby_search_placeholder')" [(ngModel)]="searchTargetQuery" (input)="searchTarget()" />
                     @if (targetResults.length) {
                       <div class="results">
                         @for (r of targetResults; track r.title) {
@@ -103,7 +103,7 @@
           </div>
 
           <div class="field">
-            <label>Tiempo de gracia tras el primer ganador</label>
+            <label>{{ t('lobby_grace_label') }}</label>
             <div class="grace-options">
               @for (opt of graceOptions; track opt.value) {
                 <button
@@ -113,7 +113,7 @@
                 >{{ opt.label }}</button>
               }
             </div>
-            <p class="field-hint">Los demás jugadores tendrán este tiempo para llegar al destino</p>
+            <p class="field-hint">{{ t('lobby_grace_hint') }}</p>
           </div>
 
           @if (error) { <div class="error-message">{{ error }}</div> }
@@ -123,7 +123,7 @@
             (click)="startGame()"
             [disabled]="starting"
           >
-            {{ starting ? 'Starting...' : '🚀 Start Game' }}
+            {{ starting ? t('lobby_starting') : t('lobby_start_btn') }}
           </button>
         </div>
       } @else {
@@ -131,7 +131,7 @@
           <div class="dots">
             <div class="dot"></div><div class="dot"></div><div class="dot"></div>
           </div>
-          <p>Waiting for the host to start...</p>
+          <p>{{ t('lobby_waiting_host') }}</p>
         </div>
       }
     </div>

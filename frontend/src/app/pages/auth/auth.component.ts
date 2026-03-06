@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
+import { LanguageService } from '../../core/services/language.service';
+import { TranslationKey } from '../../core/i18n/translations';
 
 @Component({
   selector: 'app-auth',
@@ -11,7 +14,7 @@ import { AuthService } from '../../core/services/auth.service';
   templateUrl: './auth.component.html',
   styleUrl: './auth.component.scss',
 })
-export class AuthComponent {
+export class AuthComponent implements OnInit, OnDestroy {
   activeTab: 'login' | 'register' = 'login';
   email = '';
   password = '';
@@ -19,8 +22,25 @@ export class AuthComponent {
   loading = false;
   message = '';
   error = '';
+  private langSub?: Subscription;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    public lang: LanguageService,
+  ) {}
+
+  t(key: TranslationKey): string {
+    return this.lang.t(key);
+  }
+
+  ngOnInit(): void {
+    this.langSub = this.lang.lang$.subscribe(() => {});
+  }
+
+  ngOnDestroy(): void {
+    this.langSub?.unsubscribe();
+  }
 
   async signInWithGoogle(): Promise<void> {
     this.error = '';
@@ -30,7 +50,7 @@ export class AuthComponent {
   }
 
   async submitForm(): Promise<void> {
-    if (!this.email.trim()) { this.error = 'Introduce tu email'; return; }
+    if (!this.email.trim()) { this.error = this.t('auth_email'); return; }
     this.loading = true;
     this.error = '';
     this.message = '';
@@ -39,11 +59,11 @@ export class AuthComponent {
       if (this.magicLinkMode) {
         const { error } = await this.authService.signInWithMagicLink(this.email.trim());
         if (error) { this.error = error.message; return; }
-        this.message = 'Revisa tu email — te hemos enviado un enlace mágico.';
+        this.message = this.t('auth_magic_sent');
         return;
       }
 
-      if (!this.password) { this.error = 'Introduce tu contraseña'; return; }
+      if (!this.password) { this.error = this.t('auth_password'); return; }
 
       if (this.activeTab === 'login') {
         const { error } = await this.authService.signInWithEmail(this.email.trim(), this.password);
@@ -52,7 +72,7 @@ export class AuthComponent {
       } else {
         const { error } = await this.authService.signUpWithEmail(this.email.trim(), this.password);
         if (error) { this.error = error.message; return; }
-        this.message = 'Cuenta creada. Revisa tu email para confirmarla.';
+        this.message = this.t('auth_check_email');
       }
     } finally {
       this.loading = false;

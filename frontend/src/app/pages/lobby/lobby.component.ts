@@ -5,7 +5,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SocketService } from '../../core/services/socket.service';
 import { WikipediaService } from '../../core/services/wikipedia.service';
+import { LanguageService } from '../../core/services/language.service';
 import { RoomInfo, WikiPage } from '../../core/models/types';
+import { TranslationKey } from '../../core/i18n/translations';
 
 @Component({
   selector: 'app-lobby',
@@ -30,13 +32,25 @@ export class LobbyComponent implements OnInit, OnDestroy {
   selectedTarget: WikiPage | null = null;
 
   graceTime = 60;
-  graceOptions = [
-    { label: '30 segundos', value: 30 },
-    { label: '1 minuto', value: 60 },
-    { label: '2 minutos', value: 120 },
-    { label: '3 minutos', value: 180 },
-    { label: '5 minutos', value: 300 },
-  ];
+
+  get graceOptions() {
+    const lang = this.langService.current;
+    return lang === 'en'
+      ? [
+          { label: '30 seconds', value: 30 },
+          { label: '1 minute', value: 60 },
+          { label: '2 minutes', value: 120 },
+          { label: '3 minutes', value: 180 },
+          { label: '5 minutes', value: 300 },
+        ]
+      : [
+          { label: '30 segundos', value: 30 },
+          { label: '1 minuto', value: 60 },
+          { label: '2 minutos', value: 120 },
+          { label: '3 minutos', value: 180 },
+          { label: '5 minutos', value: 300 },
+        ];
+  }
 
   starting = false;
   error = '';
@@ -47,8 +61,13 @@ export class LobbyComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private socketService: SocketService,
-    private wikipediaService: WikipediaService
+    private wikipediaService: WikipediaService,
+    public langService: LanguageService,
   ) {}
+
+  t(key: TranslationKey): string {
+    return this.langService.t(key);
+  }
 
   ngOnInit(): void {
     this.mySocketId = this.socketService.getSocketId();
@@ -79,9 +98,14 @@ export class LobbyComponent implements OnInit, OnDestroy {
             startPage: event.startPage,
             targetPage: event.targetPage,
             startTime: event.startTime,
+            lang: event.lang,
           },
         });
       })
+    );
+
+    this.subs.push(
+      this.langService.lang$.subscribe(() => {})
     );
   }
 

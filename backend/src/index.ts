@@ -18,9 +18,10 @@ app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use('/api/wikipedia', wikipediaRouter);
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
-app.get('/api/daily', async (_req, res) => {
+app.get('/api/daily', async (req, res) => {
+  const lang = (req.query.lang as string) || 'es';
   try {
-    const challenge = await getDailyChallenge();
+    const challenge = await getDailyChallenge(lang);
     res.json(challenge);
   } catch {
     res.status(500).json({ error: 'Failed to get daily challenge' });
@@ -49,6 +50,7 @@ async function emitGameFinished(roomCode: string, room: ReturnType<typeof roomMa
   // Persist results to Supabase (non-blocking)
   const today = new Date().toISOString().slice(0, 10);
   const finishedPlayers = leaderboard.filter(e => e.finished && e.time != null);
+  const lang = room.lang || 'es';
 
   for (const entry of finishedPlayers) {
     if (!entry.userId) {
@@ -66,6 +68,7 @@ async function emitGameFinished(roomCode: string, room: ReturnType<typeof roomMa
       path: entry.path,
       is_daily: room.isDaily || false,
       user_id: entry.userId,
+      language: lang,
     }).then(() => console.log(`[Supabase] Hall of fame saved: ${entry.name}`))
       .catch((e) => console.error('[Supabase] Hall of fame error:', e.message));
 
@@ -79,6 +82,7 @@ async function emitGameFinished(roomCode: string, room: ReturnType<typeof roomMa
         finished: true,
         path: entry.path,
         user_id: entry.userId,
+        language: lang,
       }).then(() => console.log(`[Supabase] Daily result saved: ${entry.name}`))
         .catch((e) => console.error('[Supabase] Daily result error:', e.message));
     }
@@ -118,7 +122,7 @@ io.on('connection', (socket) => {
   socket.on(
     'start-game',
     async (
-      { startPage, targetPage, graceTime }: { startPage?: string; targetPage?: string; graceTime?: number },
+      { startPage, targetPage, graceTime, lang }: { startPage?: string; targetPage?: string; graceTime?: number; lang?: string },
       callback: Function
     ) => {
       try {
@@ -126,40 +130,44 @@ io.on('connection', (socket) => {
         if (!room) { callback({ success: false, error: 'Room not found' }); return; }
         if (room.hostId !== socket.id) { callback({ success: false, error: 'Only the host can start' }); return; }
 
+        const gameLang = lang || 'es';
+        room.lang = gameLang;
+
         // Resolve start page: random or canonicalize custom
         let start: string;
         if (startPage) {
-          const canonical = await getCanonicalTitle(startPage);
+          const canonical = await getCanonicalTitle(startPage, gameLang);
           if (!canonical) { callback({ success: false, error: 'Start page not found on Wikipedia' }); return; }
           start = canonical;
         } else {
-          start = await getValidRandomPage();
+          start = await getValidRandomPage(10, undefined, gameLang);
         }
 
         // Resolve target page: random (excluding start) or canonicalize custom
         let target: string;
         if (targetPage) {
-          const canonical = await getCanonicalTitle(targetPage);
+          const canonical = await getCanonicalTitle(targetPage, gameLang);
           if (!canonical) { callback({ success: false, error: 'Target page not found on Wikipedia' }); return; }
           target = canonical;
         } else {
-          target = await getValidRandomPage(10, start);
+          target = await getValidRandomPage(10, start, gameLang);
         }
 
         const grace = typeof graceTime === 'number' && graceTime > 0 ? graceTime : 60;
         roomManager.startGame(room.code, start, target, grace);
         const updatedRoom = roomManager.getRoomByCode(room.code)!;
 
-        console.log(`[Game] Started in ${room.code}: "${start}" → "${target}"`);
+        console.log(`[Game] Started in ${room.code} [${gameLang}]: "${start}" → "${target}"`);
 
         // Pre-fetch both pages into cache so client requests are instant
-        preWarmCache(start).catch(() => {});
-        preWarmCache(target).catch(() => {});
+        preWarmCache(start, gameLang).catch(() => {});
+        preWarmCache(target, gameLang).catch(() => {});
 
         io.to(room.code).emit('game-started', {
           startPage: start,
           targetPage: target,
           startTime: updatedRoom.startTime,
+          lang: gameLang,
         });
 
         callback({ success: true });
@@ -187,6 +195,7 @@ io.on('connection', (socket) => {
         startPage: room.startPage,
         targetPage: room.targetPage,
         startTime: room.startTime,
+        lang: room.lang || 'es',
         room: roomManager.getRoomInfo(room),
       });
     } catch {
@@ -197,9 +206,9 @@ io.on('connection', (socket) => {
   // Returns current room state for the calling socket (used after play-again to sync fresh state)
   socket.on('get-room', (_: unknown, callback: Function) => {
     try {
-      const room = roomManager.getRoomBySocketId(socket.id);
-      if (!room) { callback({ success: false }); return; }
-      callback({ success: true, room: roomManager.getRoomInfo(room) });
+      const r = roomManager.getRoomBySocketId(socket.id);
+      if (!r) { callback({ success: false }); return; }
+      callback({ success: true, room: roomManager.getRoomInfo(r) });
     } catch {
       callback({ success: false });
     }
@@ -295,15 +304,17 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('join-daily', async ({ name }: { name: string }, callback: Function) => {
+  socket.on('join-daily', async ({ name, lang }: { name: string; lang?: string }, callback: Function) => {
     try {
-      const challenge = await getDailyChallenge();
+      const gameLang = lang || 'es';
+      const challenge = await getDailyChallenge(gameLang);
       const room = roomManager.createRoom(socket.id, name, true, socket.data.userId);
+      room.lang = gameLang;
       socket.join(room.code);
       roomManager.startGame(room.code, challenge.start_page, challenge.target_page, 0);
-      preWarmCache(challenge.start_page).catch(() => {});
-      preWarmCache(challenge.target_page).catch(() => {});
-      console.log(`[Daily] ${name} started daily: "${challenge.start_page}" → "${challenge.target_page}"`);
+      preWarmCache(challenge.start_page, gameLang).catch(() => {});
+      preWarmCache(challenge.target_page, gameLang).catch(() => {});
+      console.log(`[Daily] ${name} started daily [${gameLang}]: "${challenge.start_page}" → "${challenge.target_page}"`);
       callback({
         success: true,
         roomCode: room.code,
@@ -311,6 +322,7 @@ io.on('connection', (socket) => {
         targetPage: challenge.target_page,
         startTime: roomManager.getRoomByCode(room.code)?.startTime,
         date: challenge.date,
+        lang: gameLang,
       });
     } catch {
       callback({ success: false, error: 'Failed to start daily challenge' });

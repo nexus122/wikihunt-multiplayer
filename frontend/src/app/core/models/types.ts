@@ -45,6 +45,7 @@ export interface GameStartedEvent {
   startPage: string;
   targetPage: string;
   startTime: number;
+  lang?: string;
 }
 
 export interface PlayerMovedEvent {

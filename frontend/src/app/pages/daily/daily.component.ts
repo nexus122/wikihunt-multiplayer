@@ -1,11 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { SocketService } from '../../core/services/socket.service';
 import { SupabaseService, DailyChallenge } from '../../core/services/supabase.service';
 import { AuthService } from '../../core/services/auth.service';
+import { LanguageService } from '../../core/services/language.service';
 import { HeaderComponent } from '../../core/components/header.component';
+import { TranslationKey } from '../../core/i18n/translations';
 
 @Component({
   selector: 'app-daily',
@@ -14,13 +17,14 @@ import { HeaderComponent } from '../../core/components/header.component';
   templateUrl: './daily.component.html',
   styleUrl: './daily.component.scss',
 })
-export class DailyComponent implements OnInit {
+export class DailyComponent implements OnInit, OnDestroy {
   guestName = '';
   profileName = '';
   loading = false;
   loadingChallenge = true;
   error = '';
   challenge: DailyChallenge | null = null;
+  private langSub?: Subscription;
 
   get activeName(): string {
     return this.profileName || this.guestName;
@@ -30,8 +34,13 @@ export class DailyComponent implements OnInit {
     private socketService: SocketService,
     private supabaseService: SupabaseService,
     private authService: AuthService,
+    public lang: LanguageService,
     private router: Router,
   ) {}
+
+  t(key: TranslationKey): string {
+    return this.lang.t(key);
+  }
 
   async ngOnInit(): Promise<void> {
     const saved = localStorage.getItem('wh_name');
@@ -43,8 +52,20 @@ export class DailyComponent implements OnInit {
       if (profile) this.profileName = profile.display_name;
     }
 
+    this.langSub = this.lang.lang$.subscribe(async () => {
+      // Reload challenge when language changes
+      this.loadingChallenge = true;
+      try {
+        this.challenge = await this.supabaseService.getDailyChallenge(this.lang.current);
+      } catch {
+        this.challenge = null;
+      } finally {
+        this.loadingChallenge = false;
+      }
+    });
+
     try {
-      this.challenge = await this.supabaseService.getDailyChallenge();
+      this.challenge = await this.supabaseService.getDailyChallenge(this.lang.current);
     } catch {
       // challenge will be created on the backend when joining
     } finally {
@@ -52,8 +73,12 @@ export class DailyComponent implements OnInit {
     }
   }
 
+  ngOnDestroy(): void {
+    this.langSub?.unsubscribe();
+  }
+
   start(): void {
-    if (!this.activeName.trim()) { this.error = 'Introduce tu nombre'; return; }
+    if (!this.activeName.trim()) { this.error = this.t('daily_name_required'); return; }
     this.loading = true;
     this.error = '';
     if (!this.profileName) localStorage.setItem('wh_name', this.guestName.trim());
@@ -70,6 +95,7 @@ export class DailyComponent implements OnInit {
             startPage: data.startPage,
             targetPage: data.targetPage,
             startTime: data.startTime,
+            lang: data.lang || this.lang.current,
             isHost: true,
             isDaily: true,
           },

@@ -6,6 +6,7 @@ export interface DailyChallenge {
   date: string;
   start_page: string;
   target_page: string;
+  language?: string;
 }
 
 export interface DailyResult {
@@ -17,6 +18,7 @@ export interface DailyResult {
   finished: boolean;
   path: string[];
   created_at: string;
+  language?: string;
 }
 
 export interface HallOfFameEntry {
@@ -29,6 +31,7 @@ export interface HallOfFameEntry {
   path: string[];
   is_daily: boolean;
   created_at: string;
+  language?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -39,24 +42,27 @@ export class SupabaseService {
     this.client = createClient(environment.supabaseUrl, environment.supabaseAnonKey);
   }
 
-  async getDailyChallenge(): Promise<DailyChallenge | null> {
+  async getDailyChallenge(lang = 'es'): Promise<DailyChallenge | null> {
     const today = new Date().toISOString().slice(0, 10);
     const { data, error } = await this.client
       .from('daily_challenges')
-      .select('date, start_page, target_page')
+      .select('date, start_page, target_page, language')
       .eq('date', today)
+      .eq('language', lang)
       .single();
     if (error || !data) return null;
     return data as DailyChallenge;
   }
 
-  async getDailyPodio(date?: string): Promise<DailyResult[]> {
+  async getDailyPodio(date?: string, lang = 'es'): Promise<DailyResult[]> {
     const day = date || new Date().toISOString().slice(0, 10);
-    const { data, error } = await this.client
+    let query = this.client
       .from('daily_results')
       .select('*')
       .eq('date', day)
-      .eq('finished', true)
+      .eq('finished', true);
+    if (lang) query = query.eq('language', lang);
+    const { data, error } = await query
       .order('steps', { ascending: true })
       .order('time_ms', { ascending: true })
       .limit(10);
@@ -64,10 +70,12 @@ export class SupabaseService {
     return data as DailyResult[];
   }
 
-  async getHallOfFame(): Promise<HallOfFameEntry[]> {
-    const { data, error } = await this.client
+  async getHallOfFame(lang?: string): Promise<HallOfFameEntry[]> {
+    let query = this.client
       .from('hall_of_fame')
-      .select('*')
+      .select('*');
+    if (lang) query = query.eq('language', lang);
+    const { data, error } = await query
       .order('steps', { ascending: true })
       .order('time_ms', { ascending: true })
       .limit(50);
@@ -75,11 +83,13 @@ export class SupabaseService {
     return data as HallOfFameEntry[];
   }
 
-  async getPlayerHistory(playerName: string): Promise<HallOfFameEntry[]> {
-    const { data, error } = await this.client
+  async getPlayerHistory(playerName: string, lang?: string): Promise<HallOfFameEntry[]> {
+    let query = this.client
       .from('hall_of_fame')
       .select('*')
-      .eq('player_name', playerName)
+      .eq('player_name', playerName);
+    if (lang) query = query.eq('language', lang);
+    const { data, error } = await query
       .order('created_at', { ascending: false })
       .limit(20);
     if (error || !data) return [];

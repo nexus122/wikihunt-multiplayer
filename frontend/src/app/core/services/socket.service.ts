@@ -12,12 +12,13 @@ import {
   PlayerGaveUpEvent,
 } from '../models/types';
 import { AuthService } from './auth.service';
+import { LanguageService } from './language.service';
 
 @Injectable({ providedIn: 'root' })
 export class SocketService {
   private socket: Socket;
 
-  constructor(private authService: AuthService) {
+  constructor(private authService: AuthService, private langService: LanguageService) {
     const url = environment.backendUrl || `http://${window.location.hostname}:3001`;
     this.socket = io(url, {
       transports: ['websocket'],
@@ -68,7 +69,7 @@ export class SocketService {
 
   startGame(options?: { startPage?: string; targetPage?: string; graceTime?: number }): Observable<{ success: boolean; error?: string }> {
     return new Observable(obs => {
-      this.socket.emit('start-game', options || {}, (data: { success: boolean; error?: string }) => {
+      this.socket.emit('start-game', { ...(options || {}), lang: this.langService.current }, (data: { success: boolean; error?: string }) => {
         obs.next(data);
         obs.complete();
       });
@@ -81,7 +82,7 @@ export class SocketService {
     steps = 0,
     currentPage?: string,
     path?: string[],
-  ): Observable<{ success: boolean; startPage?: string; targetPage?: string; startTime?: number; room?: RoomInfo; error?: string }> {
+  ): Observable<{ success: boolean; startPage?: string; targetPage?: string; startTime?: number; lang?: string; room?: RoomInfo; error?: string }> {
     this.connect();
     return new Observable(obs => {
       this.socket.emit('rejoin-game', { code, name, steps, currentPage, path }, (data: any) => {
@@ -100,10 +101,10 @@ export class SocketService {
     });
   }
 
-  joinDaily(name: string): Observable<{ success: boolean; roomCode?: string; startPage?: string; targetPage?: string; startTime?: number; date?: string; error?: string }> {
+  joinDaily(name: string): Observable<{ success: boolean; roomCode?: string; startPage?: string; targetPage?: string; startTime?: number; date?: string; lang?: string; error?: string }> {
     this.connect();
     return new Observable(obs => {
-      this.socket.emit('join-daily', { name }, (data: any) => {
+      this.socket.emit('join-daily', { name, lang: this.langService.current }, (data: any) => {
         obs.next(data);
         obs.complete();
       });

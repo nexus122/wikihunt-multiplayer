@@ -3,11 +3,11 @@
   <!-- ─── Mobile top HUD ─── -->
   <div class="mobile-hud">
     <div class="hud-target">
-      <span class="hud-label">TARGET</span>
+      <span class="hud-label">{{ t('game_target') }}</span>
       <span class="hud-value">{{ targetPage }}</span>
     </div>
     <div class="hud-meta">
-      <span class="hud-chip accent">{{ mySteps }} steps</span>
+      <span class="hud-chip accent">{{ mySteps }} {{ t('game_steps') }}</span>
       <span class="hud-chip">{{ elapsed }}</span>
     </div>
     <button class="hud-players-btn" (click)="mobileMenuOpen = true">
@@ -29,44 +29,44 @@
       </div>
 
       <div class="target-box">
-        <span class="label">TARGET</span>
+        <span class="label">{{ t('game_target') }}</span>
         <span class="target-name">{{ targetPage }}</span>
         @if (targetSummary?.extract) {
           <p class="target-extract">{{ targetSummary!.extract.slice(0, 160) }}…</p>
         }
-        <a class="target-link" [href]="'https://es.wikipedia.org/wiki/' + targetPage" target="_blank" rel="noopener noreferrer">Ver en Wikipedia ↗</a>
+        <a class="target-link" [href]="wikiBaseUrl + targetPage" target="_blank" rel="noopener noreferrer">{{ t('game_wiki_link') }}</a>
       </div>
 
       <div class="my-stats">
         <div class="stat">
-          <span class="stat-label">Steps</span>
+          <span class="stat-label">{{ t('game_steps') }}</span>
           <span class="stat-value">{{ mySteps }}</span>
         </div>
         <div class="stat">
-          <span class="stat-label">Time</span>
+          <span class="stat-label">{{ t('game_time') }}</span>
           <span class="stat-value">{{ elapsed }}</span>
         </div>
       </div>
 
       <div class="current-page">
-        <span class="label">Current page</span>
+        <span class="label">{{ t('game_current_page') }}</span>
         <span class="page-name">{{ currentPage }}</span>
       </div>
 
       @if (myPath.length > 1) {
-        <button class="back-btn btn-secondary" (click)="goBack()">← Atrás</button>
+        <button class="back-btn btn-secondary" (click)="goBack()">{{ t('game_back') }}</button>
       }
     </div>
 
     <div class="players-section">
-      <p class="label">Players</p>
+      <p class="label">{{ t('game_players') }}</p>
       <ul class="players">
         @for (p of players; track p.socketId) {
           <li class="player" [class.me]="p.socketId === mySocketId" [class.finished]="p.finished" [class.disconnected]="p.disconnected">
             <div class="avatar sm" [style.background]="getAvatarColor(p.socketId)">{{ (p.name?.[0] || '?').toUpperCase() }}</div>
             <div class="player-info">
               <span class="player-name">{{ p.name }}</span>
-              <span class="player-page">{{ p.disconnected ? 'Desconectado...' : (p.currentPage || '...') }}</span>
+              <span class="player-page">{{ p.disconnected ? t('game_disconnected') : (p.currentPage || '...') }}</span>
             </div>
             <span class="player-steps">{{ p.steps }}</span>
             @if (p.finished) { <span class="done">✓</span> }
@@ -78,14 +78,14 @@
     </div>
 
     <button class="btn-secondary path-btn" (click)="showPath = !showPath; mobileMenuOpen = false">
-      {{ showPath ? 'Hide' : 'Show' }} my path
+      {{ showPath ? t('game_hide_path') : t('game_show_path') }}
     </button>
 
     @if (!iWon && !isSpectating) {
-      <button class="giveup-btn" (click)="showGiveUpConfirm = true">🏳️ Rendirse</button>
+      <button class="giveup-btn" (click)="showGiveUpConfirm = true">{{ t('game_give_up') }}</button>
     }
     @if (isSpectating) {
-      <button class="btn-secondary" style="font-size:12px;padding:7px;width:100%" (click)="goHome()">← Salir</button>
+      <button class="btn-secondary" style="font-size:12px;padding:7px;width:100%" (click)="goHome()">{{ t('game_leave') }}</button>
     }
   </aside>
 
@@ -93,20 +93,20 @@
   <main class="wiki-area" [class.spectating]="isSpectating">
     @if (isSpectating) {
       <div class="spectating-banner">
-        🏳️ Te has rendido &nbsp;·&nbsp; Mira cómo acaban los demás
+        {{ t('game_spectating') }}
       </div>
     }
 
     @if (loading) {
       <div class="loading">
         <div class="spinner"></div>
-        <p>Loading article...</p>
+        <p>{{ t('game_loading') }}</p>
       </div>
     } @else if (loadError) {
       <div class="load-error">
         <p>{{ loadError }}</p>
         @if (initialLoadFailed) {
-          <button class="btn-secondary" style="margin-top:12px" (click)="retryInitialLoad()">Reintentar</button>
+          <button class="btn-secondary" style="margin-top:12px" (click)="retryInitialLoad()">{{ t('game_initial_failed_retry') }}</button>
         }
       </div>
     } @else {
@@ -122,12 +122,12 @@
   <!-- ─── Mobile bottom bar ─── -->
   <div class="mobile-bottom">
     @if (myPath.length > 1) {
-      <button class="btn-secondary mobile-btn" (click)="goBack()">← Atrás</button>
+      <button class="btn-secondary mobile-btn" (click)="goBack()">{{ t('game_back') }}</button>
     } @else {
       <div class="mobile-btn-ghost"></div>
     }
     <span class="mobile-current-page">{{ currentPage }}</span>
-    <button class="btn-secondary mobile-btn" (click)="showPath = !showPath">📍 Ruta</button>
+    <button class="btn-secondary mobile-btn" (click)="showPath = !showPath">📍 {{ t('game_path_route') }}</button>
   </div>
 
   <!-- ─── Give up modal ─── -->
@@ -135,11 +135,11 @@
     <div class="modal-overlay" (click)="showGiveUpConfirm = false">
       <div class="modal giveup-modal" (click)="$event.stopPropagation()">
         <p class="giveup-emoji">🏳️</p>
-        <h3>¿Te rindes?</h3>
-        <p class="giveup-sub">Saldrás de la partida. Los demás seguirán jugando.</p>
+        <h3>{{ t('game_giveup_title') }}</h3>
+        <p class="giveup-sub">{{ t('game_giveup_sub') }}</p>
         <div class="giveup-actions">
-          <button class="btn-danger" (click)="giveUp()">Sí, me rindo</button>
-          <button class="btn-secondary" (click)="showGiveUpConfirm = false">Seguir intentándolo</button>
+          <button class="btn-danger" (click)="giveUp()">{{ t('game_giveup_confirm') }}</button>
+          <button class="btn-secondary" (click)="showGiveUpConfirm = false">{{ t('game_giveup_cancel') }}</button>
         </div>
       </div>
     </div>
@@ -149,13 +149,13 @@
   @if (showPath) {
     <div class="modal-overlay" (click)="showPath = false">
       <div class="modal path-modal" (click)="$event.stopPropagation()">
-        <h3>My Path ({{ myPath.length }} pages)</h3>
+        <h3>{{ t('game_path_title') }} ({{ myPath.length }})</h3>
         <ol class="path-list">
           @for (p of myPath; track $index) {
             <li [class.current]="p === currentPage">{{ p }}</li>
           }
         </ol>
-        <button class="btn-secondary" (click)="showPath = false">Close</button>
+        <button class="btn-secondary" (click)="showPath = false">{{ t('game_close') }}</button>
       </div>
     </div>
   }
@@ -164,9 +164,9 @@
   @if (countdownActive && winner) {
     <div class="countdown-banner" [class.urgent]="countdownSeconds <= 10">
       @if (iWon) {
-        <span>🏆 ¡Llegaste! Esperando a los demás…</span>
+        <span>{{ t('game_countdown_won') }}</span>
       } @else {
-        <span>🏁 <strong>{{ winner.name }}</strong> llegó primero — ¡sigue intentándolo!</span>
+        <span>🏁 <strong>{{ winner.name }}</strong> — {{ t('game_giveup_cancel') }}</span>
       }
       <div class="countdown-timer" [class.urgent]="countdownSeconds <= 10">
         {{ countdownSeconds }}s
@@ -180,11 +180,11 @@
       <div class="modal leaderboard-modal">
         <div class="lb-header">
           @if (iWon) {
-            <div class="result-badge won">🏆 ¡Ganaste!</div>
+            <div class="result-badge won">{{ t('game_finish_won') }}</div>
           } @else {
-            <div class="result-badge lost">mejor suerte la próxima</div>
+            <div class="result-badge lost">{{ t('game_finish_lost') }}</div>
           }
-          <h2>Fin de la partida</h2>
+          <h2>{{ t('game_finish_title') }}</h2>
           <p class="route-label">{{ startPage }} → {{ targetPage }}</p>
         </div>
 
@@ -194,12 +194,12 @@
               <div class="lb-row">
                 <span class="rank">{{ getRankEmoji(i) }}</span>
                 <div class="avatar sm" [style.background]="getAvatarColor(e.socketId)">{{ (e.name?.[0] || '?').toUpperCase() }}</div>
-                <span class="lb-name">{{ e.name }}@if (e.socketId === mySocketId) { <span class="you-tag">tú</span> }</span>
-                <span class="lb-steps">{{ e.steps }} pasos</span>
-                <span class="lb-time">{{ e.finished ? formatTime(e.time) : (e.gaveUp ? '🏳️ Rendido' : 'No terminó') }}</span>
+                <span class="lb-name">{{ e.name }}@if (e.socketId === mySocketId) { <span class="you-tag">{{ t('game_you_tag') }}</span> }</span>
+                <span class="lb-steps">{{ e.steps }} {{ t('game_steps') }}</span>
+                <span class="lb-time">{{ e.finished ? formatTime(e.time) : (e.gaveUp ? t('game_gave_up') : t('game_not_finished')) }}</span>
                 @if (e.path && e.path.length > 1) {
                   <button class="lb-path-toggle" (click)="togglePath(e.socketId)">
-                    {{ expandedPathPlayer === e.socketId ? '▲' : '▼' }} ruta
+                    {{ expandedPathPlayer === e.socketId ? '▲' : '▼' }} {{ t('game_path_route') }}
                   </button>
                 }
               </div>
@@ -215,8 +215,8 @@
         </ul>
 
         <div class="lb-actions">
-          <button class="btn-primary" (click)="playAgain()">Jugar de nuevo</button>
-          <button class="btn-secondary" (click)="goHome()">Inicio</button>
+          <button class="btn-primary" (click)="playAgain()">{{ t('game_play_again') }}</button>
+          <button class="btn-secondary" (click)="goHome()">{{ t('game_home') }}</button>
         </div>
       </div>
     </div>
@@ -226,7 +226,7 @@
   @if (socketDisconnected) {
     <div class="reconnect-overlay">
       <div class="spinner"></div>
-      <p>Reconectando…</p>
+      <p>{{ t('game_reconnecting') }}</p>
     </div>
   }
 
