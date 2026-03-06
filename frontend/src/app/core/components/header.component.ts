@@ -18,39 +18,92 @@ import { TranslationKey } from '../i18n/translations';
       </a>
 
       <div class="header-right">
-        <button class="btn-lang" (click)="toggleLang()" [title]="t('lang_toggle')">
-          {{ t('lang_toggle') }}
-        </button>
-
         @if (backLabel) {
-          <button class="btn-secondary" (click)="back.emit()">{{ backLabel }}</button>
+          <button class="btn-back" (click)="back.emit()">{{ backLabel }}</button>
         }
-
-        <div class="session">
+        <button class="avatar-btn" (click)="panelOpen = true" [title]="profileName || t('sign_in')">
           @if (currentUser) {
-            <span class="session-name">{{ profileName }}</span>
-            <button class="btn-signout" (click)="signOut()">{{ t('sign_out') }}</button>
-          } @else if (currentUser === null) {
-            <a class="btn-signin" routerLink="/auth">{{ t('sign_in') }}</a>
+            <span class="avatar-initial">{{ (profileName[0] || '?').toUpperCase() }}</span>
+          } @else {
+            <svg class="avatar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
           }
-        </div>
+        </button>
       </div>
     </header>
+
+    @if (panelOpen) {
+      <div class="panel-backdrop" (click)="panelOpen = false"></div>
+    }
+
+    <aside class="user-panel" [class.open]="panelOpen">
+      <div class="panel-header">
+        <span class="panel-title">{{ t('panel_title') }}</span>
+        <button class="panel-close" (click)="panelOpen = false">✕</button>
+      </div>
+
+      <div class="panel-section">
+        @if (currentUser) {
+          <div class="panel-profile">
+            <div class="panel-avatar">{{ (profileName[0] || '?').toUpperCase() }}</div>
+            <div class="panel-profile-info">
+              <span class="panel-profile-name">{{ profileName }}</span>
+              <span class="panel-profile-sub">{{ currentUser.email }}</span>
+            </div>
+          </div>
+          <button class="panel-btn panel-btn-outline" (click)="signOut()">{{ t('sign_out') }}</button>
+        } @else if (currentUser === null) {
+          <div class="panel-guest">
+            <svg class="guest-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+            <span class="panel-guest-label">{{ t('panel_guest') }}</span>
+          </div>
+          <a class="panel-btn panel-btn-primary" routerLink="/auth" (click)="panelOpen = false">{{ t('sign_in') }}</a>
+        } @else {
+          <div class="panel-loading">···</div>
+        }
+      </div>
+
+      <div class="panel-divider"></div>
+
+      <div class="panel-section">
+        <span class="panel-section-label">{{ t('panel_language') }}</span>
+        <div class="lang-toggle">
+          <button class="lang-opt" [class.active]="langService.current === 'es'" (click)="setLang('es')">🇪🇸 Español</button>
+          <button class="lang-opt" [class.active]="langService.current === 'en'" (click)="setLang('en')">🇬🇧 English</button>
+        </div>
+      </div>
+
+      <div class="panel-divider"></div>
+
+      <div class="panel-section panel-links">
+        <a class="panel-link" routerLink="/daily" (click)="panelOpen = false">📅 {{ t('daily_btn') }}</a>
+        <a class="panel-link" routerLink="/leaderboard" (click)="panelOpen = false">🏆 {{ t('leaderboard_btn') }}</a>
+      </div>
+    </aside>
   `,
   styles: [`
+    :host { display: block; }
+
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 24px;
+      padding: 12px 24px;
       border-bottom: 1px solid var(--border-color);
       background: var(--bg-secondary);
+      min-height: 52px;
+      position: relative;
+      z-index: 300;
     }
 
     .logo {
       font-size: 22px;
       letter-spacing: -1px;
       text-decoration: none;
+      flex-shrink: 0;
       .logo-wiki { color: var(--text-primary); font-weight: 800; }
       .logo-hunt { color: var(--accent); font-weight: 800; }
     }
@@ -61,33 +114,7 @@ import { TranslationKey } from '../i18n/translations';
       gap: 10px;
     }
 
-    .btn-lang {
-      background: var(--bg-tertiary);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 4px 10px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: 0.5px;
-      transition: border-color .15s, color .15s;
-      &:hover { border-color: var(--accent); color: var(--accent); }
-    }
-
-    .session {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .session-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    .btn-signout {
+    .btn-back {
       background: var(--bg-tertiary);
       color: var(--text-secondary);
       border: 1px solid var(--border-color);
@@ -96,20 +123,273 @@ import { TranslationKey } from '../i18n/translations';
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
+      white-space: nowrap;
+      transition: border-color .15s, color .15s;
+      &:hover { border-color: var(--accent); color: var(--accent); }
+    }
+
+    .avatar-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2px solid var(--border-color);
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
       transition: border-color .15s;
       &:hover { border-color: var(--accent); color: var(--accent); }
     }
 
-    .btn-signin {
+    .avatar-initial {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .avatar-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ── Panel backdrop ── */
+    .panel-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      z-index: 400;
+      backdrop-filter: blur(2px);
+      animation: fade-in .15s ease;
+    }
+
+    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ── Side panel ── */
+    .user-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 280px;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border-color);
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .25s cubic-bezier(.4,0,.2,1);
+      box-shadow: -4px 0 24px rgba(0,0,0,.4);
+
+      &.open { transform: translateX(0); }
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      flex-shrink: 0;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .panel-close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      &:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+    }
+
+    .panel-section {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .panel-divider {
+      height: 1px;
+      background: var(--border-color);
+      flex-shrink: 0;
+    }
+
+    /* Profile (logged in) */
+    .panel-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .panel-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(88,166,255,.15);
+      border: 2px solid rgba(88,166,255,.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .panel-profile-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .panel-profile-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .panel-profile-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Guest state */
+    .panel-guest {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+    }
+
+    .guest-icon {
+      width: 48px;
+      height: 48px;
+      color: var(--text-secondary);
+      opacity: .5;
+    }
+
+    .panel-guest-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .panel-loading {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 20px;
+      padding: 12px 0;
+      letter-spacing: 4px;
+    }
+
+    /* Buttons */
+    .panel-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: all .15s;
+    }
+
+    .panel-btn-primary {
       background: var(--accent);
       color: #0d1117;
-      border-radius: 6px;
-      padding: 5px 14px;
-      font-size: 12px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: opacity .15s;
+      border: none;
       &:hover { opacity: .85; }
+    }
+
+    .panel-btn-outline {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      &:hover { border-color: var(--danger); color: var(--danger); }
+    }
+
+    /* Section label */
+    .panel-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-secondary);
+    }
+
+    /* Language toggle */
+    .lang-toggle {
+      display: flex;
+      gap: 8px;
+    }
+
+    .lang-opt {
+      flex: 1;
+      padding: 9px 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+
+      &.active {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(88,166,255,.08);
+      }
+
+      &:not(.active):hover {
+        border-color: var(--text-secondary);
+        color: var(--text-primary);
+      }
+    }
+
+    /* Nav links */
+    .panel-links { gap: 4px; }
+
+    .panel-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all .15s;
+      &:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    }
+
+    @media (max-width: 600px) {
+      .header { padding: 10px 14px; }
+      .logo { font-size: 18px; }
+      .btn-back { padding: 5px 8px; font-size: 11px; }
+      .user-panel { width: min(280px, 85vw); }
     }
   `],
 })
@@ -119,6 +399,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   currentUser: User | null | undefined = undefined;
   profileName = '';
+  panelOpen = false;
   private sub?: Subscription;
   private langSub?: Subscription;
 
@@ -149,6 +430,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   toggleLang(): void {
     this.langService.toggle();
+  }
+
+  setLang(lang: 'es' | 'en'): void {
+    if (this.langService.current !== lang) this.langService.toggle();
   }
 
   async signOut(): Promise<void> {

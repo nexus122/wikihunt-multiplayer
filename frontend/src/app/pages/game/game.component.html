@@ -217,9 +217,9 @@
         <div class="lb-actions">
           <button class="btn-primary" (click)="playAgain()">{{ t('game_play_again') }}</button>
           <button class="btn-secondary" (click)="goHome()">{{ t('game_home') }}</button>
-          @if (canShare) {
-            <button class="btn-secondary" (click)="shareResult()">{{ t('game_share') }}</button>
-          }
+          <button class="btn-secondary" [class.copied]="linkCopied" (click)="shareResult()">
+            {{ linkCopied ? t('game_share_copied') : t('game_share') }}
+          </button>
         </div>
       </div>
     </div>

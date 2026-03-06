@@ -427,6 +427,12 @@
   gap: 10px;
   margin-top: 20px;
   button { flex: 1; padding: 12px; }
+
+  .copied {
+    border-color: var(--success);
+    color: var(--success);
+    pointer-events: none;
+  }
 }
 
 

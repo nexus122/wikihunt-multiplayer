@@ -71,7 +71,8 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
   mobileMenuOpen = false;
 
   // Share result
-  readonly canShare = !!navigator.share;
+  private readonly isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  linkCopied = false;
 
   // Confetti
   confettiActive = false;
@@ -523,7 +524,15 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   shareResult(): void {
-    navigator.share({ text: this.buildShareText() }).catch(() => {});
+    if (this.isMobile && navigator.share) {
+      navigator.share({ text: this.buildShareText() }).catch(() => {});
+    } else {
+      const url = `${this.siteUrl}/?start=${encodeURIComponent(this.startPage)}&target=${encodeURIComponent(this.targetPage)}&lang=${this.gameLang}`;
+      navigator.clipboard.writeText(url).then(() => {
+        this.linkCopied = true;
+        setTimeout(() => { this.linkCopied = false; }, 2500);
+      }).catch(() => {});
+    }
   }
 
   playAgain(): void {

@@ -1,9 +1,12 @@
 export const translations = {
   es: {
-    // Header
+    // Header / panel
     sign_in: 'Iniciar sesión',
-    sign_out: 'Salir',
+    sign_out: 'Cerrar sesión',
     lang_toggle: 'EN',
+    panel_title: 'Menú',
+    panel_guest: 'Jugando como invitado',
+    panel_language: 'Idioma',
 
     // Rejoin banner
     rejoin_in_progress: 'Partida en curso',
@@ -109,6 +112,7 @@ export const translations = {
     game_reconnecting: 'Reconectando…',
     game_initial_failed_retry: 'Reintentar',
     game_share: '↗ Compartir resultado',
+    game_share_copied: '✓ ¡Enlace copiado!',
 
     // Leaderboard
     lb_title: '🏆 Clasificaciones',
@@ -151,10 +155,13 @@ export const translations = {
   },
 
   en: {
-    // Header
+    // Header / panel
     sign_in: 'Sign in',
     sign_out: 'Sign out',
     lang_toggle: 'ES',
+    panel_title: 'Menu',
+    panel_guest: 'Playing as guest',
+    panel_language: 'Language',
 
     // Rejoin banner
     rejoin_in_progress: 'Game in progress',
@@ -260,6 +267,7 @@ export const translations = {
     game_reconnecting: 'Reconnecting…',
     game_initial_failed_retry: 'Retry',
     game_share: '↗ Share result',
+    game_share_copied: '✓ Link copied!',
 
     // Leaderboard
     lb_title: '🏆 Leaderboard',
