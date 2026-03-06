@@ -50,6 +50,12 @@ import { TranslationKey } from '../i18n/translations';
               <span class="panel-profile-sub">{{ currentUser.email }}</span>
             </div>
           </div>
+          @if (streak > 0) {
+            <div class="panel-streak">
+              <span class="streak-fire">🔥</span>
+              <span class="streak-text"><strong>{{ streak }}</strong> {{ t('panel_streak') }}</span>
+            </div>
+          }
           <button class="panel-btn panel-btn-outline" (click)="signOut()">{{ t('sign_out') }}</button>
         } @else if (currentUser === null) {
           <div class="panel-guest">
@@ -69,8 +75,8 @@ import { TranslationKey } from '../i18n/translations';
       <div class="panel-section">
         <span class="panel-section-label">{{ t('panel_language') }}</span>
         <div class="lang-toggle">
-          <button class="lang-opt" [class.active]="langService.current === 'es'" (click)="setLang('es')">🇪🇸 Español</button>
-          <button class="lang-opt" [class.active]="langService.current === 'en'" (click)="setLang('en')">🇬🇧 English</button>
+          <button class="lang-opt" [class.active]="langService.current === 'es'" (click)="setLang('es')">{{ t('lang_opt_es') }}</button>
+          <button class="lang-opt" [class.active]="langService.current === 'en'" (click)="setLang('en')">{{ t('lang_opt_en') }}</button>
         </div>
       </div>
 
@@ -305,6 +311,24 @@ import { TranslationKey } from '../i18n/translations';
       letter-spacing: 4px;
     }
 
+    .panel-streak {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(255,149,0,.08);
+      border: 1px solid rgba(255,149,0,.25);
+      border-radius: 8px;
+    }
+
+    .streak-fire { font-size: 18px; line-height: 1; }
+
+    .streak-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      strong { color: #ff9500; font-size: 16px; }
+    }
+
     /* Buttons */
     .panel-btn {
       display: block;
@@ -403,6 +427,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   currentUser: User | null | undefined = undefined;
   profileName = '';
+  streak = 0;
   panelOpen = false;
   private sub?: Subscription;
   private langSub?: Subscription;
@@ -419,8 +444,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
       if (user) {
         const profile = await this.authService.getProfile();
         this.profileName = profile?.display_name ?? user.email?.split('@')[0] ?? '';
+        this.streak = await this.authService.getStreak();
       } else {
         this.profileName = '';
+        this.streak = 0;
       }
     });
     // Force re-render on language change

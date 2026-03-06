@@ -100,7 +100,7 @@ export class DailyComponent implements OnInit, OnDestroy {
     this.socketService.joinDaily(this.activeName.trim()).subscribe({
       next: (data) => {
         if (!data.success || !data.startPage) {
-          this.error = data.error || 'No se pudo cargar el reto';
+          this.error = data.error || this.t('daily_load_error');
           this.loading = false;
           return;
         }
@@ -115,7 +115,7 @@ export class DailyComponent implements OnInit, OnDestroy {
           },
         });
       },
-      error: () => { this.error = 'Error al conectar con el servidor'; this.loading = false; },
+      error: () => { this.error = this.t('daily_server_error'); this.loading = false; },
     });
   }
 

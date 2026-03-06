@@ -7,6 +7,11 @@ export const translations = {
     panel_title: 'Menú',
     panel_guest: 'Jugando como invitado',
     panel_language: 'Idioma',
+    panel_streak: 'Racha',
+    lang_opt_es: '🇪🇸 Español',
+    lang_opt_en: '🇬🇧 Inglés',
+    daily_load_error: 'No se pudo cargar el reto',
+    daily_server_error: 'Error al conectar con el servidor',
 
     // Rejoin banner
     rejoin_in_progress: 'Partida en curso',
@@ -167,6 +172,11 @@ export const translations = {
     panel_title: 'Menu',
     panel_guest: 'Playing as guest',
     panel_language: 'Language',
+    panel_streak: 'Streak',
+    lang_opt_es: '🇪🇸 Spanish',
+    lang_opt_en: '🇬🇧 English',
+    daily_load_error: 'Could not load the challenge',
+    daily_server_error: 'Error connecting to server',
 
     // Rejoin banner
     rejoin_in_progress: 'Game in progress',
