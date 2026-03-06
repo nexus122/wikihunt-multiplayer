@@ -8,10 +8,17 @@ export const translations = {
     panel_guest: 'Jugando como invitado',
     panel_language: 'Idioma',
     panel_streak: 'Racha',
+    lobby_grace_30s: '30 segundos',
+    lobby_grace_1m: '1 minuto',
+    lobby_grace_2m: '2 minutos',
+    lobby_grace_3m: '3 minutos',
+    lobby_grace_5m: '5 minutos',
     lang_opt_es: '🇪🇸 Español',
     lang_opt_en: '🇬🇧 Inglés',
     daily_load_error: 'No se pudo cargar el reto',
     daily_server_error: 'Error al conectar con el servidor',
+    daily_today: 'Hoy',
+    daily_streak_hint: '¡Completa el reto para empezar!',
 
     // Rejoin banner
     rejoin_in_progress: 'Partida en curso',
@@ -116,6 +123,7 @@ export const translations = {
     game_path_route: 'ruta',
     game_reconnecting: 'Reconectando…',
     game_initial_failed_retry: 'Reintentar',
+    game_countdown_waiting: 'Esperando al resto de jugadores…',
     game_share: '↗ Compartir resultado',
     game_share_copied: '✓ ¡Enlace copiado!',
 
@@ -173,10 +181,17 @@ export const translations = {
     panel_guest: 'Playing as guest',
     panel_language: 'Language',
     panel_streak: 'Streak',
+    lobby_grace_30s: '30 seconds',
+    lobby_grace_1m: '1 minute',
+    lobby_grace_2m: '2 minutes',
+    lobby_grace_3m: '3 minutes',
+    lobby_grace_5m: '5 minutes',
     lang_opt_es: '🇪🇸 Spanish',
     lang_opt_en: '🇬🇧 English',
     daily_load_error: 'Could not load the challenge',
     daily_server_error: 'Error connecting to server',
+    daily_today: 'Today',
+    daily_streak_hint: 'Complete the challenge to start!',
 
     // Rejoin banner
     rejoin_in_progress: 'Game in progress',
@@ -281,6 +296,7 @@ export const translations = {
     game_path_route: 'path',
     game_reconnecting: 'Reconnecting…',
     game_initial_failed_retry: 'Retry',
+    game_countdown_waiting: 'Waiting for other players…',
     game_share: '↗ Share result',
     game_share_copied: '✓ Link copied!',
 

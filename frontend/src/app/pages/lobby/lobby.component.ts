@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { SocketService } from '../../core/services/socket.service';
 import { WikipediaService } from '../../core/services/wikipedia.service';
 import { LanguageService } from '../../core/services/language.service';
@@ -36,28 +36,21 @@ export class LobbyComponent implements OnInit, OnDestroy {
   graceTime = 60;
 
   get graceOptions() {
-    const lang = this.langService.current;
-    return lang === 'en'
-      ? [
-          { label: '30 seconds', value: 30 },
-          { label: '1 minute', value: 60 },
-          { label: '2 minutes', value: 120 },
-          { label: '3 minutes', value: 180 },
-          { label: '5 minutes', value: 300 },
-        ]
-      : [
-          { label: '30 segundos', value: 30 },
-          { label: '1 minuto', value: 60 },
-          { label: '2 minutos', value: 120 },
-          { label: '3 minutos', value: 180 },
-          { label: '5 minutos', value: 300 },
-        ];
+    return [
+      { label: this.t('lobby_grace_30s'), value: 30 },
+      { label: this.t('lobby_grace_1m'),  value: 60 },
+      { label: this.t('lobby_grace_2m'),  value: 120 },
+      { label: this.t('lobby_grace_3m'),  value: 180 },
+      { label: this.t('lobby_grace_5m'),  value: 300 },
+    ];
   }
 
   starting = false;
   error = '';
 
   private subs: Subscription[] = [];
+  private startSearch$ = new Subject<string>();
+  private targetSearch$ = new Subject<string>();
 
   constructor(
     private route: ActivatedRoute,
@@ -115,8 +108,21 @@ export class LobbyComponent implements OnInit, OnDestroy {
       })
     );
 
+    // Triggers Angular change detection so t() re-evaluates on language change (graceOptions, etc.)
+    this.subs.push(this.langService.lang$.subscribe(() => {}));
+
+    // Debounced Wikipedia search
     this.subs.push(
-      this.langService.lang$.subscribe(() => {})
+      this.startSearch$.pipe(debounceTime(300), distinctUntilChanged()).subscribe(q => {
+        if (q.length < 2) { this.startResults = []; return; }
+        this.wikipediaService.searchPages(q).subscribe(r => (this.startResults = r));
+      })
+    );
+    this.subs.push(
+      this.targetSearch$.pipe(debounceTime(300), distinctUntilChanged()).subscribe(q => {
+        if (q.length < 2) { this.targetResults = []; return; }
+        this.wikipediaService.searchPages(q).subscribe(r => (this.targetResults = r));
+      })
     );
   }
 
@@ -166,13 +172,11 @@ export class LobbyComponent implements OnInit, OnDestroy {
   }
 
   searchStart(): void {
-    if (this.searchStartQuery.length < 2) { this.startResults = []; return; }
-    this.wikipediaService.searchPages(this.searchStartQuery).subscribe(r => (this.startResults = r));
+    this.startSearch$.next(this.searchStartQuery);
   }
 
   searchTarget(): void {
-    if (this.searchTargetQuery.length < 2) { this.targetResults = []; return; }
-    this.wikipediaService.searchPages(this.searchTargetQuery).subscribe(r => (this.targetResults = r));
+    this.targetSearch$.next(this.searchTargetQuery);
   }
 
   setStartMode(custom: boolean): void {

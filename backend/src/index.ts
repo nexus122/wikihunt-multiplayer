@@ -10,11 +10,13 @@ import { getDailyChallenge, saveDailyResult, saveHallOfFame, updateUserStreak, v
 
 const app = express();
 const httpServer = createServer(app);
+const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
+
 const io = new Server(httpServer, {
-  cors: { origin: '*', methods: ['GET', 'POST'] },
+  cors: { origin: allowedOrigin, methods: ['GET', 'POST'] },
 });
 
-app.use(cors({ origin: '*' }));
+app.use(cors({ origin: allowedOrigin }));
 app.use(express.json());
 app.use('/api/wikipedia', wikipediaRouter);
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
@@ -40,6 +42,17 @@ io.use(async (socket, next) => {
 
 // Rate limiting for navigate events: max 1 per 200ms per socket
 const navigateLastTs = new Map<string, number>();
+
+function validateName(name: unknown): string | null {
+  if (typeof name !== 'string') return null;
+  const trimmed = name.trim().slice(0, 30);
+  return trimmed.length >= 1 ? trimmed : null;
+}
+
+const ALLOWED_LANGS = new Set(['es', 'en']);
+function validateLang(lang: unknown): string {
+  return typeof lang === 'string' && ALLOWED_LANGS.has(lang) ? lang : 'es';
+}
 
 async function emitGameFinished(roomCode: string, room: ReturnType<typeof roomManager.getRoomByCode>): Promise<void> {
   if (!room) return;
@@ -95,8 +108,10 @@ io.on('connection', (socket) => {
   console.log(`[+] Connected: ${socket.id}`);
 
   socket.on('create-room', ({ name }: { name: string }, callback: Function) => {
+    const validName = validateName(name);
+    if (!validName) { callback({ error: 'Invalid name' }); return; }
     try {
-      const room = roomManager.createRoom(socket.id, name, false, socket.data.userId);
+      const room = roomManager.createRoom(socket.id, validName, false, socket.data.userId);
       socket.join(room.code);
       console.log(`[Room] Created: ${room.code} by ${name}`);
       callback({ code: room.code, room: roomManager.getRoomInfo(room) });
@@ -106,8 +121,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on('join-room', ({ code, name }: { code: string; name: string }, callback: Function) => {
+    const validName = validateName(name);
+    if (!validName) { callback({ success: false, error: 'Invalid name' }); return; }
     try {
-      const room = roomManager.joinRoom(code.toUpperCase().trim(), socket.id, name, socket.data.userId);
+      const room = roomManager.joinRoom(code.toUpperCase().trim(), socket.id, validName, socket.data.userId);
       if (!room) {
         callback({ success: false, error: 'Room not found or game already started' });
         return;
@@ -132,7 +149,7 @@ io.on('connection', (socket) => {
         if (!room) { callback({ success: false, error: 'Room not found' }); return; }
         if (room.hostId !== socket.id) { callback({ success: false, error: 'Only the host can start' }); return; }
 
-        const gameLang = lang || 'es';
+        const gameLang = validateLang(lang);
         room.lang = gameLang;
 
         // Resolve start page: random or canonicalize custom
@@ -155,7 +172,9 @@ io.on('connection', (socket) => {
           target = await getValidRandomPage(10, start, gameLang);
         }
 
-        const grace = typeof graceTime === 'number' && graceTime > 0 ? graceTime : 60;
+        const grace = typeof graceTime === 'number'
+          ? Math.min(Math.max(graceTime, 30), 300)
+          : 60;
         roomManager.startGame(room.code, start, target, grace);
         const updatedRoom = roomManager.getRoomByCode(room.code)!;
 
@@ -308,10 +327,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('join-daily', async ({ name, lang }: { name: string; lang?: string }, callback: Function) => {
+    const validName = validateName(name);
+    if (!validName) { callback({ success: false, error: 'Invalid name' }); return; }
     try {
-      const gameLang = lang || 'es';
+      const gameLang = validateLang(lang);
       const challenge = await getDailyChallenge(gameLang);
-      const room = roomManager.createRoom(socket.id, name, true, socket.data.userId);
+      const room = roomManager.createRoom(socket.id, validName, true, socket.data.userId);
       room.lang = gameLang;
       socket.join(room.code);
       roomManager.startGame(room.code, challenge.start_page, challenge.target_page, 0);

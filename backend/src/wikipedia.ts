@@ -28,6 +28,11 @@ function setCached(lang: string, key: string, html: string, title: string): void
   contentCache.set(cacheKey(lang, key), { html, title, ts: Date.now() });
 }
 
+const ALLOWED_LANGS = new Set(['es', 'en']);
+function safeLang(lang: unknown): string {
+  return typeof lang === 'string' && ALLOWED_LANGS.has(lang) ? lang : 'es';
+}
+
 function wikiBase(lang: string): string {
   return `https://${lang}.wikipedia.org/api/rest_v1`;
 }
@@ -79,7 +84,7 @@ export async function preWarmCache(title: string, lang = 'es'): Promise<void> {
 }
 
 router.get('/random', async (req: Request, res: Response) => {
-  const lang = (req.query.lang as string) || 'es';
+  const lang = safeLang(req.query.lang);
   try {
     const title = await getValidRandomPage(10, undefined, lang);
     const summary = await fetch(`${wikiBase(lang)}/page/summary/${encodeURIComponent(title)}`);
@@ -92,7 +97,7 @@ router.get('/random', async (req: Request, res: Response) => {
 });
 
 router.get('/summary/:title', async (req: Request, res: Response) => {
-  const lang = (req.query.lang as string) || 'es';
+  const lang = safeLang(req.query.lang);
   try {
     const { title } = req.params;
     const response = await fetch(
@@ -107,7 +112,7 @@ router.get('/summary/:title', async (req: Request, res: Response) => {
 });
 
 router.get('/search', async (req: Request, res: Response) => {
-  const lang = (req.query.lang as string) || 'es';
+  const lang = safeLang(req.query.lang);
   try {
     const q = req.query.q as string;
     if (!q) { res.json([]); return; }
@@ -125,7 +130,7 @@ router.get('/search', async (req: Request, res: Response) => {
 });
 
 router.get('/content/:title', async (req: Request, res: Response) => {
-  const lang = (req.query.lang as string) || 'es';
+  const lang = safeLang(req.query.lang);
   const { title } = req.params;
   try {
     const result = await fetchAndCachePage(title, lang);

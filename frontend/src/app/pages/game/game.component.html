@@ -166,7 +166,7 @@
       @if (iWon) {
         <span>{{ t('game_countdown_won') }}</span>
       } @else {
-        <span>🏁 <strong>{{ winner.name }}</strong> — {{ t('game_giveup_cancel') }}</span>
+        <span>🏁 <strong>{{ winner.name }}</strong> — {{ t('game_countdown_waiting') }}</span>
       }
       <div class="countdown-timer" [class.urgent]="countdownSeconds <= 10">
         {{ countdownSeconds }}s

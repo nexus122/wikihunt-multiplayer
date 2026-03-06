@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SupabaseService, DailyResult, HallOfFameEntry, DailyChallenge } from '../../core/services/supabase.service';
+import { formatTime } from '../../core/utils/time.utils';
 import { AuthService } from '../../core/services/auth.service';
 import { HeaderComponent } from '../../core/components/header.component';
 import { LanguageService } from '../../core/services/language.service';
@@ -87,12 +88,7 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  formatTime(ms: number | null): string {
-    if (!ms) return '—';
-    const s = Math.floor(ms / 1000);
-    const m = Math.floor(s / 60);
-    return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
-  }
+  formatTime = formatTime;
 
   rankEmoji(i: number): string {
     return ['🥇', '🥈', '🥉'][i] ?? `${i + 1}.`;

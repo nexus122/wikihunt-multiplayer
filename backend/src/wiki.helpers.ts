@@ -4,8 +4,11 @@ export function normalizePage(page: string): string {
   return page.toLowerCase().replace(/_/g, ' ').trim();
 }
 
+const ALLOWED_LANGS = new Set(['es', 'en']);
+
 function wikiBase(lang: string): string {
-  return `https://${lang}.wikipedia.org/api/rest_v1`;
+  const safeLang = ALLOWED_LANGS.has(lang) ? lang : 'es';
+  return `https://${safeLang}.wikipedia.org/api/rest_v1`;
 }
 
 // Returns the canonical Wikipedia title (following redirects) or null if the page doesn't exist

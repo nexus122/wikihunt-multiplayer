@@ -4,7 +4,7 @@
 
   <div class="hero">
     <div class="daily-badge">{{ t('daily_title') }}</div>
-    <p class="daily-date">{{ challenge?.date || (loadingChallenge ? '...' : 'Hoy') }}</p>
+    <p class="daily-date">{{ challenge?.date || (loadingChallenge ? '...' : t('daily_today')) }}</p>
   </div>
 
   @if (loadingChallenge) {
@@ -40,7 +40,7 @@
         <div class="streak-row">
           <span class="streak-badge">{{ t('daily_streak') }} <strong>{{ streak }}</strong> {{ t('daily_streak_days') }}</span>
           @if (streak === 0) {
-            <span class="streak-hint">{{ lang.current === 'es' ? '¡Completa el reto para empezar!' : 'Complete the challenge to start!' }}</span>
+            <span class="streak-hint">{{ t('daily_streak_hint') }}</span>
           }
         </div>
       }

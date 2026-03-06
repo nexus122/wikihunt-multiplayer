@@ -464,7 +464,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   setLang(lang: 'es' | 'en'): void {
-    if (this.langService.current !== lang) this.langService.toggle();
+    this.langService.setLang(lang);
   }
 
   async signOut(): Promise<void> {

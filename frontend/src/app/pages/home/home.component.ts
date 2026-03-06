@@ -100,6 +100,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Triggers Angular change detection so t() re-evaluates on language change
     this.langSub = this.lang.lang$.subscribe(() => {});
   }
 

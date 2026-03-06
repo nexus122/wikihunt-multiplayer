@@ -96,6 +96,7 @@ export class SupabaseService {
   }
 
   async getPlayerHistory(playerName: string, lang?: string): Promise<HallOfFameEntry[]> {
+    if (!playerName.trim()) return [];
     let query = this.client
       .from('hall_of_fame')
       .select('*')

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -8,6 +8,8 @@ import { WikipediaService } from '../../core/services/wikipedia.service';
 import { LanguageService } from '../../core/services/language.service';
 import { RoomInfo, PlayerPublicInfo, LeaderboardEntry, WikiPage } from '../../core/models/types';
 import { TranslationKey } from '../../core/i18n/translations';
+import { environment } from '../../../environments/environment';
+import { formatTime } from '../../core/utils/time.utils';
 
 @Component({
   selector: 'app-game',
@@ -16,7 +18,7 @@ import { TranslationKey } from '../../core/i18n/translations';
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })
-export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
+export class GameComponent implements OnInit, OnDestroy {
   @ViewChild('wikiContent') wikiContentEl!: ElementRef<HTMLDivElement>;
 
   // Game state
@@ -171,8 +173,6 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     history.pushState(null, '', window.location.href);
     window.addEventListener('popstate', this.onPopState);
   }
-
-  ngAfterViewInit(): void {}
 
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
@@ -347,11 +347,20 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
     let content = bodyMatch ? bodyMatch[1] : html;
 
-    // Remove edit sections, references section, navboxes, infobox images for performance
+    // Remove edit sections, references section, navboxes for performance
     content = content
       .replace(/<span[^>]*class="[^"]*mw-editsection[^"]*"[^>]*>[\s\S]*?<\/span>/gi, '')
       .replace(/<div[^>]*class="[^"]*reflist[^"]*"[^>]*>[\s\S]*?<\/div>/gi, '')
       .replace(/<div[^>]*class="[^"]*navbox[^"]*"[^>]*>[\s\S]*?<\/div>/gi, '');
+
+    // Security: strip <script>, <style> and inline event handlers
+    content = content
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/\s+on\w+="[^"]*"/gi, '')
+      .replace(/\s+on\w+='[^']*'/gi, '')
+      .replace(/href="javascript:[^"]*"/gi, 'href="#"')
+      .replace(/href='javascript:[^']*'/gi, "href='#'");
 
     return content;
   }
@@ -478,18 +487,13 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
     return colors[Math.abs(h) % colors.length];
   }
 
-  formatTime(ms?: number): string {
-    if (!ms) return '--';
-    const m = Math.floor(ms / 60000);
-    const s = Math.floor((ms % 60000) / 1000);
-    return m > 0 ? `${m}m ${s}s` : `${s}s`;
-  }
+  formatTime = formatTime;
 
   getRankEmoji(i: number): string {
     return ['🥇', '🥈', '🥉'][i] || `${i + 1}.`;
   }
 
-  private readonly siteUrl = 'https://wikihunt-multiplayer-dt76.vercel.app';
+  private readonly siteUrl = environment.siteUrl;
 
   private buildShareText(): string {
     const me = this.leaderboard.find(e => e.socketId === this.mySocketId);
