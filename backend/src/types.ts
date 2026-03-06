@@ -26,6 +26,7 @@ export interface Room {
   gaveUpNames?: Set<string>;  // nombres que se rindieron en la partida actual
   isDaily?: boolean;          // true si es el reto del día
   lang?: string;              // 'es' | 'en' — Wikipedia language for this room
+  searchAllowed?: boolean;    // whether in-game article search is enabled
 }
 
 export interface RoomInfo {

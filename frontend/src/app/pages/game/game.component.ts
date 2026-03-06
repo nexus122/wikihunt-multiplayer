@@ -1,5 +1,6 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
@@ -14,7 +15,7 @@ import { formatTime } from '../../core/utils/time.utils';
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })
@@ -72,6 +73,16 @@ export class GameComponent implements OnInit, OnDestroy {
   // Mobile drawer
   mobileMenuOpen = false;
 
+  // In-page search
+  searchAllowed = true;
+  searchOpen = false;
+  searchQuery = '';
+  matchCount = 0;
+  currentMatch = 0;
+  private rawHtml = '';
+
+  @ViewChild('searchInput') searchInputRef?: ElementRef<HTMLInputElement>;
+
   // Share result
   private readonly isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   linkCopied = false;
@@ -84,6 +95,20 @@ export class GameComponent implements OnInit, OnDestroy {
   gameLang = 'es';
 
   private subs: Subscription[] = [];
+
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(e: KeyboardEvent): void {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+      e.preventDefault();
+      if (this.searchAllowed) this.openSearch();
+    }
+    if (e.key === 'Escape' && this.searchOpen) {
+      this.closeSearch();
+    }
+    if (e.key === 'Enter' && this.searchOpen) {
+      e.shiftKey ? this.prevMatch() : this.nextMatch();
+    }
+  }
 
   // Intercept browser back button: navigate within the game instead of leaving it
   private readonly onPopState = (): void => {
@@ -120,7 +145,7 @@ export class GameComponent implements OnInit, OnDestroy {
     this.mySocketId = this.socketService.getSocketId();
     const state = history.state as {
       room: RoomInfo; isHost: boolean; startPage: string; targetPage: string; startTime: number;
-      lang?: string;
+      lang?: string; searchAllowed?: boolean;
       rejoinSteps?: number; rejoinCurrentPage?: string; rejoinPath?: string[];
     } | undefined;
 
@@ -134,6 +159,7 @@ export class GameComponent implements OnInit, OnDestroy {
     this.targetPage = state.targetPage;
     this.startTime = state.startTime || Date.now();
     this.gameLang = state.lang || this.langService.current;
+    this.searchAllowed = state.searchAllowed !== false;
     this.players = state.room?.players || [];
 
     // Restore progress if rejoining mid-game
@@ -318,7 +344,11 @@ export class GameComponent implements OnInit, OnDestroy {
         if (this.myPath.length > 0) {
           this.myPath[this.myPath.length - 1] = data.title;
         }
-        this.pageContent = this.sanitizer.bypassSecurityTrustHtml(this.processHtml(data.html));
+        this.rawHtml = this.processHtml(data.html);
+        this.searchOpen = false;
+        this.searchQuery = '';
+        this.matchCount = 0;
+        this.pageContent = this.sanitizer.bypassSecurityTrustHtml(this.rawHtml);
         this.loading = false;
         setTimeout(() => this.scrollToTop(), 50);
       },
@@ -341,6 +371,76 @@ export class GameComponent implements OnInit, OnDestroy {
   retryInitialLoad(): void {
     this.loadPage(this.startPage);
   }
+
+  // ── In-page search ──────────────────────────────────────────
+
+  openSearch(): void {
+    this.searchOpen = true;
+    setTimeout(() => this.searchInputRef?.nativeElement.focus(), 50);
+  }
+
+  closeSearch(): void {
+    this.searchOpen = false;
+    this.searchQuery = '';
+    this.matchCount = 0;
+    this.currentMatch = 0;
+    this.pageContent = this.sanitizer.bypassSecurityTrustHtml(this.rawHtml);
+  }
+
+  onSearchInput(): void {
+    this.applyHighlights();
+    this.scrollToMatch(1);
+  }
+
+  nextMatch(): void {
+    if (this.matchCount === 0) return;
+    this.currentMatch = this.currentMatch >= this.matchCount ? 1 : this.currentMatch + 1;
+    this.scrollToMatch(this.currentMatch);
+  }
+
+  prevMatch(): void {
+    if (this.matchCount === 0) return;
+    this.currentMatch = this.currentMatch <= 1 ? this.matchCount : this.currentMatch - 1;
+    this.scrollToMatch(this.currentMatch);
+  }
+
+  private applyHighlights(): void {
+    const q = this.searchQuery.trim();
+    if (!q) {
+      this.matchCount = 0;
+      this.currentMatch = 0;
+      this.pageContent = this.sanitizer.bypassSecurityTrustHtml(this.rawHtml);
+      return;
+    }
+    const { html, count } = this.highlightMatches(this.rawHtml, q);
+    this.matchCount = count;
+    this.currentMatch = count > 0 ? 1 : 0;
+    this.pageContent = this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+
+  private highlightMatches(html: string, query: string): { html: string; count: number } {
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escaped, 'gi');
+    let count = 0;
+    // Replace only in text nodes (content between > and <)
+    const result = html.replace(/>([^<]+)</g, (_full, text: string) => {
+      const replaced = text.replace(regex, (m: string) => {
+        count++;
+        return `<mark class="sh" id="sh-${count}">${m}</mark>`;
+      });
+      return `>${replaced}<`;
+    });
+    return { html: result, count };
+  }
+
+  private scrollToMatch(index: number): void {
+    setTimeout(() => {
+      const el = this.wikiContentEl?.nativeElement?.querySelector(`#sh-${index}`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 30);
+  }
+
+  // ────────────────────────────────────────────────────────────
 
   private processHtml(html: string): string {
     // Strip <head>, keep only body content
@@ -423,7 +523,11 @@ export class GameComponent implements OnInit, OnDestroy {
         this.pageTitle = data.title;
         this.currentPage = data.title;
         this.myPath[this.myPath.length - 1] = data.title;
-        this.pageContent = this.sanitizer.bypassSecurityTrustHtml(this.processHtml(data.html));
+        this.rawHtml = this.processHtml(data.html);
+        this.searchOpen = false;
+        this.searchQuery = '';
+        this.matchCount = 0;
+        this.pageContent = this.sanitizer.bypassSecurityTrustHtml(this.rawHtml);
         this.loading = false;
         this.saveProgress();
         setTimeout(() => this.scrollToTop(), 50);

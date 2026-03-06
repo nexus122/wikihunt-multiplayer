@@ -141,7 +141,7 @@ io.on('connection', (socket) => {
   socket.on(
     'start-game',
     async (
-      { startPage, targetPage, graceTime, lang }: { startPage?: string; targetPage?: string; graceTime?: number; lang?: string },
+      { startPage, targetPage, graceTime, lang, searchAllowed }: { startPage?: string; targetPage?: string; graceTime?: number; lang?: string; searchAllowed?: boolean },
       callback: Function
     ) => {
       try {
@@ -151,6 +151,7 @@ io.on('connection', (socket) => {
 
         const gameLang = validateLang(lang);
         room.lang = gameLang;
+        room.searchAllowed = searchAllowed !== false; // default true
 
         // Resolve start page: random or canonicalize custom
         let start: string;
@@ -189,6 +190,7 @@ io.on('connection', (socket) => {
           targetPage: target,
           startTime: updatedRoom.startTime,
           lang: gameLang,
+          searchAllowed: room.searchAllowed,
         });
 
         callback({ success: true });

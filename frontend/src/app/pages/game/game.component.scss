@@ -184,6 +184,77 @@
   &:hover { background: rgba(248,81,73,.25); }
 }
 
+/* ─── In-page search ─── */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  z-index: 50;
+  animation: slide-down .15s ease;
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.search-input {
+  flex: 1;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+  &:focus { border-color: var(--accent); }
+}
+
+.search-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  min-width: 40px;
+  text-align: center;
+  &.no-results { color: var(--danger); }
+}
+
+.search-nav {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  &:disabled { opacity: .35; cursor: default; }
+}
+
+.search-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 15px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  &:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+}
+
+.search-active {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
 /* ─── Wiki Area ─── */
 .wiki-area {
   flex: 1;
@@ -258,6 +329,13 @@
   li { margin-bottom: 3px; }
   .infobox { float: right; clear: right; margin: 0 0 16px 24px; border: 1px solid #a2a9b1; font-size: 13px; background: #f8f9fa; }
   .thumb { float: right; clear: right; margin: 0 0 12px 16px; }
+
+  mark.sh {
+    background: #ffe066;
+    color: #000;
+    border-radius: 2px;
+    padding: 0 1px;
+  }
 }
 
 /* ─── Modals ─── */

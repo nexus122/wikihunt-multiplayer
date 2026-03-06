@@ -34,6 +34,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
   selectedTarget: WikiPage | null = null;
 
   graceTime = 60;
+  searchAllowed = true;
 
   get graceOptions() {
     return [
@@ -103,6 +104,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
             targetPage: event.targetPage,
             startTime: event.startTime,
             lang: event.lang,
+            searchAllowed: event.searchAllowed !== false,
           },
         });
       })
@@ -218,8 +220,9 @@ export class LobbyComponent implements OnInit, OnDestroy {
     this.starting = true;
     this.error = '';
 
-    const opts: { graceTime: number; startPage?: string; targetPage?: string } = {
+    const opts: { graceTime: number; startPage?: string; targetPage?: string; searchAllowed: boolean } = {
       graceTime: this.graceTime,
+      searchAllowed: this.searchAllowed,
     };
     if (this.selectedStart) opts.startPage = this.selectedStart.title;
     if (this.selectedTarget) opts.targetPage = this.selectedTarget.title;

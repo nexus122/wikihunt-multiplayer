@@ -81,6 +81,12 @@
       {{ showPath ? t('game_hide_path') : t('game_show_path') }}
     </button>
 
+    @if (searchAllowed) {
+      <button class="btn-secondary path-btn" [class.search-active]="searchOpen" (click)="searchOpen ? closeSearch() : openSearch(); mobileMenuOpen = false">
+        🔍 {{ t('game_search') }}
+      </button>
+    }
+
     @if (!iWon && !isSpectating) {
       <button class="giveup-btn" (click)="showGiveUpConfirm = true">{{ t('game_give_up') }}</button>
     }
@@ -91,6 +97,30 @@
 
   <!-- ─── Wikipedia Content ─── -->
   <main class="wiki-area" [class.spectating]="isSpectating">
+
+    <!-- ─── In-page search bar ─── -->
+    @if (searchAllowed && searchOpen) {
+      <div class="search-bar">
+        <input
+          #searchInput
+          class="search-input"
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="onSearchInput()"
+          [placeholder]="t('game_search_placeholder')"
+          autocomplete="off"
+        />
+        @if (searchQuery) {
+          <span class="search-count" [class.no-results]="matchCount === 0">
+            {{ matchCount === 0 ? t('game_search_no_results') : currentMatch + '/' + matchCount }}
+          </span>
+        }
+        <button class="search-nav" (click)="prevMatch()" [disabled]="matchCount === 0" title="Anterior (Shift+Enter)">↑</button>
+        <button class="search-nav" (click)="nextMatch()" [disabled]="matchCount === 0" title="Siguiente (Enter)">↓</button>
+        <button class="search-close" (click)="closeSearch()">✕</button>
+      </div>
+    }
+
     @if (isSpectating) {
       <div class="spectating-banner">
         {{ t('game_spectating') }}
@@ -128,6 +158,9 @@
     }
     <span class="mobile-current-page">{{ currentPage }}</span>
     <button class="btn-secondary mobile-btn" (click)="showPath = !showPath">📍 {{ t('game_path_route') }}</button>
+    @if (searchAllowed) {
+      <button class="btn-secondary mobile-btn" [class.search-active]="searchOpen" (click)="searchOpen ? closeSearch() : openSearch()">🔍</button>
+    }
   </div>
 
   <!-- ─── Give up modal ─── -->

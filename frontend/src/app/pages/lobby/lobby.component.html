@@ -9,12 +9,16 @@
     <!-- Room Code -->
     <div class="card code-card">
       <p class="label">{{ t('lobby_room_code') }}</p>
-      <div class="code-row">
-        <span class="code">{{ roomCode }}</span>
-        <button class="btn-secondary" (click)="copyCode()">{{ codeCopied ? t('lobby_copied') : t('lobby_copy') }}</button>
-        <button class="btn-secondary" (click)="copyLink()">{{ linkCopied ? t('lobby_link_copied') : t('lobby_copy_link') }}</button>
-        <button class="btn-secondary qr-toggle-btn" (click)="showQr = !showQr" [title]="t('lobby_show_qr')">
-          <span class="qr-icon">&#9638;</span>
+      <span class="code">{{ roomCode }}</span>
+      <div class="code-actions">
+        <button class="btn-secondary code-btn" (click)="copyCode()">
+          {{ codeCopied ? t('lobby_copied') : t('lobby_copy') }}
+        </button>
+        <button class="btn-secondary code-btn" (click)="copyLink()">
+          {{ linkCopied ? t('lobby_link_copied') : t('lobby_copy_link') }}
+        </button>
+        <button class="btn-secondary code-btn qr-toggle-btn" (click)="showQr = !showQr">
+          📷 {{ t('lobby_show_qr') }}
         </button>
       </div>
       @if (showQr) {
@@ -123,6 +127,21 @@
               }
             </div>
             <p class="field-hint">{{ t('lobby_grace_hint') }}</p>
+          </div>
+
+          <div class="field toggle-field">
+            <label class="toggle-label">
+              <span>{{ t('lobby_search_allowed') }}</span>
+              <button
+                class="toggle-btn"
+                [class.on]="searchAllowed"
+                (click)="searchAllowed = !searchAllowed"
+                type="button"
+              >
+                <span class="toggle-knob"></span>
+              </button>
+            </label>
+            <p class="field-hint">{{ t('lobby_search_allowed_hint') }}</p>
           </div>
 
           @if (error) { <div class="error-message">{{ error }}</div> }

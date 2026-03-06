@@ -67,7 +67,7 @@ export class SocketService {
     });
   }
 
-  startGame(options?: { startPage?: string; targetPage?: string; graceTime?: number }): Observable<{ success: boolean; error?: string }> {
+  startGame(options?: { startPage?: string; targetPage?: string; graceTime?: number; searchAllowed?: boolean }): Observable<{ success: boolean; error?: string }> {
     return new Observable(obs => {
       this.socket.emit('start-game', { ...(options || {}), lang: this.langService.current }, (data: { success: boolean; error?: string }) => {
         obs.next(data);
