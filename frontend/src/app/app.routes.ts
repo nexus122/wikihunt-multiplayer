@@ -36,5 +36,8 @@ export const routes: Routes = [
     path: 'join/:code',
     loadComponent: () => import('./pages/join/join.component').then(m => m.JoinComponent),
   },
-  { path: '**', redirectTo: '' },
+  {
+    path: '**',
+    loadComponent: () => import('./pages/not-found/not-found.component').then(m => m.NotFoundComponent),
+  },
 ];

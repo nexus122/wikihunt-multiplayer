@@ -21,13 +21,11 @@ import { TranslationKey } from '../i18n/translations';
         @if (backLabel) {
           <button class="btn-back" (click)="back.emit()">{{ backLabel }}</button>
         }
-        <button class="avatar-btn" (click)="panelOpen = true" [title]="profileName || t('sign_in')">
+        <button class="avatar-btn" [class.logged-in]="!!currentUser" (click)="panelOpen = true">
           @if (currentUser) {
             <span class="avatar-initial">{{ (profileName[0] || '?').toUpperCase() }}</span>
           } @else {
-            <svg class="avatar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-            </svg>
+            <span class="avatar-menu-icon">&#9776;</span>
           }
         </button>
       </div>
@@ -55,8 +53,8 @@ import { TranslationKey } from '../i18n/translations';
           <button class="panel-btn panel-btn-outline" (click)="signOut()">{{ t('sign_out') }}</button>
         } @else if (currentUser === null) {
           <div class="panel-guest">
-            <svg class="guest-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            <svg class="guest-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-5.3 0-8 2.7-8 4v1h16v-1c0-1.3-2.7-4-8-4z"/>
             </svg>
             <span class="panel-guest-label">{{ t('panel_guest') }}</span>
           </div>
@@ -131,29 +129,35 @@ import { TranslationKey } from '../i18n/translations';
     .avatar-btn {
       width: 34px;
       height: 34px;
-      border-radius: 50%;
-      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      border: none;
       background: var(--bg-tertiary);
-      color: var(--text-secondary);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       flex-shrink: 0;
-      transition: border-color .15s;
-      &:hover { border-color: var(--accent); color: var(--accent); }
+      transition: background .15s;
+
+      &:hover { background: var(--border-color); }
+
+      &.logged-in {
+        background: rgba(88,166,255,.18);
+        border-radius: 50%;
+      }
     }
 
     .avatar-initial {
-      font-size: 14px;
-      font-weight: 700;
+      font-size: 15px;
+      font-weight: 800;
       color: var(--accent);
       line-height: 1;
     }
 
-    .avatar-icon {
-      width: 18px;
-      height: 18px;
+    .avatar-menu-icon {
+      font-size: 17px;
+      color: var(--text-primary);
+      line-height: 1;
     }
 
     /* ── Panel backdrop ── */

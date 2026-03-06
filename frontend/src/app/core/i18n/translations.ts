@@ -152,6 +152,11 @@ export const translations = {
     setup_available: '✓ Nombre disponible',
     setup_taken_prefix: 'Nombre no disponible. Sugerencia:',
     setup_confirm: 'Confirmar nombre',
+
+    // 404
+    nf_title: 'Página no encontrada',
+    nf_sub: 'Esta ruta no existe. ¿Volvemos al inicio?',
+    nf_home: 'Ir al inicio',
   },
 
   en: {
@@ -307,6 +312,11 @@ export const translations = {
     setup_available: '✓ Name available',
     setup_taken_prefix: 'Name not available. Try:',
     setup_confirm: 'Confirm name',
+
+    // 404
+    nf_title: 'Page not found',
+    nf_sub: "This route doesn't exist. Head back home?",
+    nf_home: 'Go home',
   },
 } as const;
 
