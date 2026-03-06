@@ -25,6 +25,7 @@ export class DailyComponent implements OnInit, OnDestroy {
   error = '';
   challenge: DailyChallenge | null = null;
   streak = 0;
+  isLoggedIn = false;
   private langSub?: Subscription;
   private authSub?: Subscription;
 
@@ -50,6 +51,7 @@ export class DailyComponent implements OnInit, OnDestroy {
 
     this.authSub = this.authService.user$.subscribe(async user => {
       if (user) {
+        this.isLoggedIn = true;
         const profile = await this.authService.getProfile();
         if (profile) {
           this.profileName = profile.display_name;
@@ -57,6 +59,7 @@ export class DailyComponent implements OnInit, OnDestroy {
         }
         this.streak = await this.authService.getStreak();
       } else if (user === null) {
+        this.isLoggedIn = false;
         this.profileName = '';
         this.streak = 0;
       }

@@ -5,9 +5,6 @@
   <div class="hero">
     <div class="daily-badge">{{ t('daily_title') }}</div>
     <p class="daily-date">{{ challenge?.date || (loadingChallenge ? '...' : 'Hoy') }}</p>
-    @if (streak > 0) {
-      <div class="streak-badge">{{ t('daily_streak') }} <strong>{{ streak }}</strong> {{ t('daily_streak_days') }}</div>
-    }
   </div>
 
   @if (loadingChallenge) {
@@ -38,6 +35,15 @@
           <input type="text" [placeholder]="t('name_placeholder')" [(ngModel)]="guestName" maxlength="20" (keydown.enter)="start()" />
         }
       </div>
+
+      @if (isLoggedIn) {
+        <div class="streak-row">
+          <span class="streak-badge">{{ t('daily_streak') }} <strong>{{ streak }}</strong> {{ t('daily_streak_days') }}</span>
+          @if (streak === 0) {
+            <span class="streak-hint">{{ langService.current === 'es' ? '¡Completa el reto para empezar!' : 'Complete the challenge to start!' }}</span>
+          }
+        </div>
+      }
 
       @if (error) {
         <div class="error-message">{{ error }}</div>

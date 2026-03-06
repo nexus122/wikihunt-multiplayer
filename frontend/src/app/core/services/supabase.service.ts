@@ -65,9 +65,15 @@ export class SupabaseService {
     const { data, error } = await query
       .order('steps', { ascending: true })
       .order('time_ms', { ascending: true })
-      .limit(10);
+      .limit(100);
     if (error || !data) return [];
-    return data as DailyResult[];
+    // Keep only best result per player
+    const seen = new Set<string>();
+    return (data as DailyResult[]).filter(e => {
+      if (seen.has(e.player_name)) return false;
+      seen.add(e.player_name);
+      return true;
+    }).slice(0, 10);
   }
 
   async getHallOfFame(lang?: string): Promise<HallOfFameEntry[]> {
@@ -78,9 +84,15 @@ export class SupabaseService {
     const { data, error } = await query
       .order('steps', { ascending: true })
       .order('time_ms', { ascending: true })
-      .limit(50);
+      .limit(200);
     if (error || !data) return [];
-    return data as HallOfFameEntry[];
+    // Keep only best result per player
+    const seen = new Set<string>();
+    return (data as HallOfFameEntry[]).filter(e => {
+      if (seen.has(e.player_name)) return false;
+      seen.add(e.player_name);
+      return true;
+    }).slice(0, 50);
   }
 
   async getPlayerHistory(playerName: string, lang?: string): Promise<HallOfFameEntry[]> {

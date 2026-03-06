@@ -73,6 +73,10 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
   // Share result
   readonly canShare = !!navigator.share;
 
+  // Confetti
+  confettiActive = false;
+  confettiPieces: { x: number; color: string; delay: number; size: number; duration: number }[] = [];
+
   // Language
   gameLang = 'es';
 
@@ -216,6 +220,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
         if (ev.playerId === this.mySocketId) {
           this.iWon = true;
           this.timerSub?.unsubscribe();
+          this.launchConfetti();
         }
         this.players = this.players.map(p =>
           p.socketId === ev.playerId ? { ...p, finished: true, finishTime: ev.time } : p
@@ -487,24 +492,34 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private buildShareText(): string {
     const me = this.leaderboard.find(e => e.socketId === this.mySocketId);
-    const rank = me ? this.leaderboard.findIndex(e => e.socketId === this.mySocketId) + 1 : null;
-    const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
-    const stepsLabel = this.gameLang === 'en' ? 'steps' : 'pasos';
-    const pathLabel = this.gameLang === 'en' ? 'path' : 'ruta';
-    const lines: string[] = [`WikiHunt`, `${this.startPage} → ${this.targetPage}`, ''];
-    if (me?.finished) {
-      lines.push(`${rankEmoji} ${me.steps} ${stepsLabel} · ${this.formatTime(me.time)}`);
-    } else if (me?.gaveUp) {
-      lines.push(`🏳️ ${this.gameLang === 'en' ? 'Gave up' : 'Me rendí'}`);
-    } else {
-      lines.push(`⏱️ ${this.gameLang === 'en' ? 'Did not finish' : 'No terminé'}`);
-    }
-    if (me?.path && me.path.length > 1) {
-      lines.push(`📍 ${pathLabel}: ${me.path.join(' → ')}`);
-    }
     const challengeUrl = `${this.siteUrl}/?start=${encodeURIComponent(this.startPage)}&target=${encodeURIComponent(this.targetPage)}&lang=${this.gameLang}`;
-    lines.push('', challengeUrl);
-    return lines.join('\n');
+
+    if (this.gameLang === 'en') {
+      if (me?.finished) {
+        return `I reached "${this.targetPage}" from "${this.startPage}" in ${me.steps} steps on WikiHunt 🎯\n\nCan you beat me? ⚔️\n${challengeUrl}`;
+      } else {
+        return `I tried to reach "${this.targetPage}" from "${this.startPage}" on WikiHunt 😅\n\nThink you can do it? ⚔️\n${challengeUrl}`;
+      }
+    } else {
+      if (me?.finished) {
+        return `He llegado a "${this.targetPage}" desde "${this.startPage}" en ${me.steps} pasos en WikiHunt 🎯\n\n¿Te atreves a hacerlo mejor? ⚔️\n${challengeUrl}`;
+      } else {
+        return `He intentado llegar a "${this.targetPage}" desde "${this.startPage}" en WikiHunt 😅\n\n¿Crees que puedes lograrlo? ⚔️\n${challengeUrl}`;
+      }
+    }
+  }
+
+  private launchConfetti(): void {
+    const colors = ['#58a6ff', '#3fb950', '#ffd700', '#ff9500', '#bc8cff', '#f85149', '#39d353'];
+    this.confettiPieces = Array.from({ length: 80 }, () => ({
+      x: Math.random() * 100,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      delay: Math.random() * 2,
+      size: 6 + Math.random() * 8,
+      duration: 2.5 + Math.random() * 2,
+    }));
+    this.confettiActive = true;
+    setTimeout(() => { this.confettiActive = false; }, 5500);
   }
 
   shareResult(): void {

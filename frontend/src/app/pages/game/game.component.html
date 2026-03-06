@@ -225,6 +225,22 @@
     </div>
   }
 
+  <!-- ─── Confetti ─── -->
+  @if (confettiActive) {
+    <div class="confetti-container" aria-hidden="true">
+      @for (p of confettiPieces; track $index) {
+        <div class="confetti-piece"
+             [style.left.%]="p.x"
+             [style.background]="p.color"
+             [style.width.px]="p.size"
+             [style.height.px]="p.size * 0.6"
+             [style.animation-delay.s]="p.delay"
+             [style.animation-duration.s]="p.duration">
+        </div>
+      }
+    </div>
+  }
+
   <!-- ─── Socket reconnecting overlay ─── -->
   @if (socketDisconnected) {
     <div class="reconnect-overlay">

@@ -10,14 +10,11 @@
         <span class="route-arrow">→</span>
         <span class="route-page accent">{{ challengingTarget }}</span>
       </div>
-      <div class="field">
-        <label>{{ t('your_name') }}</label>
-        @if (profileName) {
-          <div class="name-locked">{{ profileName }} <span class="name-locked-badge">{{ t('name_badge') }}</span></div>
-        } @else {
+      @if (!profileName) {
+        <div class="field">
           <input type="text" [placeholder]="t('name_placeholder')" [(ngModel)]="guestName" maxlength="20" (keydown.enter)="playChallenge()" />
-        }
-      </div>
+        </div>
+      }
       @if (error) { <div class="error-message">{{ error }}</div> }
       <button class="btn-primary" (click)="playChallenge()" [disabled]="creating">
         {{ creating ? t('creating') : t('challenge_play') }}
