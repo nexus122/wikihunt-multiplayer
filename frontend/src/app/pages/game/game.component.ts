@@ -159,7 +159,7 @@ export class GameComponent implements OnInit, OnDestroy {
     this.targetPage = state.targetPage;
     this.startTime = state.startTime || Date.now();
     this.gameLang = state.lang || this.langService.current;
-    this.searchAllowed = state.searchAllowed !== false;
+    this.searchAllowed = typeof state.searchAllowed === 'boolean' ? state.searchAllowed : true;
     this.players = state.room?.players || [];
 
     // Restore progress if rejoining mid-game
@@ -314,8 +314,8 @@ export class GameComponent implements OnInit, OnDestroy {
         next: (data) => {
           if (data.success) {
             this.mySocketId = this.socketService.getSocketId();
-            // Re-sync timer with server's authoritative startTime
             if (data.startTime) this.startTime = data.startTime;
+            if (typeof data.searchAllowed === 'boolean') this.searchAllowed = data.searchAllowed;
           } else {
             this.router.navigate(['/']);
           }

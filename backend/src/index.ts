@@ -151,7 +151,7 @@ io.on('connection', (socket) => {
 
         const gameLang = validateLang(lang);
         room.lang = gameLang;
-        room.searchAllowed = searchAllowed !== false; // default true
+        room.searchAllowed = typeof searchAllowed === 'boolean' ? searchAllowed : true;
 
         // Resolve start page: random or canonicalize custom
         let start: string;
@@ -220,6 +220,7 @@ io.on('connection', (socket) => {
         targetPage: room.targetPage,
         startTime: room.startTime,
         lang: room.lang || 'es',
+        searchAllowed: typeof room.searchAllowed === 'boolean' ? room.searchAllowed : true,
         room: roomManager.getRoomInfo(room),
       });
     } catch {

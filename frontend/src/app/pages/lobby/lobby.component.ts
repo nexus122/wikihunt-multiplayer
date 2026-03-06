@@ -104,7 +104,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
             targetPage: event.targetPage,
             startTime: event.startTime,
             lang: event.lang,
-            searchAllowed: event.searchAllowed !== false,
+            searchAllowed: typeof event.searchAllowed === 'boolean' ? event.searchAllowed : true,
           },
         });
       })

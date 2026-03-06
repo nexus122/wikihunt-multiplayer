@@ -82,7 +82,7 @@ export class SocketService {
     steps = 0,
     currentPage?: string,
     path?: string[],
-  ): Observable<{ success: boolean; startPage?: string; targetPage?: string; startTime?: number; lang?: string; room?: RoomInfo; error?: string }> {
+  ): Observable<{ success: boolean; startPage?: string; targetPage?: string; startTime?: number; lang?: string; searchAllowed?: boolean; room?: RoomInfo; error?: string }> {
     this.connect();
     return new Observable(obs => {
       this.socket.emit('rejoin-game', { code, name, steps, currentPage, path }, (data: any) => {
