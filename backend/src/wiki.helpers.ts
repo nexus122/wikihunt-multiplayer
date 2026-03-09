@@ -21,7 +21,10 @@ export async function getCanonicalTitle(title: string, lang = 'es'): Promise<str
     if (!res.ok) return null;
     const cl = res.headers.get('content-location');
     const encoded = cl?.split('/page/html/')[1]?.split('/')[0];
-    return encoded ? decodeURIComponent(encoded).replace(/_/g, ' ') : title;
+    if (encoded) return decodeURIComponent(encoded).replace(/_/g, ' ');
+    // Fallback: extract canonical from final URL after redirect (Wikipedia REST API v2 format: /page/TITLE/html)
+    const urlMatch = res.url.match(/\/page\/([^/?]+)\/html/);
+    return urlMatch ? decodeURIComponent(urlMatch[1]).replace(/_/g, ' ') : title;
   } catch {
     return null;
   }

@@ -57,9 +57,16 @@ async function fetchAndCachePage(title: string, lang: string): Promise<{ html: s
     const html = await response.text();
     const cl = response.headers.get('content-location');
     const encoded = cl?.split('/page/html/')[1]?.split('/')[0];
-    const canonicalTitle = encoded
-      ? decodeURIComponent(encoded).replace(/_/g, ' ')
-      : decodeURIComponent(title);
+    let canonicalTitle: string;
+    if (encoded) {
+      canonicalTitle = decodeURIComponent(encoded).replace(/_/g, ' ');
+    } else {
+      // Fallback: extract canonical from final URL after redirect (Wikipedia REST API v2 format: /page/TITLE/html)
+      const urlMatch = response.url.match(/\/page\/([^/?]+)\/html/);
+      canonicalTitle = urlMatch
+        ? decodeURIComponent(urlMatch[1]).replace(/_/g, ' ')
+        : decodeURIComponent(title);
+    }
 
     setCached(lang, title, html, canonicalTitle);
     if (canonicalTitle !== decodeURIComponent(title)) {
