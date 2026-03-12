@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Subscription, interval } from 'rxjs';
+import { Subject, Subscription, interval } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { SocketService } from '../../core/services/socket.service';
 import { WikipediaService } from '../../core/services/wikipedia.service';
 import { LanguageService } from '../../core/services/language.service';
@@ -80,6 +81,7 @@ export class GameComponent implements OnInit, OnDestroy {
   matchCount = 0;
   currentMatch = 0;
   private rawHtml = '';
+  private searchInput$ = new Subject<string>();
 
   @ViewChild('searchInput') searchInputRef?: ElementRef<HTMLInputElement>;
 
@@ -194,6 +196,14 @@ export class GameComponent implements OnInit, OnDestroy {
       currentPage: this.currentPage,
       path: this.myPath,
     }));
+
+    // Debounced in-page search
+    this.subs.push(
+      this.searchInput$.pipe(debounceTime(300), distinctUntilChanged()).subscribe(() => {
+        this.applyHighlights();
+        this.scrollToMatch(1);
+      })
+    );
 
     // Trap browser back button inside the game
     history.pushState(null, '', window.location.href);
@@ -388,8 +398,7 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   onSearchInput(): void {
-    this.applyHighlights();
-    this.scrollToMatch(1);
+    this.searchInput$.next(this.searchQuery);
   }
 
   nextMatch(): void {
