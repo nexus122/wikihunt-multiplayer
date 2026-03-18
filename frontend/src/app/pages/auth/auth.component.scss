@@ -95,9 +95,9 @@ form {
 }
 
 .success-message {
-  background: rgba(57, 197, 110, 0.1);
-  border: 1px solid rgba(57, 197, 110, 0.3);
-  color: #39c56e;
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  color: var(--success);
   border-radius: 8px;
   padding: 10px 14px;
   font-size: 13px;

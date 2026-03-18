@@ -114,6 +114,20 @@ export async function updateUserStreak(userId: string, date: string): Promise<vo
   else console.log(`[Supabase] Streak updated for ${userId}: ${newStreak}`);
 }
 
+export async function isNameTakenByRegisteredUser(name: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('user_id')
+    .ilike('display_name', name)
+    .limit(1);
+  if (error) {
+    console.error('[Supabase] Error checking name conflict:', error.message);
+    return false;
+  }
+  return Array.isArray(data) && data.length > 0;
+}
+
 export async function verifyUserToken(token: string): Promise<string | null> {
   if (!supabase) return null;
   const { data, error } = await supabase.auth.getUser(token);

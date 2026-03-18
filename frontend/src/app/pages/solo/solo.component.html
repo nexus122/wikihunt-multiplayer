@@ -1,0 +1,96 @@
+<app-header [backLabel]="t('solo_home')" (back)="goHome()" />
+
+<div class="solo-page">
+
+  <div class="hero">
+    <div class="solo-badge">{{ t('solo_title') }}</div>
+    <p class="solo-subtitle">{{ t('solo_subtitle') }}</p>
+  </div>
+
+  <div class="card setup-card">
+
+    <!-- Name -->
+    <div class="field">
+      <label>{{ t('your_name') }}</label>
+      @if (profileName) {
+        <div class="name-locked">{{ profileName }} <span class="name-locked-badge">{{ t('name_badge') }}</span></div>
+      } @else {
+        <input type="text" [placeholder]="t('name_placeholder')" [(ngModel)]="playerName" maxlength="20" (keydown.enter)="start()" />
+      }
+    </div>
+
+    <!-- Page pickers (same pattern as lobby) -->
+    <div class="page-pickers">
+
+      <!-- Start page -->
+      <div class="picker">
+        <div class="picker-row">
+          <label>{{ t('solo_start_page') }}</label>
+          <div class="mode-pills">
+            <button class="pill" [class.active]="!customStart" (click)="setStartMode(false)">{{ t('lobby_random') }}</button>
+            <button class="pill" [class.active]="customStart" (click)="setStartMode(true)">{{ t('lobby_custom') }}</button>
+          </div>
+        </div>
+        @if (customStart) {
+          @if (selectedStart) {
+            <div class="page-chip">
+              <span class="page-tag start">{{ selectedStart.title }}</span>
+              <button class="chip-clear" (click)="clearStart()" title="Clear">✕</button>
+            </div>
+          } @else {
+            <div class="search-wrap">
+              <input type="text" [placeholder]="t('lobby_search_placeholder')" [(ngModel)]="searchStartQuery" (input)="searchStart()" />
+              @if (startResults.length) {
+                <div class="results">
+                  @for (r of startResults; track r.title) {
+                    <button class="result" (click)="selectStart(r)">{{ r.title }}</button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Target page -->
+      <div class="picker">
+        <div class="picker-row">
+          <label>{{ t('solo_target_page') }}</label>
+          <div class="mode-pills">
+            <button class="pill" [class.active]="!customTarget" (click)="setTargetMode(false)">{{ t('lobby_random') }}</button>
+            <button class="pill" [class.active]="customTarget" (click)="setTargetMode(true)">{{ t('lobby_custom') }}</button>
+          </div>
+        </div>
+        @if (customTarget) {
+          @if (selectedTarget) {
+            <div class="page-chip">
+              <span class="page-tag target">{{ selectedTarget.title }}</span>
+              <button class="chip-clear" (click)="clearTarget()" title="Clear">✕</button>
+            </div>
+          } @else {
+            <div class="search-wrap">
+              <input type="text" [placeholder]="t('lobby_search_placeholder')" [(ngModel)]="searchTargetQuery" (input)="searchTarget()" />
+              @if (targetResults.length) {
+                <div class="results">
+                  @for (r of targetResults; track r.title) {
+                    <button class="result" (click)="selectTarget(r)">{{ r.title }}</button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+
+    </div>
+
+    @if (error) {
+      <div class="error-message">{{ error }}</div>
+    }
+
+    <button class="btn-primary" (click)="start()" [disabled]="starting">
+      {{ starting ? t('solo_validating') : t('solo_start_btn') }}
+    </button>
+
+  </div>
+</div>

@@ -160,6 +160,16 @@
             <div class="dot"></div><div class="dot"></div><div class="dot"></div>
           </div>
           <p>{{ t('lobby_waiting_host') }}</p>
+          @if (room?.startPage && room?.targetPage) {
+            <div class="game-preview">
+              <span class="game-preview-label">{{ t('lobby_preview_label') }}</span>
+              <div class="game-preview-route">
+                <span class="preview-page">{{ room.startPage }}</span>
+                <span class="preview-arrow">→</span>
+                <span class="preview-page preview-page--target">{{ room.targetPage }}</span>
+              </div>
+            </div>
+          }
         </div>
       }
     </div>

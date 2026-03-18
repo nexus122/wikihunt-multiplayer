@@ -93,6 +93,9 @@ export class GameComponent implements OnInit, OnDestroy {
   confettiActive = false;
   confettiPieces: { x: number; color: string; delay: number; size: number; duration: number }[] = [];
 
+  // Daily challenge flag
+  isDaily = false;
+
   // Language
   gameLang = 'es';
 
@@ -147,7 +150,7 @@ export class GameComponent implements OnInit, OnDestroy {
     this.mySocketId = this.socketService.getSocketId();
     const state = history.state as {
       room: RoomInfo; isHost: boolean; startPage: string; targetPage: string; startTime: number;
-      lang?: string; searchAllowed?: boolean;
+      lang?: string; searchAllowed?: boolean; isDaily?: boolean;
       rejoinSteps?: number; rejoinCurrentPage?: string; rejoinPath?: string[];
     } | undefined;
 
@@ -162,6 +165,7 @@ export class GameComponent implements OnInit, OnDestroy {
     this.startTime = state.startTime || Date.now();
     this.gameLang = state.lang || this.langService.current;
     this.searchAllowed = typeof state.searchAllowed === 'boolean' ? state.searchAllowed : true;
+    this.isDaily = state.isDaily === true;
     this.players = state.room?.players || [];
 
     // Restore progress if rejoining mid-game
@@ -654,9 +658,13 @@ export class GameComponent implements OnInit, OnDestroy {
 
   playAgain(): void {
     localStorage.removeItem('wh_game');
-    this.router.navigate(['/lobby', this.room?.code], {
-      state: { room: this.room, isHost: this.isHost },
-    });
+    if (this.isDaily) {
+      this.router.navigate(['/daily']);
+    } else {
+      this.router.navigate(['/lobby', this.room?.code], {
+        state: { room: this.room, isHost: this.isHost },
+      });
+    }
   }
 
   goHome(): void {

@@ -10,14 +10,14 @@
       <span class="hud-chip accent">{{ mySteps }} {{ t('game_steps') }}</span>
       <span class="hud-chip">{{ elapsed }}</span>
     </div>
-    <button class="hud-players-btn" (click)="mobileMenuOpen = true">
-      👥 {{ players.length }}
+    <button class="hud-players-btn" (click)="mobileMenuOpen = true" aria-label="Open navigation menu" [attr.aria-expanded]="mobileMenuOpen">
+      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> {{ players.length }}
     </button>
   </div>
 
   <!-- ─── Mobile overlay ─── -->
   @if (mobileMenuOpen) {
-    <div class="mobile-overlay" (click)="mobileMenuOpen = false"></div>
+    <div class="mobile-overlay" (click)="mobileMenuOpen = false" aria-hidden="true"></div>
   }
 
   <!-- ─── Sidebar ─── -->
@@ -65,19 +65,19 @@
           <li class="player" [class.me]="p.socketId === mySocketId" [class.finished]="p.finished" [class.disconnected]="p.disconnected">
             <div class="avatar sm" [style.background]="getAvatarColor(p.socketId)">{{ (p.name?.[0] || '?').toUpperCase() }}</div>
             <div class="player-info">
-              <span class="player-name">{{ p.name }}</span>
+              <span class="player-name" [title]="p.name">{{ p.name }}</span>
               <span class="player-page">{{ p.disconnected ? t('game_disconnected') : (p.currentPage || '...') }}</span>
             </div>
             <span class="player-steps">{{ p.steps }}</span>
-            @if (p.finished) { <span class="done">✓</span> }
-            @if (p.gaveUp) { <span class="gave-up-icon">🏳️</span> }
-            @if (p.disconnected) { <span class="offline-icon">⚡</span> }
+            @if (p.finished) { <span class="done status-icon" aria-label="Finished"><svg aria-label="Finished" role="img" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--success)"><polyline points="20 6 9 17 4 12"/></svg></span> }
+            @if (p.gaveUp) { <span class="gave-up-icon status-icon" aria-label="Gave up"><svg aria-label="Gave up" role="img" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-secondary)"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></span> }
+            @if (p.disconnected) { <span class="offline-icon status-icon" aria-label="Disconnected"><svg aria-label="Disconnected" role="img" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-secondary)"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></span> }
           </li>
         }
       </ul>
     </div>
 
-    <button class="btn-secondary path-btn" (click)="showPath = !showPath; mobileMenuOpen = false">
+    <button class="btn-secondary path-btn" (click)="showPath = !showPath; mobileMenuOpen = false" [attr.aria-expanded]="showPath">
       {{ showPath ? t('game_hide_path') : t('game_show_path') }}
     </button>
 
@@ -115,9 +115,9 @@
             {{ matchCount === 0 ? t('game_search_no_results') : currentMatch + '/' + matchCount }}
           </span>
         }
-        <button class="search-nav" (click)="prevMatch()" [disabled]="matchCount === 0" title="Anterior (Shift+Enter)">↑</button>
-        <button class="search-nav" (click)="nextMatch()" [disabled]="matchCount === 0" title="Siguiente (Enter)">↓</button>
-        <button class="search-close" (click)="closeSearch()">✕</button>
+        <button class="search-nav" (click)="prevMatch()" [disabled]="matchCount === 0" aria-label="Previous match">↑</button>
+        <button class="search-nav" (click)="nextMatch()" [disabled]="matchCount === 0" aria-label="Next match">↓</button>
+        <button class="search-close" (click)="closeSearch()" aria-label="Close search">✕</button>
       </div>
     }
 
@@ -128,12 +128,12 @@
     }
 
     @if (loading) {
-      <div class="loading">
+      <div class="loading" role="status" aria-live="polite">
         <div class="spinner"></div>
         <p>{{ t('game_loading') }}</p>
       </div>
     } @else if (loadError) {
-      <div class="load-error">
+      <div class="load-error" role="alert">
         <p>{{ loadError }}</p>
         @if (initialLoadFailed) {
           <button class="btn-secondary" style="margin-top:12px" (click)="retryInitialLoad()">{{ t('game_initial_failed_retry') }}</button>
@@ -157,7 +157,7 @@
       <div class="mobile-btn-ghost"></div>
     }
     <span class="mobile-current-page">{{ currentPage }}</span>
-    <button class="btn-secondary mobile-btn" (click)="showPath = !showPath">📍 {{ t('game_path_route') }}</button>
+    <button class="btn-secondary mobile-btn" (click)="showPath = !showPath" [attr.aria-expanded]="showPath">📍 {{ t('game_path_route') }}</button>
     @if (searchAllowed) {
       <button class="btn-secondary mobile-btn" [class.search-active]="searchOpen" (click)="searchOpen ? closeSearch() : openSearch()">🔍</button>
     }
@@ -165,10 +165,10 @@
 
   <!-- ─── Give up modal ─── -->
   @if (showGiveUpConfirm) {
-    <div class="modal-overlay" (click)="showGiveUpConfirm = false">
-      <div class="modal giveup-modal" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="showGiveUpConfirm = false" aria-hidden="true">
+      <div class="modal giveup-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="giveup-modal-title">
         <p class="giveup-emoji">🏳️</p>
-        <h3>{{ t('game_giveup_title') }}</h3>
+        <h3 id="giveup-modal-title">{{ t('game_giveup_title') }}</h3>
         <p class="giveup-sub">{{ t('game_giveup_sub') }}</p>
         <div class="giveup-actions">
           <button class="btn-danger" (click)="giveUp()">{{ t('game_giveup_confirm') }}</button>
@@ -180,9 +180,9 @@
 
   <!-- ─── Path modal ─── -->
   @if (showPath) {
-    <div class="modal-overlay" (click)="showPath = false">
-      <div class="modal path-modal" (click)="$event.stopPropagation()">
-        <h3>{{ t('game_path_title') }} ({{ myPath.length }})</h3>
+    <div class="modal-overlay" (click)="showPath = false" aria-hidden="true">
+      <div class="modal path-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="path-modal-title">
+        <h3 id="path-modal-title">{{ t('game_path_title') }} ({{ myPath.length }})</h3>
         <ol class="path-list">
           @for (p of myPath; track $index) {
             <li [class.current]="p === currentPage">{{ p }}</li>
@@ -195,7 +195,7 @@
 
   <!-- ─── Countdown banner ─── -->
   @if (countdownActive && winner) {
-    <div class="countdown-banner" [class.urgent]="countdownSeconds <= 10">
+    <div class="countdown-banner" [class.urgent]="countdownSeconds <= 10" role="status" aria-live="polite" aria-atomic="true">
       @if (iWon) {
         <span>{{ t('game_countdown_won') }}</span>
       } @else {
@@ -209,15 +209,15 @@
 
   <!-- ─── Leaderboard ─── -->
   @if (showLeaderboard) {
-    <div class="modal-overlay">
-      <div class="modal leaderboard-modal">
+    <div class="modal-overlay" aria-hidden="true">
+      <div class="modal leaderboard-modal" role="dialog" aria-modal="true" aria-labelledby="leaderboard-modal-title">
         <div class="lb-header">
           @if (iWon) {
             <div class="result-badge won">{{ t('game_finish_won') }}</div>
           } @else {
             <div class="result-badge lost">{{ t('game_finish_lost') }}</div>
           }
-          <h2>{{ t('game_finish_title') }}</h2>
+          <h2 id="leaderboard-modal-title">{{ t('game_finish_title') }}</h2>
           <p class="route-label">{{ startPage }} → {{ targetPage }}</p>
         </div>
 
@@ -276,7 +276,7 @@
 
   <!-- ─── Socket reconnecting overlay ─── -->
   @if (socketDisconnected) {
-    <div class="reconnect-overlay">
+    <div class="reconnect-overlay" role="alert" aria-live="assertive">
       <div class="spinner"></div>
       <p>{{ t('game_reconnecting') }}</p>
     </div>

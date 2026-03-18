@@ -13,32 +13,34 @@ import { TranslationKey } from '../i18n/translations';
   imports: [CommonModule, RouterModule],
   template: `
     <header class="header">
-      <a class="logo wh-logo" routerLink="/">
-        <span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span>
+      <a class="logo wh-logo" routerLink="/" aria-label="WikiHunt - Home">
+        <span class="logo-wiki" aria-hidden="true">Wiki</span><span class="logo-hunt" aria-hidden="true">Hunt</span>
       </a>
 
       <div class="header-right">
         @if (backLabel) {
-          <button class="btn-back" (click)="back.emit()">{{ backLabel }}</button>
+          <button class="btn-back" (click)="back.emit()">← {{ backLabel }}</button>
         }
-        <button class="avatar-btn" [class.logged-in]="!!currentUser" (click)="panelOpen = true">
+        <button class="avatar-btn" [class.logged-in]="!!currentUser" (click)="panelOpen = true"
+          [attr.aria-label]="currentUser ? profileName || 'User menu' : 'Open menu'"
+          [attr.aria-expanded]="panelOpen">
           @if (currentUser) {
-            <span class="avatar-initial">{{ (profileName[0] || '?').toUpperCase() }}</span>
+            <span class="avatar-initial" aria-hidden="true">{{ (profileName[0] || '?').toUpperCase() }}</span>
           } @else {
-            <span class="avatar-menu-icon">&#9776;</span>
+            <span class="avatar-menu-icon" aria-hidden="true">&#9776;</span>
           }
         </button>
       </div>
     </header>
 
     @if (panelOpen) {
-      <div class="panel-backdrop" (click)="panelOpen = false"></div>
+      <div class="panel-backdrop" (click)="panelOpen = false" aria-hidden="true"></div>
     }
 
-    <aside class="user-panel" [class.open]="panelOpen">
+    <aside class="user-panel" [class.open]="panelOpen" role="navigation" aria-label="User menu" [attr.aria-hidden]="!panelOpen">
       <div class="panel-header">
         <span class="panel-title">{{ t('panel_title') }}</span>
-        <button class="panel-close" (click)="panelOpen = false">✕</button>
+        <button class="panel-close" (click)="panelOpen = false" aria-label="Close menu">✕</button>
       </div>
 
       <div class="panel-section">
@@ -47,7 +49,7 @@ import { TranslationKey } from '../i18n/translations';
             <div class="panel-avatar">{{ (profileName[0] || '?').toUpperCase() }}</div>
             <div class="panel-profile-info">
               <span class="panel-profile-name">{{ profileName }}</span>
-              <span class="panel-profile-sub">{{ currentUser.email }}</span>
+              <span class="panel-profile-sub" [title]="currentUser?.email || ''">{{ currentUser.email }}</span>
             </div>
           </div>
           @if (streak > 0) {
@@ -73,11 +75,15 @@ import { TranslationKey } from '../i18n/translations';
       <div class="panel-divider"></div>
 
       <div class="panel-section">
-        <span class="panel-section-label">{{ t('panel_language') }}</span>
-        <div class="lang-toggle">
-          <button class="lang-opt" [class.active]="langService.current === 'es'" (click)="setLang('es')">{{ t('lang_opt_es') }}</button>
-          <button class="lang-opt" [class.active]="langService.current === 'en'" (click)="setLang('en')">{{ t('lang_opt_en') }}</button>
-        </div>
+        <fieldset style="border:none;padding:0;margin:0">
+          <legend class="panel-section-label">{{ t('panel_language') }}</legend>
+          <div class="lang-toggle">
+            <button class="lang-opt" [class.active]="langService.current === 'es'" (click)="setLang('es')"
+              [attr.aria-pressed]="langService.current === 'es'" aria-label="Español">{{ t('lang_opt_es') }}</button>
+            <button class="lang-opt" [class.active]="langService.current === 'en'" (click)="setLang('en')"
+              [attr.aria-pressed]="langService.current === 'en'" aria-label="English">{{ t('lang_opt_en') }}</button>
+          </div>
+        </fieldset>
       </div>
 
       <div class="panel-divider"></div>
@@ -100,7 +106,7 @@ import { TranslationKey } from '../i18n/translations';
       background: var(--bg-secondary);
       min-height: 52px;
       position: relative;
-      z-index: 300;
+      z-index: 300; /* --z-header */
     }
 
     .logo {
@@ -119,17 +125,20 @@ import { TranslationKey } from '../i18n/translations';
     }
 
     .btn-back {
-      background: var(--bg-tertiary);
+      background: transparent;
       color: var(--text-secondary);
       border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 5px 12px;
-      font-size: 12px;
+      border-radius: var(--radius-sm, 6px);
+      padding: 6px 12px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
-      transition: border-color .15s, color .15s;
-      &:hover { border-color: var(--accent); color: var(--accent); }
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: border-color .15s, color .15s, background .15s;
+      &:hover { border-color: var(--accent); color: var(--accent); background: rgba(88,166,255,.06); }
     }
 
     .avatar-btn {
@@ -171,7 +180,7 @@ import { TranslationKey } from '../i18n/translations';
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,.6);
-      z-index: 400;
+      z-index: 400; /* --z-panel-backdrop */
       backdrop-filter: blur(2px);
       animation: fade-in .15s ease;
     }
@@ -187,7 +196,7 @@ import { TranslationKey } from '../i18n/translations';
       width: 280px;
       background: var(--bg-secondary);
       border-left: 1px solid var(--border-color);
-      z-index: 500;
+      z-index: 500; /* --z-panel */
       display: flex;
       flex-direction: column;
       transform: translateX(100%);
@@ -414,9 +423,9 @@ import { TranslationKey } from '../i18n/translations';
     }
 
     @media (max-width: 600px) {
-      .header { padding: 10px 14px; }
-      .logo { font-size: 18px; }
-      .btn-back { padding: 5px 8px; font-size: 11px; }
+      .header { padding: 10px 16px; }
+      .logo { font-size: 20px; }
+      .btn-back { padding: 6px 10px; }
       .user-panel { width: min(280px, 85vw); }
     }
   `],

@@ -19,7 +19,8 @@ cd frontend
 npm install
 npm start        # ng serve on port 4200 (proxies /api → localhost:3001)
 npm run build    # production build → dist/frontend/browser/
-npm test         # Karma/Jasmine unit tests (run a single spec with --include)
+npm test         # Karma/Jasmine unit tests
+npm test -- --include="**/foo.spec.ts"  # run a single spec file
 ```
 
 ## Architecture
@@ -51,9 +52,12 @@ Backend env vars required: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`.
 
 **Guards (`core/guards/auth.guard.ts`):** Three functional guards — `authGuard` (requires login), `guestGuard` (redirects logged-in users away from `/auth`), `noProfileGuard` (requires login but no profile yet for `/setup-profile`). All filter `user !== undefined` to avoid acting on the loading state.
 
-**Pages:** `home`, `lobby`, `game`, `daily`, `leaderboard`, `auth`, `setup-profile`. All lazy-loaded.
+**Pages (all lazy-loaded):** `home`, `lobby`, `game`, `solo`, `solo/game`, `daily`, `leaderboard`, `auth`, `setup-profile`, `join/:code`, `not-found`.
 
-**Shared component:** `core/components/header.component.ts` — used on home, daily, leaderboard. Shows logo, language toggle (ES↔EN), and session indicator (profile name + sign-out, or sign-in link).
+- **`solo/`** — Two-component flow: `solo.component` (page picker, mirrors lobby host controls) → navigates to `solo/game` passing state via router. `solo-game.component` runs a fully client-side game (no Socket.io); saves results to `hall_of_fame` on win. Uses `formatTime` from `core/utils/time.utils.ts`.
+- **`join/:code`** — Deep-link entry: resolves the room code then redirects to `/lobby/:code`.
+
+**Shared component:** `core/components/header.component.ts` — used on home, daily, leaderboard, solo. Shows logo, language toggle (ES↔EN), and session indicator.
 
 ### Key data flows
 
@@ -74,6 +78,30 @@ Backend env vars required: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`.
 - `Content-Location` response header provides the canonical title after redirects — used for win detection.
 - `normalizePage()` lowercases and replaces underscores with spaces before comparing titles.
 - `preWarmCache(title, lang)` is called after game start for both start and target pages to make the first navigation instant.
+
+### Design system & styles
+
+**`frontend/src/styles.scss`** is the single source of truth for the design system. All component SCSS files must use these tokens — never hardcode colors.
+
+CSS variable categories defined in `:root`:
+- Colors: `--bg-primary/secondary/tertiary`, `--border-color`, `--text-primary/secondary`, `--accent`, `--accent-hover`, `--success`, `--warning`, `--danger`, `--streak-color`
+- Spacing: `--space-xs` through `--space-2xl`
+- Radius: `--radius-xs` through `--radius-full`
+- Shadows: `--shadow-sm/md/lg`
+- Z-index: `--z-header(300)`, `--z-backdrop(400)`, `--z-modal(500)`, `--z-toast(600)`
+- Font sizes: `--font-xs(12px)` through `--font-xl(16px)`
+
+Global shared classes in `styles.scss` (use these instead of duplicating):
+- `.route-display` — unified start→target route layout with `.route-start`, `.route-target`, `.route-label`, `.route-title`, `.route-arrow`
+- `.name-locked` + `.name-locked-badge` — authenticated user name display
+- `.badge`, `.badge-accent`, `.badge-success` — pill badges
+- `.form-label` — uppercase 12px label (use instead of ad-hoc label styles)
+- `.btn-primary`, `.btn-secondary`, `.btn-success`, `.btn-danger` — button variants
+- `.card` — standard card container
+- `.error-message` — red error box
+- `.sr-only` — screen-reader-only visually hidden content
+
+**Tailwind CSS** is configured with `preflight: false` (no reset, no conflict with existing SCSS). Only utility classes are available — use for one-off spacing/layout tweaks. Color/radius/spacing tokens from the CSS variables are mapped in `frontend/tailwind.config.js`.
 
 ### Environment config
 

@@ -1,0 +1,226 @@
+<div class="game">
+
+  <!-- ─── Mobile top HUD ─── -->
+  <div class="mobile-hud">
+    <div class="hud-target">
+      <span class="hud-label">{{ t('solo_target_label') }}</span>
+      <span class="hud-value">{{ targetPage }}</span>
+    </div>
+    <div class="hud-meta">
+      <span class="hud-chip accent">{{ steps }} {{ t('game_steps') }}</span>
+      <span class="hud-chip">{{ elapsedDisplay }}</span>
+      <span class="lang-pill">{{ gameLang.toUpperCase() }}</span>
+    </div>
+    <button class="hud-menu-btn" (click)="mobileMenuOpen = true" aria-label="Open menu" [attr.aria-expanded]="mobileMenuOpen">☰</button>
+  </div>
+
+  <!-- ─── Mobile overlay ─── -->
+  @if (mobileMenuOpen) {
+    <div class="mobile-overlay" (click)="mobileMenuOpen = false" aria-hidden="true"></div>
+  }
+
+  <!-- ─── Sidebar ─── -->
+  <aside class="sidebar" [class.mobile-open]="mobileMenuOpen">
+    <div class="sidebar-top">
+      <div class="sidebar-head">
+        <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
+        <button class="sidebar-close-btn btn-secondary" (click)="mobileMenuOpen = false">✕</button>
+      </div>
+
+      <div class="target-box">
+        <div class="target-box-header">
+          <span class="label">{{ t('solo_target_label') }}</span>
+          <span class="lang-pill">{{ gameLang.toUpperCase() }}</span>
+        </div>
+        <span class="target-name">{{ targetPage }}</span>
+        @if (targetExtract) {
+          <p class="target-extract">{{ targetExtract.slice(0, 160) }}…</p>
+        }
+        <a class="target-link" [href]="wikiBaseUrl + targetPage" target="_blank" rel="noopener noreferrer">{{ t('solo_wiki_link') }}</a>
+      </div>
+
+      <div class="my-stats">
+        <div class="stat">
+          <span class="stat-label">{{ t('solo_steps_label') }}</span>
+          <span class="stat-value">{{ steps }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">{{ t('solo_time_label') }}</span>
+          <span class="stat-value time-val">{{ elapsedDisplay }}</span>
+        </div>
+      </div>
+
+      <div class="current-page">
+        <span class="label">{{ t('solo_current_label') }}</span>
+        <span class="page-name">{{ currentPage }}</span>
+      </div>
+
+      @if (path.length > 1 && gameState === 'playing') {
+        <button class="back-btn btn-secondary" (click)="goBack()">{{ t('solo_back') }}</button>
+      }
+    </div>
+
+    <div class="sidebar-actions">
+      <button class="btn-secondary path-btn" (click)="showPath = !showPath; mobileMenuOpen = false">
+        {{ showPath ? t('solo_hide_path') : t('solo_show_path') }}
+      </button>
+
+      <button class="btn-secondary path-btn" [class.search-active]="searchOpen" (click)="searchOpen ? closeSearch() : openSearch(); mobileMenuOpen = false">
+        🔍 {{ t('solo_search') }}
+      </button>
+
+      @if (gameState === 'playing') {
+        <button class="giveup-btn" (click)="showGiveUpConfirm = true; mobileMenuOpen = false">{{ t('solo_give_up') }}</button>
+      }
+    </div>
+  </aside>
+
+  <!-- ─── Wikipedia Content ─── -->
+  <main class="wiki-area">
+
+    <!-- ─── In-page search bar ─── -->
+    @if (searchOpen) {
+      <div class="search-bar">
+        <input
+          #searchInput
+          class="search-input"
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="onSearchInput()"
+          [placeholder]="t('solo_search_placeholder')"
+          autocomplete="off"
+        />
+        @if (searchQuery) {
+          <span class="search-count" [class.no-results]="matchCount === 0">
+            {{ matchCount === 0 ? t('solo_search_no_results') : currentMatch + '/' + matchCount }}
+          </span>
+        }
+        <button class="search-nav" (click)="prevMatch()" [disabled]="matchCount === 0" aria-label="Previous match">↑</button>
+        <button class="search-nav" (click)="nextMatch()" [disabled]="matchCount === 0" aria-label="Next match">↓</button>
+        <button class="search-close" (click)="closeSearch()" aria-label="Close search">✕</button>
+      </div>
+    }
+
+    @if (gameState === 'loading') {
+      <div class="loading" role="status" aria-live="polite">
+        <div class="spinner"></div>
+        <p>{{ t('solo_loading') }}</p>
+      </div>
+    } @else if (loadError && gameState === 'playing') {
+      <div class="load-error" role="alert">
+        <p>{{ loadError }}</p>
+        @if (initialLoadFailed) {
+          <button class="btn-secondary" style="margin-top:12px" (click)="retryInitialLoad()">{{ t('solo_retry') }}</button>
+        }
+      </div>
+    } @else {
+      <div
+        #wikiContent
+        class="wiki-content"
+        [class.navigating]="isNavigating"
+        [innerHTML]="pageContent"
+        (click)="onContentClick($event)"
+      ></div>
+    }
+  </main>
+
+  <!-- ─── Mobile bottom bar ─── -->
+  <div class="mobile-bottom">
+    @if (path.length > 1 && gameState === 'playing') {
+      <button class="btn-secondary mobile-btn" (click)="goBack()">{{ t('solo_back') }}</button>
+    } @else {
+      <div class="mobile-btn-ghost"></div>
+    }
+    <span class="mobile-current-page">{{ currentPage }}</span>
+    <button class="btn-secondary mobile-btn" (click)="showPath = !showPath">📍 {{ t('game_path_route') }}</button>
+    <button class="btn-secondary mobile-btn" [class.search-active]="searchOpen" (click)="searchOpen ? closeSearch() : openSearch()">🔍</button>
+  </div>
+
+  <!-- ─── Give up modal ─── -->
+  @if (showGiveUpConfirm) {
+    <div class="modal-overlay" (click)="showGiveUpConfirm = false" aria-hidden="true">
+      <div class="modal giveup-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="solo-giveup-modal-title">
+        <p class="giveup-emoji">🏳️</p>
+        <h3 id="solo-giveup-modal-title">{{ t('solo_give_up_title') }}</h3>
+        <p class="giveup-sub">{{ t('solo_give_up_sub') }}</p>
+        <div class="giveup-actions">
+          <button class="btn-danger" (click)="giveUp()">{{ t('solo_give_up_confirm') }}</button>
+          <button class="btn-secondary" (click)="showGiveUpConfirm = false">{{ t('solo_give_up_cancel') }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ─── Path modal ─── -->
+  @if (showPath) {
+    <div class="modal-overlay" (click)="showPath = false" aria-hidden="true">
+      <div class="modal path-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="solo-path-modal-title">
+        <h3 id="solo-path-modal-title">{{ t('solo_path_label') }} ({{ path.length }})</h3>
+        <ol class="path-list">
+          @for (p of path; track $index) {
+            <li [class.current]="p === currentPage">{{ p }}</li>
+          }
+        </ol>
+        <button class="btn-secondary" (click)="showPath = false">{{ t('game_close') }}</button>
+      </div>
+    </div>
+  }
+
+  <!-- ─── Win / gave up result overlay ─── -->
+  @if (gameState === 'won' || gameState === 'gave_up') {
+    <div class="modal-overlay" aria-hidden="true">
+      <div class="modal result-modal" role="dialog" aria-modal="true" aria-labelledby="solo-result-modal-title">
+        <div class="result-header">
+          @if (gameState === 'won') {
+            <div class="result-badge won" id="solo-result-modal-title">{{ t('solo_won_title') }}</div>
+          } @else {
+            <div class="result-badge gave-up" id="solo-result-modal-title">{{ t('solo_gave_up_title') }}</div>
+          }
+          <p class="result-route">{{ startPage }} → {{ targetPage }}</p>
+        </div>
+
+        <div class="result-stats">
+          <div class="result-stat">
+            <span class="result-stat-label">{{ t('solo_steps_label') }}</span>
+            <span class="result-stat-value accent">{{ steps }}</span>
+          </div>
+          <div class="result-stat">
+            <span class="result-stat-label">{{ t('solo_time_label') }}</span>
+            <span class="result-stat-value">{{ formatTime(elapsedMs) }}</span>
+          </div>
+        </div>
+
+        <div class="result-path-section">
+          <p class="result-path-label">{{ t('solo_result_route') }}</p>
+          <ol class="result-path-list">
+            @for (p of path; track $index) {
+              <li [class.target]="normalizePage(p) === normalizePage(targetPage)">{{ p }}</li>
+            }
+          </ol>
+        </div>
+
+        <div class="result-actions">
+          <button class="btn-primary" (click)="playAgain()">{{ t('solo_play_again') }}</button>
+          <button class="btn-secondary" (click)="goHome()">{{ t('solo_home') }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ─── Confetti ─── -->
+  @if (confettiActive) {
+    <div class="confetti-container" aria-hidden="true">
+      @for (p of confettiPieces; track $index) {
+        <div class="confetti-piece"
+             [style.left.%]="p.x"
+             [style.background]="p.color"
+             [style.width.px]="p.size"
+             [style.height.px]="p.size * 0.6"
+             [style.animation-delay.s]="p.delay"
+             [style.animation-duration.s]="p.duration">
+        </div>
+      }
+    </div>
+  }
+
+</div>

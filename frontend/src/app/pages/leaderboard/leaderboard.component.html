@@ -3,14 +3,14 @@
 <div class="lb-page">
   <h1 class="lb-title">{{ t('lb_title') }}</h1>
 
-  <div class="tabs">
-    <button class="tab-btn" [class.active]="activeTab === 'today'" (click)="loadTab('today')">{{ t('lb_tab_today') }}</button>
-    <button class="tab-btn" [class.active]="activeTab === 'alltime'" (click)="loadTab('alltime')">{{ t('lb_tab_alltime') }}</button>
-    <button class="tab-btn" [class.active]="activeTab === 'mine'" (click)="loadTab('mine')">{{ t('lb_tab_mine') }}</button>
+  <div class="tabs" role="tablist">
+    <button class="tab-btn" role="tab" [attr.aria-selected]="activeTab === 'today'" [class.active]="activeTab === 'today'" (click)="loadTab('today')">{{ t('lb_tab_today') }}</button>
+    <button class="tab-btn" role="tab" [attr.aria-selected]="activeTab === 'alltime'" [class.active]="activeTab === 'alltime'" (click)="loadTab('alltime')">{{ t('lb_tab_alltime') }}</button>
+    <button class="tab-btn" role="tab" [attr.aria-selected]="activeTab === 'mine'" [class.active]="activeTab === 'mine'" (click)="loadTab('mine')">{{ t('lb_tab_mine') }}</button>
   </div>
 
   @if (loading) {
-    <div class="loading">{{ t('lb_loading') }}</div>
+    <div class="loading" role="status" aria-live="polite" aria-busy="true">{{ t('lb_loading') }}</div>
   }
 
   <!-- HOY -->
@@ -23,18 +23,31 @@
     }
 
     @if (todayPodio.length === 0) {
-      <div class="empty">{{ t('lb_empty_today') }}</div>
+      <div class="empty">
+        <p>{{ t('lb_empty_today') }}</p>
+        <a class="btn-primary" routerLink="/daily">{{ t('lb_play_daily_cta') }}</a>
+      </div>
     } @else {
-      <ul class="entries">
-        @for (entry of todayPodio; track entry.id; let i = $index) {
-          <li class="entry" [class.top]="i < 3">
-            <span class="rank">{{ rankEmoji(i) }}</span>
-            <span class="entry-name">{{ entry.player_name }}</span>
-            <span class="entry-steps">{{ entry.steps }} {{ t('lb_steps') }}</span>
-            <span class="entry-time">{{ formatTime(entry.time_ms) }}</span>
-          </li>
-        }
-      </ul>
+      <table class="entries">
+        <thead>
+          <tr>
+            <th scope="col" class="col-rank">Rank</th>
+            <th scope="col" class="col-player">{{ t('lb_col_player') }}</th>
+            <th scope="col" class="col-steps">{{ t('lb_col_steps') }}</th>
+            <th scope="col" class="col-time">{{ t('lb_col_time') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of todayPodio; track entry.id; let i = $index) {
+            <tr class="entry" [class.top]="i < 3">
+              <td class="rank">{{ rankEmoji(i) }}</td>
+              <td class="entry-name">{{ entry.player_name }}</td>
+              <td class="entry-steps">{{ entry.steps }} {{ t('lb_steps') }}</td>
+              <td class="entry-time">{{ formatTime(entry.time_ms) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
     }
   }
 
@@ -43,19 +56,36 @@
     @if (hallOfFame.length === 0) {
       <div class="empty">{{ t('lb_empty_alltime') }}</div>
     } @else {
-      <ul class="entries">
-        @for (entry of hallOfFame; track entry.id; let i = $index) {
-          <li class="entry" [class.top]="i < 3">
-            <span class="rank">{{ rankEmoji(i) }}</span>
-            <div class="entry-info">
-              <span class="entry-name">{{ entry.player_name }}</span>
-              <span class="entry-route">{{ entry.start_page }} → {{ entry.target_page }}</span>
-            </div>
-            <span class="entry-steps">{{ entry.steps }} {{ t('lb_steps') }}</span>
-            <span class="entry-time">{{ formatTime(entry.time_ms) }}</span>
-          </li>
-        }
-      </ul>
+      <table class="entries">
+        <thead>
+          <tr>
+            <th scope="col" class="col-rank">Rank</th>
+            <th scope="col" class="col-player">{{ t('lb_col_player') }}</th>
+            <th scope="col" class="col-steps">{{ t('lb_col_steps') }}</th>
+            <th scope="col" class="col-time">{{ t('lb_col_time') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of hallOfFame; track entry.id; let i = $index) {
+            <tr class="entry" [class.top]="i < 3">
+              <td class="rank">{{ rankEmoji(i) }}</td>
+              <td>
+                <div class="entry-info">
+                  <span class="entry-name">{{ entry.player_name }}</span>
+                  <span class="entry-route">{{ entry.start_page }} → {{ entry.target_page }}</span>
+                </div>
+              </td>
+              <td>
+                @if (entry.game_type === 'solo') {
+                  <span class="game-type-badge" aria-label="Solo">Solo</span>
+                }
+                <span class="entry-steps">{{ entry.steps }} {{ t('lb_steps') }}</span>
+              </td>
+              <td class="entry-time">{{ formatTime(entry.time_ms) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
     }
   }
 
@@ -67,18 +97,34 @@
       <div class="empty">{{ t('lb_no_history') }} <strong>{{ myName }}</strong>.</div>
     } @else {
       <p class="my-name-hint">{{ t('lb_my_history') }} <strong>{{ myName }}</strong></p>
-      <ul class="entries">
-        @for (entry of myHistory; track entry.id; let i = $index) {
-          <li class="entry">
-            <div class="entry-info">
-              <span class="entry-route">{{ entry.start_page }} → {{ entry.target_page }}</span>
-              <span class="entry-date">{{ entry.created_at | date:'d MMM yyyy' }}</span>
-            </div>
-            <span class="entry-steps">{{ entry.steps }} {{ t('lb_steps') }}</span>
-            <span class="entry-time">{{ formatTime(entry.time_ms) }}</span>
-          </li>
-        }
-      </ul>
+      <table class="entries">
+        <thead>
+          <tr>
+            <th scope="col" class="col-player">{{ t('lb_col_player') }}</th>
+            <th scope="col" class="col-steps">{{ t('lb_col_steps') }}</th>
+            <th scope="col" class="col-time">{{ t('lb_col_time') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of myHistory; track entry.id; let i = $index) {
+            <tr class="entry">
+              <td>
+                <div class="entry-info">
+                  <span class="entry-route">{{ entry.start_page }} → {{ entry.target_page }}</span>
+                  <span class="entry-date">{{ entry.created_at | date:'d MMM yyyy' }}</span>
+                </div>
+              </td>
+              <td>
+                @if (entry.game_type === 'solo') {
+                  <span class="game-type-badge" aria-label="Solo">Solo</span>
+                }
+                <span class="entry-steps">{{ entry.steps }} {{ t('lb_steps') }}</span>
+              </td>
+              <td class="entry-time">{{ formatTime(entry.time_ms) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
     }
   }
 </div>

@@ -1,13 +1,15 @@
 {
   "name": "WikiHunt",
   "short_name": "WikiHunt",
-  "description": "El juego multijugador de Wikipedia. Salta de artículo en artículo y llega al destino antes que tus amigos.",
+  "description": "Multiplayer Wikipedia racing game. Navigate articles to reach the target.",
   "theme_color": "#0d1117",
   "background_color": "#0d1117",
   "display": "standalone",
+  "orientation": "portrait-primary",
+  "categories": ["games"],
+  "prefer_related_applications": false,
   "scope": "/",
   "start_url": "/",
-  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "assets/icons/icon.svg",
@@ -20,6 +22,20 @@
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Daily Challenge",
+      "short_name": "Daily",
+      "description": "Play today's challenge",
+      "url": "/daily"
+    },
+    {
+      "name": "Solo Mode",
+      "short_name": "Solo",
+      "description": "Play alone",
+      "url": "/solo"
     }
   ]
 }

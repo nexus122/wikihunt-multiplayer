@@ -32,6 +32,7 @@ export interface HallOfFameEntry {
   is_daily: boolean;
   created_at: string;
   language?: string;
+  game_type?: 'solo' | 'multi' | null;
 }
 
 @Injectable({ providedIn: 'root' })

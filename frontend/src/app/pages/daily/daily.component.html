@@ -17,7 +17,7 @@
             <span class="route-label">{{ t('daily_start_label') }}</span>
             <span class="route-title">{{ challenge.start_page }}</span>
           </div>
-          <span class="route-arrow">→</span>
+          <span class="route-arrow" aria-hidden="true">→</span>
           <div class="route-page target">
             <span class="route-label">{{ t('daily_target_label') }}</span>
             <span class="route-title">{{ challenge.target_page }}</span>
@@ -28,11 +28,11 @@
       }
 
       <div class="field">
-        <label>{{ t('your_name') }}</label>
+        <label for="daily-player-name">{{ t('your_name') }}</label>
         @if (profileName) {
           <div class="name-locked">{{ profileName }} <span class="name-locked-badge">{{ t('name_badge') }}</span></div>
         } @else {
-          <input type="text" [placeholder]="t('name_placeholder')" [(ngModel)]="guestName" maxlength="20" (keydown.enter)="start()" />
+          <input id="daily-player-name" type="text" [placeholder]="t('name_placeholder')" [(ngModel)]="guestName" maxlength="20" (keydown.enter)="start()" />
         }
       </div>
 
@@ -46,7 +46,7 @@
       }
 
       @if (error) {
-        <div class="error-message">{{ error }}</div>
+        <div class="error-message" role="alert">{{ error }}</div>
       }
 
       <button class="btn-primary" (click)="start()" [disabled]="loading">

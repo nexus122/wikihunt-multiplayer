@@ -1,6 +1,6 @@
 <app-header />
 
-<div class="home">
+<div class="home" id="main-content">
 
   @if (challengingStart && challengingTarget) {
     <div class="card challenge-invite-card">
@@ -33,7 +33,7 @@
         <button class="btn-primary" (click)="rejoinGame()" [disabled]="rejoining">
           {{ rejoining ? t('rejoin_resuming') : t('rejoin_resume') }}
         </button>
-        <button class="btn-secondary" (click)="dismissSavedGame()">✕</button>
+        <button class="btn-secondary" (click)="dismissSavedGame()" aria-label="Dismiss">✕</button>
       </div>
     </div>
   }
@@ -41,16 +41,26 @@
   <div class="hero">
     <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
     <p class="tagline">{{ t('tagline') }}</p>
-    <div class="hero-actions">
-      <a class="btn-daily" routerLink="/daily">{{ t('daily_btn') }}</a>
-      <a class="btn-leaderboard" routerLink="/leaderboard">{{ t('leaderboard_btn') }}</a>
-    </div>
   </div>
 
+  <div class="mode-grid">
+    <a class="mode-card mode-card--daily" routerLink="/daily">
+      <div class="mode-title">{{ t('daily_btn') }}</div>
+      <div class="mode-desc">{{ t('mode_daily_desc') }}</div>
+    </a>
+    <a class="mode-card" routerLink="/solo">
+      <div class="mode-title">{{ t('solo_btn') }}</div>
+      <div class="mode-desc">{{ t('mode_solo_desc') }}</div>
+    </a>
+  </div>
+
+  <a class="lb-link" routerLink="/leaderboard">{{ t('leaderboard_btn') }}</a>
+
   <div class="card form-card">
-    <div class="tabs">
-      <button class="tab-btn" [class.active]="activeTab === 'create'" (click)="activeTab='create'; error=''">{{ t('create_tab') }}</button>
-      <button class="tab-btn" [class.active]="activeTab === 'join'" (click)="activeTab='join'; error=''">{{ t('join_tab') }}</button>
+    <p class="section-label">{{ t('multiplayer_label') }}</p>
+    <div class="tabs" role="tablist">
+      <button class="tab-btn" role="tab" [attr.aria-selected]="activeTab === 'create'" [attr.id]="'tab-create'" [class.active]="activeTab === 'create'" (click)="activeTab='create'; error=''">{{ t('create_tab') }}</button>
+      <button class="tab-btn" role="tab" [attr.aria-selected]="activeTab === 'join'" [attr.id]="'tab-join'" [class.active]="activeTab === 'join'" (click)="activeTab='join'; error=''">{{ t('join_tab') }}</button>
     </div>
 
     @if (activeTab === 'create') {
@@ -92,10 +102,15 @@
     @if (error) {
       <div class="error-message">{{ error }}</div>
     }
+    @if (!profileName) {
+      <p class="auth-hint">
+        {{ t('auth_hint') }} <a routerLink="/auth">{{ t('auth_hint_link') }}</a>
+      </p>
+    }
   </div>
 
   <div class="how-to-play">
-    <h3>{{ t('how_to_play') }}</h3>
+    <h2>{{ t('how_to_play') }}</h2>
     <div class="steps">
       @for (step of steps; track step.n) {
         <div class="step">

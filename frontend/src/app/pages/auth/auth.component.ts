@@ -34,6 +34,12 @@ export class AuthComponent implements OnInit, OnDestroy {
     return this.lang.t(key);
   }
 
+  get submitLabel(): string {
+    if (this.loading) return this.t('daily_loading_btn');
+    if (this.magicLinkMode) return this.t('auth_magic_link_btn');
+    return this.activeTab === 'login' ? this.t('auth_sign_in_btn') : this.t('auth_sign_up_btn');
+  }
+
   ngOnInit(): void {
     this.langSub = this.lang.lang$.subscribe(() => {});
   }
@@ -51,6 +57,11 @@ export class AuthComponent implements OnInit, OnDestroy {
 
   async submitForm(): Promise<void> {
     if (!this.email.trim()) { this.error = this.t('auth_email'); return; }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.email.trim())) {
+      this.error = this.t('auth_invalid_email') || 'Invalid email format';
+      return;
+    }
     this.loading = true;
     this.error = '';
     this.message = '';

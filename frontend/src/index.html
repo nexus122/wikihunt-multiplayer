@@ -2,12 +2,13 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>Wikihunt</title>
+  <title>WikiHunt - Multiplayer Wikipedia Game</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="index, follow">
 
   <!-- Favicon WikiHunt -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230d1117'/><text x='50' y='76' font-family='Georgia,serif' font-size='74' font-weight='900' text-anchor='middle' fill='%2358a6ff'>W</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23000000'/><text x='50' y='76' font-family='Georgia,serif' font-size='74' font-weight='900' text-anchor='middle' fill='%23ffffff'>W</text></svg>">
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.webmanifest">
@@ -21,15 +22,48 @@
   <!-- SEO / descripción -->
   <meta name="description" content="Wikihunt: el juego multijugador de Wikipedia. Empieza en un artículo al azar y llega al objetivo antes que tus amigos saltando solo por los enlaces. ¿Quién llega en menos pasos?">
 
+  <!-- Canonical -->
+  <link rel="canonical" href="https://wikihunt.vercel.app/">
+
   <!-- Open Graph (WhatsApp, redes sociales) -->
   <meta property="og:title" content="Wikihunt">
   <meta property="og:description" content="El juego multijugador de Wikipedia. Salta de artículo en artículo y llega al objetivo antes que tus amigos.">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://wikihunt.vercel.app/">
+  <meta property="og:image" content="https://wikihunt.vercel.app/assets/icons/icon.svg">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
 
   <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Wikihunt">
   <meta name="twitter:description" content="El juego multijugador de Wikipedia. Salta de artículo en artículo y llega al objetivo antes que tus amigos.">
+  <meta name="twitter:image" content="https://wikihunt.vercel.app/assets/icons/icon.svg">
+
+  <!-- Preconnect to Wikipedia -->
+  <link rel="preconnect" href="https://en.wikipedia.org">
+  <link rel="preconnect" href="https://es.wikipedia.org">
+  <link rel="dns-prefetch" href="https://en.wikipedia.org">
+  <link rel="dns-prefetch" href="https://es.wikipedia.org">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "WikiHunt",
+  "description": "Multiplayer Wikipedia racing game. Navigate from article to article and reach the target first.",
+  "url": "https://wikihunt.vercel.app",
+  "applicationCategory": "Game",
+  "genre": "Puzzle",
+  "operatingSystem": "Web Browser",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+  </script>
 </head>
 <body>
   <app-root></app-root>

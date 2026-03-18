@@ -6,7 +6,7 @@ import cors from 'cors';
 import wikipediaRouter, { preWarmCache } from './wikipedia';
 import { roomManager } from './room.manager';
 import { getCanonicalTitle, getValidRandomPage, normalizePage } from './wiki.helpers';
-import { getDailyChallenge, saveDailyResult, saveHallOfFame, updateUserStreak, verifyUserToken } from './supabase';
+import { getDailyChallenge, isNameTakenByRegisteredUser, saveDailyResult, saveHallOfFame, updateUserStreak, verifyUserToken } from './supabase';
 
 const app = express();
 const httpServer = createServer(app);
@@ -67,11 +67,16 @@ async function emitGameFinished(roomCode: string, room: ReturnType<typeof roomMa
 
   for (const entry of finishedPlayers) {
     if (!entry.userId) {
-      console.log(`[Supabase] Skipping guest: ${entry.name}`);
-      continue;
+      // Guest player: only save if the name is not taken by a registered user
+      const nameTaken = await isNameTakenByRegisteredUser(entry.name);
+      if (nameTaken) {
+        console.log(`[Supabase] Skipping guest "${entry.name}": name conflicts with a registered user`);
+        continue;
+      }
+      console.log(`[Supabase] Saving guest result: ${entry.name}`);
     }
 
-    // Hall of fame: all finished games (registered users only)
+    // Hall of fame: all finished games
     saveHallOfFame({
       player_name: entry.name,
       start_page: room.startPage || '',
@@ -98,7 +103,7 @@ async function emitGameFinished(roomCode: string, room: ReturnType<typeof roomMa
         language: lang,
       }).then(() => {
         console.log(`[Supabase] Daily result saved: ${entry.name}`);
-        return updateUserStreak(entry.userId!, today);
+        if (entry.userId) return updateUserStreak(entry.userId, today);
       }).catch((e) => console.error('[Supabase] Daily result error:', e.message));
     }
   }
