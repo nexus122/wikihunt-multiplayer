@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { User } from '@supabase/supabase-js';
 import { AuthService } from '../services/auth.service';
 import { LanguageService } from '../services/language.service';
+import { ThemeService, Theme } from '../services/theme.service';
 import { TranslationKey } from '../i18n/translations';
 
 @Component({
@@ -70,6 +71,26 @@ import { TranslationKey } from '../i18n/translations';
         } @else {
           <div class="panel-loading">···</div>
         }
+      </div>
+
+      <div class="panel-divider"></div>
+
+      <div class="panel-section">
+        <fieldset style="border:none;padding:0;margin:0">
+          <legend class="panel-section-label">{{ t('panel_theme') }}</legend>
+          <div class="theme-toggle">
+            <button class="theme-opt" [class.active]="themeService.current === 'dark'" (click)="setTheme('dark')"
+              [attr.aria-pressed]="themeService.current === 'dark'" [attr.aria-label]="t('theme_opt_dark')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              {{ t('theme_opt_dark') }}
+            </button>
+            <button class="theme-opt" [class.active]="themeService.current === 'light'" (click)="setTheme('light')"
+              [attr.aria-pressed]="themeService.current === 'light'" [attr.aria-label]="t('theme_opt_light')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              {{ t('theme_opt_light') }}
+            </button>
+          </div>
+        </fieldset>
       </div>
 
       <div class="panel-divider"></div>
@@ -179,7 +200,7 @@ import { TranslationKey } from '../i18n/translations';
     .panel-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.6);
+      background: var(--overlay-bg, rgba(0,0,0,.6));
       z-index: 400; /* --z-panel-backdrop */
       backdrop-filter: blur(2px);
       animation: fade-in .15s ease;
@@ -201,7 +222,7 @@ import { TranslationKey } from '../i18n/translations';
       flex-direction: column;
       transform: translateX(100%);
       transition: transform .25s cubic-bezier(.4,0,.2,1);
-      box-shadow: -4px 0 24px rgba(0,0,0,.4);
+      box-shadow: var(--shadow-panel, -4px 0 24px rgba(0,0,0,.4));
 
       &.open { transform: translateX(0); }
     }
@@ -325,8 +346,8 @@ import { TranslationKey } from '../i18n/translations';
       align-items: center;
       gap: 8px;
       padding: 8px 12px;
-      background: rgba(255,149,0,.08);
-      border: 1px solid rgba(255,149,0,.25);
+      background: var(--warning-tint, rgba(255,149,0,.08));
+      border: 1px solid var(--warning-border, rgba(255,149,0,.25));
       border-radius: 8px;
     }
 
@@ -405,6 +426,40 @@ import { TranslationKey } from '../i18n/translations';
       }
     }
 
+    /* Theme toggle — same layout as lang-toggle */
+    .theme-toggle {
+      display: flex;
+      gap: 8px;
+    }
+
+    .theme-opt {
+      flex: 1;
+      padding: 9px 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+
+      &.active {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-tint, rgba(88,166,255,.08));
+      }
+
+      &:not(.active):hover {
+        border-color: var(--text-secondary);
+        color: var(--text-primary);
+      }
+    }
+
     /* Nav links */
     .panel-links { gap: 4px; }
 
@@ -440,8 +495,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
   panelOpen = false;
   private sub?: Subscription;
   private langSub?: Subscription;
+  private themeSub?: Subscription;
 
-  constructor(private authService: AuthService, public langService: LanguageService) {}
+  constructor(
+    private authService: AuthService,
+    public langService: LanguageService,
+    public themeService: ThemeService
+  ) {}
 
   t(key: TranslationKey): string {
     return this.langService.t(key);
@@ -461,11 +521,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
     });
     // Force re-render on language change
     this.langSub = this.langService.lang$.subscribe(() => {});
+    // Force re-render on theme change
+    this.themeSub = this.themeService.theme$.subscribe(() => {});
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
     this.langSub?.unsubscribe();
+    this.themeSub?.unsubscribe();
   }
 
   toggleLang(): void {
@@ -474,6 +537,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   setLang(lang: 'es' | 'en'): void {
     this.langService.setLang(lang);
+  }
+
+  setTheme(theme: 'dark' | 'light'): void {
+    this.themeService.setTheme(theme);
   }
 
   async signOut(): Promise<void> {

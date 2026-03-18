@@ -8,11 +8,12 @@ import { WikipediaService } from '../../core/services/wikipedia.service';
 import { LanguageService } from '../../core/services/language.service';
 import { RoomInfo, WikiPage } from '../../core/models/types';
 import { TranslationKey } from '../../core/i18n/translations';
+import { HeaderComponent } from '../../core/components/header.component';
 
 @Component({
   selector: 'app-lobby',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HeaderComponent],
   templateUrl: './lobby.component.html',
   styleUrl: './lobby.component.scss',
 })

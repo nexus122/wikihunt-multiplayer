@@ -3,18 +3,6 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg-primary: #0d1117;
-  --bg-secondary: #161b22;
-  --bg-tertiary: #21262d;
-  --border-color: #30363d;
-  --text-primary: #f0f6fc;
-  --text-secondary: #a1a7b3;
-  --accent: #58a6ff;
-  --accent-hover: #79b8ff;
-  --success: #4ade80;
-  --warning: #d29922;
-  --danger: #f85149;
-
   // Spacing scale
   --space-xs: 4px;
   --space-sm: 8px;
@@ -50,14 +38,113 @@
   --font-base: 14px;
   --font-lg: 15px;
   --font-xl: 16px;
+}
 
-  // Streak color
-  --streak-color: #ff9500;
+// ── Default (dark) theme — applied when no data-theme is set OR data-theme="dark"
+:root,
+[data-theme="dark"] {
+  // Backgrounds
+  --bg-primary:      #0d1117;
+  --bg-secondary:    #161b22;
+  --bg-tertiary:     #21262d;
+  --border-color:    #30363d;
 
-  // Shadow scale
-  --shadow-sm: 0 2px 8px rgba(0,0,0,.2);
-  --shadow-md: 0 4px 16px rgba(0,0,0,.3);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,.4);
+  // Text
+  --text-primary:    #f0f6fc;
+  --text-secondary:  #8b949e;
+
+  // Brand
+  --accent:          #58a6ff;
+  --accent-hover:    #79b8ff;
+  --success:         #4ade80;
+  --warning:         #d29922;
+  --danger:          #f85149;
+  --streak-color:    #ff9500;
+
+  // Semantic tints (replaces all hardcoded rgba in components)
+  --accent-tint:     rgba(88,166,255,0.10);
+  --accent-tint-sm:  rgba(88,166,255,0.05);
+  --accent-tint-lg:  rgba(88,166,255,0.18);
+  --accent-border:   rgba(88,166,255,0.30);
+  --danger-tint:     rgba(248,81,73,0.10);
+  --danger-tint-sm:  rgba(248,81,73,0.06);
+  --danger-border:   rgba(248,81,73,0.25);
+  --success-tint:    rgba(74,222,128,0.10);
+  --success-border:  rgba(74,222,128,0.25);
+  --warning-tint:    rgba(255,149,0,0.08);
+  --warning-border:  rgba(255,149,0,0.22);
+
+  // Overlays
+  --overlay-bg:      rgba(0,0,0,0.60);
+  --overlay-dark:    rgba(13,17,23,0.90);
+
+  // Shadows
+  --shadow-sm:  0 2px 8px rgba(0,0,0,.22);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.32);
+  --shadow-lg:  0 8px 24px rgba(0,0,0,.44);
+  --shadow-panel: -4px 0 24px rgba(0,0,0,.44);
+
+  // Wiki content (game/solo-game page Wikipedia area)
+  --wiki-bg:          #ffffff;
+  --wiki-text:        #202122;
+  --wiki-link:        #0645ad;
+  --wiki-link-hover:  #0b0080;
+  --wiki-border:      #a2a9b1;
+  --wiki-table-head:  #eaecf0;
+  --wiki-infobox-bg:  #f8f9fa;
+}
+
+// ── Light theme
+[data-theme="light"] {
+  // Backgrounds
+  --bg-primary:      #ffffff;
+  --bg-secondary:    #f6f8fa;
+  --bg-tertiary:     #eaeef2;
+  --border-color:    #d0d7de;
+
+  // Text
+  --text-primary:    #1f2328;
+  --text-secondary:  #57606a;
+
+  // Brand
+  --accent:          #0969da;
+  --accent-hover:    #0860ca;
+  --success:         #1a7f37;
+  --warning:         #9a6700;
+  --danger:          #cf222e;
+  --streak-color:    #e16f24;
+
+  // Semantic tints
+  --accent-tint:     rgba(9,105,218,0.08);
+  --accent-tint-sm:  rgba(9,105,218,0.04);
+  --accent-tint-lg:  rgba(9,105,218,0.15);
+  --accent-border:   rgba(9,105,218,0.25);
+  --danger-tint:     rgba(207,34,46,0.08);
+  --danger-tint-sm:  rgba(207,34,46,0.04);
+  --danger-border:   rgba(207,34,46,0.20);
+  --success-tint:    rgba(26,127,55,0.08);
+  --success-border:  rgba(26,127,55,0.20);
+  --warning-tint:    rgba(154,103,0,0.08);
+  --warning-border:  rgba(154,103,0,0.22);
+
+  // Overlays (lighter for light theme)
+  --overlay-bg:      rgba(0,0,0,0.45);
+  --overlay-dark:    rgba(0,0,0,0.65);
+
+  // Shadows (softer for light theme)
+  --shadow-sm:  0 2px 8px rgba(31,35,40,.08);
+  --shadow-md:  0 4px 16px rgba(31,35,40,.12);
+  --shadow-lg:  0 8px 24px rgba(31,35,40,.16);
+  --shadow-panel: -4px 0 24px rgba(31,35,40,.16);
+
+  // Wiki content — stays standard Wikipedia colors in both themes
+  --wiki-bg:          #ffffff;
+  --wiki-text:        #202122;
+  --wiki-link:        #0645ad;
+  --wiki-link-hover:  #0b0080;
+  --wiki-border:      #a2a9b1;
+  --wiki-table-head:  #eaecf0;
+  --wiki-infobox-bg:  #f8f9fa;
 }
 
 html, body {
@@ -125,7 +212,7 @@ input, select {
   outline: none;
   transition: border-color 0.15s ease;
   width: 100%;
-  &:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15); }
+  &:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
   &::placeholder { color: var(--text-secondary); }
 }
 
@@ -147,8 +234,8 @@ input, select {
 }
 
 .error-message {
-  background: rgba(248, 81, 73, 0.1);
-  border: 1px solid rgba(248, 81, 73, 0.3);
+  background: var(--danger-tint);
+  border: 1px solid var(--danger-border);
   border-radius: 8px;
   color: var(--danger);
   font-size: 14px;
@@ -254,8 +341,8 @@ input, select {
     text-transform: uppercase;
     letter-spacing: .06em;
     color: var(--success);
-    background: rgba(74, 222, 128, .1);
-    border: 1px solid rgba(74, 222, 128, .25);
+    background: var(--success-tint);
+    border: 1px solid var(--success-border);
     border-radius: var(--radius-xs);
     padding: 2px 6px;
     flex-shrink: 0;
@@ -265,15 +352,15 @@ input, select {
 // ─── Shared component: .badge-accent / .badge-danger ─────────────────────────
 // Color variants for the .badge base class
 .badge-accent {
-  background: rgba(88, 166, 255, .12);
+  background: var(--accent-tint);
   color: var(--accent);
-  border-color: rgba(88, 166, 255, .3);
+  border-color: var(--accent-border);
 }
 
 .badge-success {
-  background: rgba(74, 222, 128, .1);
+  background: var(--success-tint);
   color: var(--success);
-  border-color: rgba(74, 222, 128, .25);
+  border-color: var(--success-border);
 }
 
 // ─── Shared form label ────────────────────────────────────────────────────────
@@ -283,6 +370,236 @@ input, select {
   text-transform: uppercase;
   letter-spacing: .06em;
   color: var(--text-secondary);
+}
+
+// ─── Shared component: .field ─────────────────────────────────────────────────
+// Standard form field wrapper used on Home, Lobby, Solo, Daily
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    display: block;
+    font-size: var(--font-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .field-hint {
+    font-size: var(--font-xs);
+    color: var(--text-secondary);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+}
+
+// ─── Shared component: .mode-pills ───────────────────────────────────────────
+// Random/Custom toggle pills used on Lobby and Solo setup
+.mode-pills {
+  display: flex;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  width: fit-content;
+
+  .pill {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    transition: all .15s;
+
+    &.active {
+      background: var(--accent-tint);
+      color: var(--accent);
+    }
+
+    &:not(.active):hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    & + .pill {
+      border-left: 1px solid var(--border-color);
+    }
+  }
+}
+
+// ─── Shared component: .page-chip ────────────────────────────────────────────
+// Selected Wikipedia page tag (start=blue, target=red) used on Lobby and Solo
+.page-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  max-width: 100%;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-tint);
+  color: var(--accent);
+
+  &.target {
+    border-color: var(--danger-border);
+    background: var(--danger-tint);
+    color: var(--danger);
+  }
+
+  .chip-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chip-clear {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    opacity: .6;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    flex-shrink: 0;
+
+    &:hover { opacity: 1; }
+  }
+}
+
+// ─── Shared component: .search-wrap ──────────────────────────────────────────
+// Wikipedia page search input + dropdown (Lobby, Solo)
+.search-wrap {
+  position: relative;
+
+  .search-input {
+    width: 100%;
+  }
+
+  .results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 50;
+    box-shadow: var(--shadow-md);
+
+    .result-item {
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: background .1s;
+      border-bottom: 1px solid var(--border-color);
+
+      &:last-child { border-bottom: none; }
+      &:hover { background: var(--bg-tertiary); }
+    }
+  }
+}
+
+// ─── Shared component: .avatar-circle ────────────────────────────────────────
+// Colored player avatar circle used in game, lobby, leaderboard
+.avatar-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+// ─── Shared component: .tabs ─────────────────────────────────────────────────
+// Tab navigation bar used on Home (create/join), Auth (sign in/up), Leaderboard
+.tabs {
+  display: flex;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  gap: 4px;
+
+  .tab {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+
+    &.active {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    &:not(.active):hover {
+      color: var(--text-primary);
+    }
+  }
+}
+
+// ─── Shared component: .success-message ──────────────────────────────────────
+.success-message {
+  background: var(--success-tint);
+  border: 1px solid var(--success-border);
+  border-radius: 8px;
+  color: var(--success);
+  font-size: 14px;
+  padding: 10px 14px;
+  margin-top: 8px;
+}
+
+// ─── Shared component: .streak-row ───────────────────────────────────────────
+// Streak display used on Daily and header panel
+.streak-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--warning-tint);
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius-md);
+
+  .streak-fire { font-size: 18px; line-height: 1; }
+
+  .streak-badge {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--streak-color);
+  }
+
+  .streak-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .streak-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
 }
 
 // ─── Tailwind utilities ───────────────────────────────────────────────────────

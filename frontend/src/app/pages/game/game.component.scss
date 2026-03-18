@@ -46,8 +46,8 @@
 }
 
 .target-box {
-  background: rgba(248, 81, 73, .08); /* --danger tint */
-  border: 1px solid rgba(248, 81, 73, .25); /* --danger tint */
+  background: var(--danger-tint, rgba(248,81,73,.10)); /* --danger tint */
+  border: 1px solid var(--danger-border, rgba(248,81,73,.25)); /* --danger tint */
   border-radius: 8px;
   padding: 10px 12px;
 
@@ -70,7 +70,7 @@
   .target-link {
     font-size: 11px;
     font-weight: 600;
-    color: rgba(248, 81, 73, .7); /* --danger tint */
+    color: var(--danger-border, rgba(248,81,73,.25)); /* --danger tint */
     text-decoration: none;
     display: inline-block;
     &:hover { color: var(--danger); text-decoration: underline; }
@@ -181,14 +181,14 @@
 }
 
 .btn-danger {
-  background: rgba(248, 81, 73, .15); /* --danger tint */
-  border: 1px solid rgba(248, 81, 73, .4); /* --danger tint */
+  background: var(--danger-tint, rgba(248,81,73,.12)); /* --danger tint */
+  border: 1px solid var(--danger-border, rgba(248,81,73,.25)); /* --danger tint */
   color: var(--danger);
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all .15s;
-  &:hover { background: rgba(248, 81, 73, .25); } /* --danger tint */
+  &:hover { background: var(--danger-tint-lg, rgba(248,81,73,.20)); } /* --danger tint */
 }
 
 /* ─── In-page search ─── */
@@ -318,27 +318,27 @@
   font-family: 'Linux Libertine', Georgia, Times, serif;
   font-size: 15px;
   line-height: 1.7;
-  color: var(--text-primary);
-  background: var(--bg-primary);
+  color: var(--wiki-text, #202122);
+  background: var(--wiki-bg, #ffffff);
 
   // Dark mode overrides for Wikipedia content
-  a { color: var(--accent); cursor: pointer; }
-  a:visited { color: var(--accent-hover); }
-  a:hover { color: var(--accent-hover); text-decoration: underline; }
+  a { color: var(--wiki-link, #0645ad); cursor: pointer; }
+  a:visited { color: var(--wiki-link-hover, #0b0080); }
+  a:hover { color: var(--wiki-link-hover, #0b0080); text-decoration: underline; }
 
   // Override any hardcoded text colors
   p, li, td, th, span, div { color: inherit; }
 
-  h1, h2, h3, h4, h5, h6 { font-family: 'Linux Libertine', Georgia, serif; color: var(--text-primary); border-color: var(--border-color); }
-  h1 { font-size: 28px; border-bottom: 1px solid var(--border-color); margin-bottom: 16px; padding-bottom: 4px; }
-  h2 { font-size: 22px; border-bottom: 1px solid var(--border-color); margin: 20px 0 8px; }
+  h1, h2, h3, h4, h5, h6 { font-family: 'Linux Libertine', Georgia, serif; color: var(--wiki-text, #202122); border-color: var(--wiki-border, #a2a9b1); }
+  h1 { font-size: 28px; border-bottom: 1px solid var(--wiki-border, #a2a9b1); margin-bottom: 16px; padding-bottom: 4px; }
+  h2 { font-size: 22px; border-bottom: 1px solid var(--wiki-border, #a2a9b1); margin: 20px 0 8px; }
   h3 { font-size: 17px; margin: 16px 0 6px; }
   p { margin-bottom: 12px; }
 
   // Tables
-  table { border-collapse: collapse; margin: 16px 0; font-size: 13px; border-color: var(--border-color); }
-  td, th { border: 1px solid var(--border-color); padding: 6px 10px; }
-  th { background: var(--bg-secondary); font-weight: 600; color: var(--text-primary); }
+  table { border-collapse: collapse; margin: 16px 0; font-size: 13px; border-color: var(--wiki-border, #a2a9b1); }
+  td, th { border: 1px solid var(--wiki-border, #a2a9b1); padding: 6px 10px; }
+  th { background: var(--wiki-table-head, #eaecf0); font-weight: 600; color: var(--wiki-text, #202122); }
 
   img { max-width: 100%; height: auto; }
   ul, ol { margin: 8px 0 12px 24px; }
@@ -346,24 +346,24 @@
 
   // Infoboxes and other Wikipedia boxes
   .infobox, .wikitable {
-    background: var(--bg-secondary) !important;
-    border-color: var(--border-color) !important;
-    color: var(--text-primary) !important;
+    background: var(--wiki-infobox-bg, #f8f9fa) !important;
+    border-color: var(--wiki-border, #a2a9b1) !important;
+    color: var(--wiki-text, #202122) !important;
 
     th, td {
       background: transparent !important;
-      color: var(--text-primary) !important;
-      border-color: var(--border-color) !important;
+      color: var(--wiki-text, #202122) !important;
+      border-color: var(--wiki-border, #a2a9b1) !important;
     }
   }
 
-  .infobox { float: right; clear: right; margin: 0 0 16px 24px; border: 1px solid var(--border-color); font-size: 13px; }
+  .infobox { float: right; clear: right; margin: 0 0 16px 24px; border: 1px solid var(--wiki-border, #a2a9b1); font-size: 13px; }
   .thumb { float: right; clear: right; margin: 0 0 12px 16px; }
 
   // Block quotes
   blockquote {
-    border-left-color: var(--border-color);
-    color: var(--text-secondary);
+    border-left-color: var(--wiki-border, #a2a9b1);
+    color: var(--wiki-text, #202122);
   }
 
   mark.sh {
@@ -378,7 +378,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.7);
+  background: var(--overlay-bg, rgba(0,0,0,.6));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -433,7 +433,7 @@
 
   &.urgent {
     border-color: var(--danger);
-    background: rgba(248, 81, 73, 0.12);
+    background: var(--danger-tint, rgba(248,81,73,.12));
   }
 }
 
@@ -472,14 +472,14 @@
   padding: 6px 18px;
   border-radius: 20px;
   margin-bottom: 6px;
-  &.won { background: rgba(63,185,80,.15); color: var(--success); border: 1px solid rgba(63,185,80,.4); }
+  &.won { background: var(--success-tint, rgba(74,222,128,.10)); color: var(--success); border: 1px solid var(--success-border, rgba(74,222,128,.25)); }
   &.lost { background: rgba(139,148,158,.1); color: var(--text-secondary); border: 1px solid var(--border-color); }
 }
 
 .you-tag {
   font-size: 11px;
   font-weight: 600;
-  background: rgba(88, 166, 255, .15); /* --accent tint */
+  background: var(--accent-tint, rgba(88,166,255,.10)); /* --accent tint */
   color: var(--accent);
   padding: 1px 7px;
   border-radius: 8px;
@@ -499,7 +499,7 @@
   font-size: 14px;
   gap: 0;
   &.me { border-color: var(--accent); }
-  &.winner { border-color: #ffd700; background: rgba(255,215,0,.05); }
+  &.winner { border-color: var(--gold, #ffd700); background: rgba(255,215,0,.05); }
 }
 
 .lb-row {
@@ -576,7 +576,7 @@
 .reconnect-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(13, 17, 23, 0.88);
+  background: var(--overlay-dark, rgba(13,17,23,.88));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -592,7 +592,7 @@
 .mobile-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.6);
+  background: var(--overlay-bg, rgba(0,0,0,.6));
   z-index: 199;
   backdrop-filter: blur(2px);
 }
@@ -689,7 +689,7 @@
     z-index: 200;
     transform: translateX(-100%);
     transition: transform 0.25s cubic-bezier(.4,0,.2,1);
-    box-shadow: 4px 0 24px rgba(0,0,0,.5);
+    box-shadow: var(--shadow-lg);
 
     &.mobile-open { transform: translateX(0); }
 

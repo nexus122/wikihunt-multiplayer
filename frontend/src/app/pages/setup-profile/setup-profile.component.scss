@@ -40,8 +40,8 @@
 .status {
   font-size: 13px;
   font-weight: 600;
-  &.available { color: #39c56e; }
-  &.taken { color: #f85149; }
+  &.available { color: var(--success, #4ade80); }
+  &.taken { color: var(--danger, #f85149); }
 }
 
 .suggestion {

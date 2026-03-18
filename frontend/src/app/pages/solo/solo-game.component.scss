@@ -3,6 +3,7 @@
   height: 100vh;
   overflow: hidden;
   position: relative;
+  --sidebar-width: 280px;
 }
 
 /* ─── Mobile-only elements (hidden on desktop) ─── */
@@ -71,8 +72,8 @@
 }
 
 .target-box {
-  background: rgba(248,81,73,.08);
-  border: 1px solid rgba(248,81,73,.25);
+  background: var(--danger-tint, rgba(248,81,73,.10));
+  border: 1px solid var(--danger-border, rgba(248,81,73,.25));
   border-radius: 8px;
   padding: 10px 12px;
 
@@ -104,7 +105,7 @@
   .target-link {
     font-size: 11px;
     font-weight: 600;
-    color: rgba(248,81,73,.7);
+    color: var(--danger-border, rgba(248,81,73,.25));
     text-decoration: none;
     display: inline-block;
     &:hover { color: var(--danger); text-decoration: underline; }
@@ -174,14 +175,14 @@
 }
 
 .btn-danger {
-  background: rgba(248,81,73,.15);
-  border: 1px solid rgba(248,81,73,.4);
+  background: var(--danger-tint, rgba(248,81,73,.12));
+  border: 1px solid var(--danger-border, rgba(248,81,73,.25));
   color: var(--danger);
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all .15s;
-  &:hover { background: rgba(248,81,73,.25); }
+  &:hover { background: var(--danger-tint-lg, rgba(248,81,73,.20)); }
 }
 
 /* ─── In-page search ─── */
@@ -295,26 +296,39 @@
   font-family: 'Linux Libertine', Georgia, Times, serif;
   font-size: 15px;
   line-height: 1.7;
-  color: #202122;
-  background: #fff;
+  color: var(--wiki-text, #202122);
+  background: var(--wiki-bg, #ffffff);
   transition: opacity .15s;
 
   &.navigating { opacity: 0.5; pointer-events: none; }
 
-  h1, h2, h3, h4 { font-family: 'Linux Libertine', Georgia, serif; color: #000; }
-  h1 { font-size: 28px; border-bottom: 1px solid #a2a9b1; margin-bottom: 16px; padding-bottom: 4px; }
-  h2 { font-size: 22px; border-bottom: 1px solid #a2a9b1; margin: 20px 0 8px; }
+  h1, h2, h3, h4 { font-family: 'Linux Libertine', Georgia, serif; color: var(--wiki-text, #202122); }
+  h1 { font-size: 28px; border-bottom: 1px solid var(--wiki-border, #a2a9b1); margin-bottom: 16px; padding-bottom: 4px; }
+  h2 { font-size: 22px; border-bottom: 1px solid var(--wiki-border, #a2a9b1); margin: 20px 0 8px; }
   h3 { font-size: 17px; margin: 16px 0 6px; }
   p { margin-bottom: 12px; }
-  a { color: #0645ad; cursor: pointer; }
-  a:hover { color: #0b0080; text-decoration: underline; }
-  table { border-collapse: collapse; margin: 16px 0; font-size: 13px; }
-  td, th { border: 1px solid #a2a9b1; padding: 6px 10px; }
-  th { background: #eaecf0; font-weight: 600; }
+  a { color: var(--wiki-link, #0645ad); cursor: pointer; }
+  a:visited { color: var(--wiki-link-hover, #0b0080); }
+  a:hover { color: var(--wiki-link-hover, #0b0080); text-decoration: underline; }
+  table { border-collapse: collapse; margin: 16px 0; font-size: 13px; border-color: var(--wiki-border, #a2a9b1); }
+  td, th { border: 1px solid var(--wiki-border, #a2a9b1); padding: 6px 10px; }
+  th { background: var(--wiki-table-head, #eaecf0); font-weight: 600; color: var(--wiki-text, #202122); }
   img { max-width: 100%; height: auto; }
   ul, ol { margin: 8px 0 12px 24px; }
   li { margin-bottom: 3px; }
-  .infobox { float: right; clear: right; margin: 0 0 16px 24px; border: 1px solid #a2a9b1; font-size: 13px; background: #f8f9fa; }
+
+  .infobox, .wikitable {
+    background: var(--wiki-infobox-bg, #f8f9fa) !important;
+    border-color: var(--wiki-border, #a2a9b1) !important;
+    color: var(--wiki-text, #202122) !important;
+    th, td {
+      background: transparent !important;
+      color: var(--wiki-text, #202122) !important;
+      border-color: var(--wiki-border, #a2a9b1) !important;
+    }
+  }
+
+  .infobox { float: right; clear: right; margin: 0 0 16px 24px; border: 1px solid var(--wiki-border, #a2a9b1); font-size: 13px; }
   .thumb { float: right; clear: right; margin: 0 0 12px 16px; }
 
   mark.sh {
@@ -329,7 +343,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.7);
+  background: var(--overlay-bg, rgba(0,0,0,.6));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -387,9 +401,9 @@
   border-radius: 20px;
 
   &.won {
-    background: rgba(63,185,80,.15);
+    background: var(--success-tint, rgba(74,222,128,.10));
     color: var(--success);
-    border: 1px solid rgba(63,185,80,.4);
+    border: 1px solid var(--success-border, rgba(74,222,128,.25));
   }
 
   &.gave-up {
@@ -493,7 +507,7 @@
 .mobile-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.6);
+  background: var(--overlay-bg, rgba(0,0,0,.6));
   z-index: 199;
   backdrop-filter: blur(2px);
 }
@@ -507,6 +521,7 @@
     flex-direction: column;
     height: 100vh;
     height: 100svh;
+    --sidebar-width: 0px;
   }
 
   /* ── Mobile top HUD ── */
@@ -589,7 +604,7 @@
     z-index: 200;
     transform: translateX(-100%);
     transition: transform 0.25s cubic-bezier(.4,0,.2,1);
-    box-shadow: 4px 0 24px rgba(0,0,0,.5);
+    box-shadow: var(--shadow-lg);
 
     &.mobile-open { transform: translateX(0); }
 

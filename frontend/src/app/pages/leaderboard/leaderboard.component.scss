@@ -208,9 +208,9 @@
 }
 
 .game-type-badge {
-  background: rgba(88, 166, 255, .12);
+  background: var(--accent-tint, rgba(88,166,255,.12));
   color: var(--accent);
-  border-color: rgba(88, 166, 255, .3);
+  border-color: var(--accent-border, rgba(88,166,255,.30));
   border-radius: var(--radius-full, 9999px);
   font-size: var(--font-xs, 12px);
   font-weight: 600;
