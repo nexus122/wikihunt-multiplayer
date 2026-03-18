@@ -76,7 +76,7 @@ export const translations = {
     daily_streak_days: 'días',
 
     // Lobby
-    lobby_leave: '← Salir',
+    lobby_leave: 'Salir',
     lobby_room_code: 'Código de sala',
     lobby_copy: 'Copiar código',
     lobby_copied: '✓ Copiado!',
@@ -113,7 +113,7 @@ export const translations = {
     game_show_path: 'Ver ruta',
     game_hide_path: 'Ocultar ruta',
     game_give_up: '🏳️ Rendirse',
-    game_leave: '← Salir',
+    game_leave: 'Salir',
     game_wiki_link: 'Ver en Wikipedia ↗',
     game_loading: 'Cargando artículo…',
     game_spectating: '🏳️ Te has rendido · Mira cómo acaban los demás',
