@@ -72,6 +72,7 @@ export const translations = {
     challenge_share_btn: 'Copiar enlace de reto',
     challenge_copied: '¡Enlace copiado!',
     challenge_share_text: '⚔️ WikiHunt: ¿puedes llegar de "{{start}}" a "{{target}}" en Wikipedia? ¡Acepta el reto!',
+    challenge_view_ranking: 'Ver ranking de este reto',
 
     // Daily
     daily_title: 'Reto del día',
@@ -168,6 +169,8 @@ export const translations = {
     lb_tab_today: '☀️ Hoy',
     lb_tab_alltime: '⭐ Hall of Fame',
     lb_tab_mine: '👤 Mis partidas',
+    lb_tab_challenge: '⚔️ Reto',
+    lb_empty_challenge: 'Nadie ha completado este reto todavía.\n¡Sé el primero!',
     lb_loading: 'Cargando…',
     lb_play_link: 'Jugar ↗',
     lb_empty_today: 'Nadie ha completado el reto de hoy todavía.\n¡Sé el primero!',
@@ -331,6 +334,7 @@ export const translations = {
     challenge_share_btn: 'Copy challenge link',
     challenge_copied: 'Link copied!',
     challenge_share_text: '⚔️ WikiHunt: can you get from "{{start}}" to "{{target}}" on Wikipedia? Accept the challenge!',
+    challenge_view_ranking: 'View leaderboard for this challenge',
 
     // Daily
     daily_title: 'Daily Challenge',
@@ -427,6 +431,8 @@ export const translations = {
     lb_tab_today: '☀️ Today',
     lb_tab_alltime: '⭐ Hall of Fame',
     lb_tab_mine: '👤 My games',
+    lb_tab_challenge: '⚔️ Challenge',
+    lb_empty_challenge: 'Nobody has completed this challenge yet.\nBe the first!',
     lb_loading: 'Loading…',
     lb_play_link: 'Play ↗',
     lb_empty_today: 'Nobody has completed today\'s challenge yet.\nBe the first!',

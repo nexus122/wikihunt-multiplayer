@@ -7,6 +7,9 @@
     <button class="tab-btn" role="tab" [attr.aria-selected]="activeTab === 'today'" [class.active]="activeTab === 'today'" (click)="loadTab('today')">{{ t('lb_tab_today') }}</button>
     <button class="tab-btn" role="tab" [attr.aria-selected]="activeTab === 'alltime'" [class.active]="activeTab === 'alltime'" (click)="loadTab('alltime')">{{ t('lb_tab_alltime') }}</button>
     <button class="tab-btn" role="tab" [attr.aria-selected]="activeTab === 'mine'" [class.active]="activeTab === 'mine'" (click)="loadTab('mine')">{{ t('lb_tab_mine') }}</button>
+    @if (challengeStart && challengeTarget) {
+      <button class="tab-btn tab-btn--challenge" role="tab" [attr.aria-selected]="activeTab === 'challenge'" [class.active]="activeTab === 'challenge'" (click)="loadTab('challenge')">{{ t('lb_tab_challenge') }}</button>
+    }
   </div>
 
   @if (loading) {
@@ -81,6 +84,41 @@
                 }
                 <span class="entry-steps">{{ entry.steps }} {{ t('lb_steps') }}</span>
               </td>
+              <td class="entry-time">{{ formatTime(entry.time_ms) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+
+  <!-- RANKING DE RETO -->
+  @if (!loading && activeTab === 'challenge') {
+    <div class="challenge-info">
+      <span class="challenge-route">{{ challengeStart }} → {{ challengeTarget }}</span>
+      <a class="play-link" [routerLink]="['/']" [queryParams]="{start: challengeStart, target: challengeTarget}">{{ t('lb_play_link') }}</a>
+    </div>
+    @if (challengeBoard.length === 0) {
+      <div class="empty">
+        <p>{{ t('lb_empty_challenge') }}</p>
+        <a class="btn-primary" [routerLink]="['/']" [queryParams]="{start: challengeStart, target: challengeTarget}">{{ t('challenge_play') }}</a>
+      </div>
+    } @else {
+      <table class="entries">
+        <thead>
+          <tr>
+            <th scope="col" class="col-rank">Rank</th>
+            <th scope="col" class="col-player">{{ t('lb_col_player') }}</th>
+            <th scope="col" class="col-steps">{{ t('lb_col_steps') }}</th>
+            <th scope="col" class="col-time">{{ t('lb_col_time') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of challengeBoard; track entry.id; let i = $index) {
+            <tr class="entry" [class.top]="i < 3">
+              <td class="rank">{{ rankEmoji(i) }}</td>
+              <td class="entry-main entry-name">{{ entry.player_name }}</td>
+              <td class="entry-stat entry-steps">{{ entry.steps }} {{ t('lb_steps') }}</td>
               <td class="entry-time">{{ formatTime(entry.time_ms) }}</td>
             </tr>
           }

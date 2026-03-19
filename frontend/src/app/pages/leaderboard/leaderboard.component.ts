@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SupabaseService, DailyResult, HallOfFameEntry, DailyChallenge } from '../../core/services/supabase.service';
 import { formatTime } from '../../core/utils/time.utils';
@@ -17,13 +17,16 @@ import { TranslationKey } from '../../core/i18n/translations';
   styleUrl: './leaderboard.component.scss',
 })
 export class LeaderboardComponent implements OnInit, OnDestroy {
-  activeTab: 'today' | 'alltime' | 'mine' = 'today';
+  activeTab: 'today' | 'alltime' | 'mine' | 'challenge' = 'today';
   loading = true;
 
   todayChallenge: DailyChallenge | null = null;
   todayPodio: DailyResult[] = [];
   hallOfFame: HallOfFameEntry[] = [];
   myHistory: HallOfFameEntry[] = [];
+  challengeBoard: HallOfFameEntry[] = [];
+  challengeStart = '';
+  challengeTarget = '';
   myName = '';
 
   private langSub?: Subscription;
@@ -33,6 +36,7 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
     private supabaseService: SupabaseService,
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     public lang: LanguageService,
   ) {}
 
@@ -53,7 +57,14 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
       }
     });
 
-    await this.loadTab('today');
+    // Challenge-specific leaderboard via query params ?start=X&target=Y
+    const params = this.route.snapshot.queryParamMap;
+    this.challengeStart = params.get('start') || '';
+    this.challengeTarget = params.get('target') || '';
+
+    const initialTab = this.challengeStart && this.challengeTarget ? 'challenge' : 'today';
+    await this.loadTab(initialTab);
+
     this.langSub = this.lang.lang$.subscribe(async () => {
       await this.loadTab(this.activeTab);
     });
@@ -64,7 +75,7 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
     this.authSub?.unsubscribe();
   }
 
-  async loadTab(tab: 'today' | 'alltime' | 'mine'): Promise<void> {
+  async loadTab(tab: 'today' | 'alltime' | 'mine' | 'challenge'): Promise<void> {
     this.activeTab = tab;
     this.loading = true;
     const l = this.lang.current;
@@ -79,6 +90,10 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
       } else if (tab === 'mine') {
         this.myHistory = this.myName
           ? await this.supabaseService.getPlayerHistory(this.myName, l)
+          : [];
+      } else if (tab === 'challenge') {
+        this.challengeBoard = this.challengeStart && this.challengeTarget
+          ? await this.supabaseService.getChallengeLeaderboard(this.challengeStart, this.challengeTarget, l)
           : [];
       }
     } catch {

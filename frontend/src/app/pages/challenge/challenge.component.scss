@@ -169,6 +169,15 @@
   padding: 12px;
 }
 
+.ranking-link {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+
+  &:hover { color: var(--accent); }
+}
+
 .hint-text {
   text-align: center;
   color: var(--text-secondary);

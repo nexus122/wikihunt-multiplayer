@@ -150,23 +150,14 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   playChallenge(): void {
     if (!this.activeName.trim()) { this.error = this.t('name_placeholder'); return; }
-    this.creating = true;
-    this.error = '';
     if (!this.profileName) localStorage.setItem('wh_name', this.guestName.trim());
-
-    this.socketService.createRoom(this.activeName.trim()).subscribe({
-      next: (data) => {
-        this.router.navigate(['/lobby', data.code], {
-          state: {
-            room: data.room,
-            isHost: true,
-            challengeStart: this.challengingStart,
-            challengeTarget: this.challengingTarget,
-            challengeLang: this.challengeLang,
-          },
-        });
+    this.router.navigate(['/solo/game'], {
+      state: {
+        playerName: this.activeName.trim(),
+        startPage: this.challengingStart,
+        targetPage: this.challengingTarget,
+        lang: this.challengeLang || this.lang.current,
       },
-      error: () => { this.error = 'Failed to create room.'; this.creating = false; },
     });
   }
 

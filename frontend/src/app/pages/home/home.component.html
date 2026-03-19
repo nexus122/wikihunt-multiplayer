@@ -16,9 +16,8 @@
         </div>
       }
       @if (error) { <div class="error-message">{{ error }}</div> }
-      <button class="btn-primary" (click)="playChallenge()" [disabled]="creating">
-        {{ creating ? t('creating') : t('challenge_play') }}
-      </button>
+      <button class="btn-primary" (click)="playChallenge()">{{ t('challenge_play') }}</button>
+      <a class="challenge-lb-link" [routerLink]="['/leaderboard']" [queryParams]="{start: challengingStart, target: challengingTarget, lang: challengeLang}">{{ t('challenge_view_ranking') }}</a>
     </div>
   }
 

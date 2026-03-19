@@ -175,6 +175,15 @@
 // .name-locked and .name-locked-badge are now defined globally in styles.scss
 
 // ─── Challenge invite & rejoin ────────────────────────────────────────────────
+.challenge-lb-link {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+
+  &:hover { color: var(--accent); }
+}
+
 .challenge-invite-card {
   width: 100%;
   max-width: 400px;

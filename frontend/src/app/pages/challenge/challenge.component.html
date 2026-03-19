@@ -85,6 +85,9 @@
             ⚔️ {{ t('challenge_share_btn') }}
           }
         </button>
+        <a class="ranking-link" [routerLink]="['/leaderboard']" [queryParams]="{start: selectedStart!.title, target: selectedTarget!.title, lang: lang.current}">
+          🏆 {{ t('challenge_view_ranking') }}
+        </a>
       </div>
     } @else {
       <p class="hint-text">{{ t('challenge_hint') }}</p>

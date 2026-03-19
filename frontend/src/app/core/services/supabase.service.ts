@@ -96,6 +96,26 @@ export class SupabaseService {
     }).slice(0, 50);
   }
 
+  async getChallengeLeaderboard(start: string, target: string, lang?: string): Promise<HallOfFameEntry[]> {
+    let query = this.client
+      .from('hall_of_fame')
+      .select('*')
+      .eq('start_page', start)
+      .eq('target_page', target);
+    if (lang) query = query.eq('language', lang);
+    const { data, error } = await query
+      .order('steps', { ascending: true })
+      .order('time_ms', { ascending: true })
+      .limit(100);
+    if (error || !data) return [];
+    const seen = new Set<string>();
+    return (data as HallOfFameEntry[]).filter(e => {
+      if (seen.has(e.player_name)) return false;
+      seen.add(e.player_name);
+      return true;
+    }).slice(0, 20);
+  }
+
   async getPlayerHistory(playerName: string, lang?: string): Promise<HallOfFameEntry[]> {
     if (!playerName.trim()) return [];
     let query = this.client
