@@ -83,7 +83,7 @@ import { TranslationKey } from '../i18n/translations';
                 </div>
 
                 @if (streak > 0) {
-                  <div class="dropdown-streak" aria-label="{{ streak }} day streak">
+                  <div class="dropdown-streak" [attr.aria-label]="streak + ' day streak'">
                     <span aria-hidden="true">🔥</span>
                     <span><strong>{{ streak }}</strong> {{ t('panel_streak') }}</span>
                   </div>

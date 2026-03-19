@@ -317,7 +317,7 @@ export const translations = {
     daily_streak_days: 'days',
 
     // Lobby
-    lobby_leave: '← Leave',
+    lobby_leave: 'Leave',
     lobby_room_code: 'Room Code',
     lobby_copy: 'Copy code',
     lobby_copied: '✓ Copied!',
@@ -354,7 +354,7 @@ export const translations = {
     game_show_path: 'Show path',
     game_hide_path: 'Hide path',
     game_give_up: '🏳️ Give Up',
-    game_leave: '← Exit',
+    game_leave: 'Exit',
     game_wiki_link: 'View on Wikipedia ↗',
     game_loading: 'Loading article…',
     game_spectating: '🏳️ You gave up · Watch others finish',
