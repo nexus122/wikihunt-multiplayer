@@ -207,6 +207,86 @@
   margin: 0;
 }
 
+// ── Mobile: convert table rows to flex cards ─────────────────────────────────
+@media (max-width: 560px) {
+  .lb-page { padding: 16px 12px; }
+
+  .entries {
+    display: block;
+    border-spacing: 0;
+
+    thead { display: none; }
+    tbody { display: flex; flex-direction: column; gap: 6px; }
+
+    tr.entry {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 0;
+
+      &.top { border-color: var(--accent); }
+      &:hover { background: var(--bg-secondary); }
+
+      // Remove all cell-level borders and padding
+      td {
+        display: block;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+      }
+
+      // Rank emoji — fixed small width
+      td.rank {
+        width: 26px;
+        flex-shrink: 0;
+        font-size: 18px;
+        text-align: center;
+        align-self: center;
+      }
+
+      // Main content (name / route+date) — takes remaining space
+      td.entry-main {
+        flex: 1;
+        min-width: 0;
+      }
+
+      // Stats cell (badge + steps) — right-aligned, shrinks
+      td.entry-stat {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 2px;
+      }
+
+      // Time — right-aligned, shrinks
+      td.entry-time {
+        flex-shrink: 0;
+        min-width: unset;
+        text-align: right;
+      }
+    }
+  }
+
+  // On mobile time goes inside the stat cell visually — hide standalone time
+  // but keep it for accessibility. Instead show steps + time together in stat.
+  .entry-route {
+    white-space: normal;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    max-width: 100%;
+  }
+
+  .game-type-badge { margin-bottom: 2px; }
+}
+
 .game-type-badge {
   background: var(--accent-tint, rgba(88,166,255,.12));
   color: var(--accent);

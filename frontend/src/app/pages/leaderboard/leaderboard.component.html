@@ -41,8 +41,8 @@
           @for (entry of todayPodio; track entry.id; let i = $index) {
             <tr class="entry" [class.top]="i < 3">
               <td class="rank">{{ rankEmoji(i) }}</td>
-              <td class="entry-name">{{ entry.player_name }}</td>
-              <td class="entry-steps">{{ entry.steps }} {{ t('lb_steps') }}</td>
+              <td class="entry-main entry-name">{{ entry.player_name }}</td>
+              <td class="entry-stat entry-steps">{{ entry.steps }} {{ t('lb_steps') }}</td>
               <td class="entry-time">{{ formatTime(entry.time_ms) }}</td>
             </tr>
           }
@@ -69,13 +69,13 @@
           @for (entry of hallOfFame; track entry.id; let i = $index) {
             <tr class="entry" [class.top]="i < 3">
               <td class="rank">{{ rankEmoji(i) }}</td>
-              <td>
+              <td class="entry-main">
                 <div class="entry-info">
                   <span class="entry-name">{{ entry.player_name }}</span>
                   <span class="entry-route">{{ entry.start_page }} → {{ entry.target_page }}</span>
                 </div>
               </td>
-              <td>
+              <td class="entry-stat">
                 @if (entry.game_type === 'solo') {
                   <span class="game-type-badge" aria-label="Solo">Solo</span>
                 }
@@ -108,13 +108,13 @@
         <tbody>
           @for (entry of myHistory; track entry.id; let i = $index) {
             <tr class="entry">
-              <td>
+              <td class="entry-main">
                 <div class="entry-info">
                   <span class="entry-route">{{ entry.start_page }} → {{ entry.target_page }}</span>
                   <span class="entry-date">{{ entry.created_at | date:'d MMM yyyy' }}</span>
                 </div>
               </td>
-              <td>
+              <td class="entry-stat">
                 @if (entry.game_type === 'solo') {
                   <span class="game-type-badge" aria-label="Solo">Solo</span>
                 }
