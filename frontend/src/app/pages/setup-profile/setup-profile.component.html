@@ -10,7 +10,7 @@
         <input id="display-name-input" type="text" [placeholder]="t('setup_name_placeholder')" [(ngModel)]="displayName" maxlength="20"
                (ngModelChange)="nameAvailable = null; suggestion = ''"
                (keydown.enter)="save()" />
-        <button class="btn-secondary" (click)="checkName()" [disabled]="!displayName?.trim() || checking || saving">
+        <button class="btn-secondary" (click)="checkName()" [disabled]="!displayName.trim() || checking || saving">
           {{ checking ? '...' : t('setup_check') }}
         </button>
       </div>

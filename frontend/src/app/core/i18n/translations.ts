@@ -146,9 +146,6 @@ export const translations = {
     game_search_placeholder: 'Buscar en el artículo…',
     game_search_no_results: 'Sin resultados',
     game_countdown_waiting: 'Esperando al resto de jugadores…',
-    game_share: '↗ Compartir resultado',
-    game_share_copied: '✓ ¡Enlace copiado!',
-
     // Leaderboard
     lb_title: '🏆 Clasificaciones',
     lb_back: 'Volver',
@@ -392,9 +389,6 @@ export const translations = {
     game_search_placeholder: 'Search in article…',
     game_search_no_results: 'No results',
     game_countdown_waiting: 'Waiting for other players…',
-    game_share: '↗ Share result',
-    game_share_copied: '✓ Link copied!',
-
     // Leaderboard
     lb_title: '🏆 Leaderboard',
     lb_back: 'Back',

@@ -33,7 +33,7 @@
         <ul class="player-list">
           @for (p of room.players; track p.socketId) {
             <li class="player-item">
-              <div class="avatar" [style.background]="getAvatarColor(p.socketId)">{{ (p.name?.[0] || '?').toUpperCase() }}</div>
+              <div class="avatar" [style.background]="getAvatarColor(p.socketId)">{{ (p.name[0] || '?').toUpperCase() }}</div>
               <span class="name">{{ p.name }}</span>
               @if (p.socketId === room.hostId) { <span class="tag host">{{ t('lobby_host_tag') }}</span> }
               @if (p.socketId === mySocketId) { <span class="tag you">{{ t('lobby_you_tag') }}</span> }

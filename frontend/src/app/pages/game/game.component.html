@@ -63,7 +63,7 @@
       <ul class="players">
         @for (p of players; track p.socketId) {
           <li class="player" [class.me]="p.socketId === mySocketId" [class.finished]="p.finished" [class.disconnected]="p.disconnected">
-            <div class="avatar sm" [style.background]="getAvatarColor(p.socketId)">{{ (p.name?.[0] || '?').toUpperCase() }}</div>
+            <div class="avatar sm" [style.background]="getAvatarColor(p.socketId)">{{ (p.name[0] || '?').toUpperCase() }}</div>
             <div class="player-info">
               <span class="player-name" [title]="p.name">{{ p.name }}</span>
               <span class="player-page">{{ p.disconnected ? t('game_disconnected') : (p.currentPage || '...') }}</span>
@@ -240,7 +240,7 @@
             <li class="lb-entry" [class.me]="e.socketId === mySocketId" [class.winner]="i === 0 && e.finished">
               <div class="lb-row">
                 <span class="rank">{{ getRankEmoji(i) }}</span>
-                <div class="avatar sm" [style.background]="getAvatarColor(e.socketId)">{{ (e.name?.[0] || '?').toUpperCase() }}</div>
+                <div class="avatar sm" [style.background]="getAvatarColor(e.socketId)">{{ (e.name[0] || '?').toUpperCase() }}</div>
                 <span class="lb-name">{{ e.name }}@if (e.socketId === mySocketId) { <span class="you-tag">{{ t('game_you_tag') }}</span> }</span>
                 <span class="lb-steps">{{ e.steps }} {{ t('game_steps') }}</span>
                 <span class="lb-time">{{ e.finished ? formatTime(e.time) : (e.gaveUp ? t('game_gave_up') : t('game_not_finished')) }}</span>
@@ -264,9 +264,6 @@
         <div class="lb-actions">
           <button class="btn-primary" (click)="playAgain()">{{ t('game_play_again') }}</button>
           <button class="btn-secondary" (click)="goHome()">{{ t('game_home') }}</button>
-          <button class="btn-secondary" [class.copied]="linkCopied" (click)="shareResult()">
-            {{ linkCopied ? t('game_share_copied') : t('game_share') }}
-          </button>
           <button class="btn-secondary share-btn" (click)="shareResult()">
             @if (shareCopied) {
               ✓ {{ t('share_copied') }}
