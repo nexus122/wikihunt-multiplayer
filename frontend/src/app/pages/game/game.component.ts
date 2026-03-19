@@ -68,6 +68,9 @@ export class GameComponent implements OnInit, OnDestroy {
   showGiveUpConfirm = false;
   isSpectating = false;
 
+  // Leave confirmation
+  showLeaveConfirm = false;
+
   // True when the very first page failed to load (shows a retry button)
   initialLoadFailed = false;
 
@@ -88,6 +91,7 @@ export class GameComponent implements OnInit, OnDestroy {
   // Share result
   private readonly isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   linkCopied = false;
+  shareCopied = false;
 
   // Confetti
   confettiActive = false;
@@ -651,7 +655,8 @@ export class GameComponent implements OnInit, OnDestroy {
       const url = `${this.siteUrl}/?start=${encodeURIComponent(this.startPage)}&target=${encodeURIComponent(this.targetPage)}&lang=${this.gameLang}`;
       navigator.clipboard.writeText(url).then(() => {
         this.linkCopied = true;
-        setTimeout(() => { this.linkCopied = false; }, 2500);
+        this.shareCopied = true;
+        setTimeout(() => { this.linkCopied = false; this.shareCopied = false; }, 2500);
       }).catch(() => {});
     }
   }
@@ -670,5 +675,18 @@ export class GameComponent implements OnInit, OnDestroy {
   goHome(): void {
     localStorage.removeItem('wh_game');
     this.router.navigate(['/']);
+  }
+
+  confirmLeave(): void {
+    this.showLeaveConfirm = true;
+  }
+
+  doLeave(): void {
+    this.showLeaveConfirm = false;
+    this.goHome();
+  }
+
+  cancelLeave(): void {
+    this.showLeaveConfirm = false;
   }
 }

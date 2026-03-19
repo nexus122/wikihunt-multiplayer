@@ -91,7 +91,7 @@
       <button class="giveup-btn" (click)="showGiveUpConfirm = true">{{ t('game_give_up') }}</button>
     }
     @if (isSpectating) {
-      <button class="btn-secondary" style="font-size:12px;padding:7px;width:100%" (click)="goHome()">{{ t('game_leave') }}</button>
+      <button class="btn-secondary" style="font-size:12px;padding:7px;width:100%" (click)="confirmLeave()">{{ t('game_leave') }}</button>
     }
   </aside>
 
@@ -178,6 +178,20 @@
     </div>
   }
 
+  <!-- ─── Leave confirmation modal ─── -->
+  @if (showLeaveConfirm) {
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="leave-confirm-title">
+      <div class="modal leave-confirm-modal" (click)="$event.stopPropagation()">
+        <h2 id="leave-confirm-title" class="modal-title">{{ t('leave_confirm_title') }}</h2>
+        <p class="modal-sub">{{ t('leave_confirm_sub') }}</p>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="cancelLeave()">{{ t('leave_confirm_cancel') }}</button>
+          <button class="btn-danger" (click)="doLeave()">{{ t('leave_confirm_ok') }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
   <!-- ─── Path modal ─── -->
   @if (showPath) {
     <div class="modal-overlay" (click)="showPath = false" aria-hidden="true">
@@ -252,6 +266,13 @@
           <button class="btn-secondary" (click)="goHome()">{{ t('game_home') }}</button>
           <button class="btn-secondary" [class.copied]="linkCopied" (click)="shareResult()">
             {{ linkCopied ? t('game_share_copied') : t('game_share') }}
+          </button>
+          <button class="btn-secondary share-btn" (click)="shareResult()">
+            @if (shareCopied) {
+              ✓ {{ t('share_copied') }}
+            } @else {
+              {{ t('share_result') }}
+            }
           </button>
         </div>
       </div>

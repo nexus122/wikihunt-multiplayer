@@ -174,6 +174,55 @@
   button { width: 100%; padding: 10px; }
 }
 
+/* ─── Leave confirmation modal ─── */
+.leave-confirm-modal {
+  max-width: 360px;
+  text-align: center;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--text-primary);
+}
+
+.modal-sub {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  button { width: 100%; padding: 10px; }
+}
+
+.leave-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 12px;
+  padding: 7px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all .15s;
+  &:hover { border-color: var(--danger); color: var(--danger); }
+}
+
+/* ─── Share button ─── */
+.share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all .15s;
+}
+
 .btn-danger {
   background: var(--danger-tint, rgba(248,81,73,.12));
   border: 1px solid var(--danger-border, rgba(248,81,73,.25));

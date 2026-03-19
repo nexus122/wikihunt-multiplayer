@@ -61,6 +61,7 @@ export class SoloGameComponent implements OnInit, OnDestroy {
   // UI
   showPath = false;
   showGiveUpConfirm = false;
+  showLeaveConfirm = false;
   mobileMenuOpen = false;
 
   // In-page search
@@ -69,6 +70,9 @@ export class SoloGameComponent implements OnInit, OnDestroy {
   matchCount = 0;
   currentMatch = 0;
   private searchInput$ = new Subject<string>();
+
+  // Share
+  shareCopied = false;
 
   // Confetti
   confettiActive = false;
@@ -531,6 +535,52 @@ export class SoloGameComponent implements OnInit, OnDestroy {
     }));
     this.confettiActive = true;
     setTimeout(() => { this.confettiActive = false; }, 5500);
+  }
+
+  // ── Leave confirmation ─────────────────────────────────────
+
+  confirmLeave(): void {
+    this.showLeaveConfirm = true;
+  }
+
+  cancelLeave(): void {
+    this.showLeaveConfirm = false;
+  }
+
+  doLeave(): void {
+    this.showLeaveConfirm = false;
+    this.router.navigate(['/solo']);
+  }
+
+  // ── Share result ───────────────────────────────────────────
+
+  shareResult(): void {
+    const steps = this.steps;
+    const time = formatTime(this.elapsedMs);
+    const start = this.startPage;
+    const target = this.targetPage;
+    const won = this.gameState === 'won';
+
+    const template = won
+      ? this.t('share_text_won')
+      : this.t('share_text_giveup');
+
+    const text = template
+      .replace('{{start}}', start)
+      .replace('{{target}}', target)
+      .replace('{{steps}}', String(steps))
+      .replace('{{time}}', time);
+
+    const url = window.location.origin;
+
+    if (navigator.share) {
+      navigator.share({ title: 'WikiHunt', text, url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(text + '\n' + url).then(() => {
+        this.shareCopied = true;
+        setTimeout(() => { this.shareCopied = false; }, 2000);
+      });
+    }
   }
 
   // ── Navigation buttons ─────────────────────────────────────

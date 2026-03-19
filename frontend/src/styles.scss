@@ -74,6 +74,10 @@
   --warning-tint:    rgba(255,149,0,0.08);
   --warning-border:  rgba(255,149,0,0.22);
 
+  // Button text colors
+  --btn-primary-text: #0d1117;
+  --btn-success-text: #0d1117;
+
   // Overlays
   --overlay-bg:      rgba(0,0,0,0.60);
   --overlay-dark:    rgba(13,17,23,0.90);
@@ -126,6 +130,10 @@
   --success-border:  rgba(26,127,55,0.20);
   --warning-tint:    rgba(154,103,0,0.08);
   --warning-border:  rgba(154,103,0,0.22);
+
+  // Button text colors
+  --btn-primary-text: #ffffff;
+  --btn-success-text: #ffffff;
 
   // Overlays (lighter for light theme)
   --overlay-bg:      rgba(0,0,0,0.45);
@@ -185,7 +193,7 @@ button {
 }
 
 .btn-primary {
-  background: var(--accent); color: #0d1117;
+  background: var(--accent); color: var(--btn-primary-text);
   &:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
 }
 .btn-secondary {
@@ -193,7 +201,7 @@ button {
   &:hover:not(:disabled) { background: var(--border-color); }
 }
 .btn-success {
-  background: var(--success); color: #0d1117;
+  background: var(--success); color: var(--btn-success-text);
   &:hover:not(:disabled) { filter: brightness(1.1); }
 }
 .btn-danger {

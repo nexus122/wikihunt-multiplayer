@@ -71,6 +71,7 @@
 
       @if (gameState === 'playing') {
         <button class="giveup-btn" (click)="showGiveUpConfirm = true; mobileMenuOpen = false">{{ t('solo_give_up') }}</button>
+        <button class="leave-btn" (click)="confirmLeave(); mobileMenuOpen = false">{{ t('leave_confirm_ok') }}</button>
       }
     </div>
   </aside>
@@ -151,6 +152,20 @@
     </div>
   }
 
+  <!-- ─── Leave confirmation modal ─── -->
+  @if (showLeaveConfirm) {
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="leave-confirm-title">
+      <div class="modal leave-confirm-modal">
+        <h2 id="leave-confirm-title" class="modal-title">{{ t('leave_confirm_title') }}</h2>
+        <p class="modal-sub">{{ t('leave_confirm_sub') }}</p>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="cancelLeave()">{{ t('leave_confirm_cancel') }}</button>
+          <button class="btn-danger" (click)="doLeave()">{{ t('leave_confirm_ok') }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
   <!-- ─── Path modal ─── -->
   @if (showPath) {
     <div class="modal-overlay" (click)="showPath = false" aria-hidden="true">
@@ -202,6 +217,13 @@
         <div class="result-actions">
           <button class="btn-primary" (click)="playAgain()">{{ t('solo_play_again') }}</button>
           <button class="btn-secondary" (click)="goHome()">{{ t('solo_home') }}</button>
+          <button class="btn-secondary share-btn" (click)="shareResult()">
+            @if (shareCopied) {
+              ✓ {{ t('share_copied') }}
+            } @else {
+              {{ t('share_result') }}
+            }
+          </button>
         </div>
       </div>
     </div>
