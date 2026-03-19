@@ -49,13 +49,29 @@ export const translations = {
     step4: '¡Llega primero a la página destino para ganar!',
     mode_daily_desc: 'Un nuevo reto cada día',
     mode_solo_desc: 'A tu ritmo, sin presión',
+    mode_challenge_desc: 'Elige páginas y reta a alguien',
+    challenge_mode_btn: '⚔️ Crear reto',
     multiplayer_label: 'Multijugador',
     auth_hint: '¿Quieres guardar tu historial y racha?',
     auth_hint_link: 'Crea una cuenta →',
 
-    // Challenge invite
+    // Challenge invite (home — receiving)
     challenge_title: '¡Alguien te ha retado!',
     challenge_play: '⚔️ Aceptar reto',
+
+    // Challenge creator page
+    challenge_back: 'Volver',
+    challenge_creator_title: 'Crear reto',
+    challenge_creator_subtitle: 'Elige inicio y destino para retar a alguien',
+    challenge_start_label: 'Página de inicio',
+    challenge_target_label: 'Página destino',
+    challenge_search_placeholder: 'Buscar artículo de Wikipedia…',
+    challenge_clear: 'Limpiar',
+    challenge_hint: 'Elige una página de inicio y una de destino',
+    challenge_link_ready: '¡Reto listo!',
+    challenge_share_btn: 'Copiar enlace de reto',
+    challenge_copied: '¡Enlace copiado!',
+    challenge_share_text: '⚔️ WikiHunt: ¿puedes llegar de "{{start}}" a "{{target}}" en Wikipedia? ¡Acepta el reto!',
 
     // Daily
     daily_title: 'Reto del día',
@@ -292,13 +308,29 @@ export const translations = {
     step4: 'Be the first to reach the target page to win!',
     mode_daily_desc: 'A new challenge every day',
     mode_solo_desc: 'At your own pace, no pressure',
+    mode_challenge_desc: 'Pick pages and challenge someone',
+    challenge_mode_btn: '⚔️ Create challenge',
     multiplayer_label: 'Multiplayer',
     auth_hint: 'Want to save your history and streak?',
     auth_hint_link: 'Create an account →',
 
-    // Challenge invite
+    // Challenge invite (home — receiving)
     challenge_title: 'Someone challenged you!',
     challenge_play: '⚔️ Accept challenge',
+
+    // Challenge creator page
+    challenge_back: 'Back',
+    challenge_creator_title: 'Create Challenge',
+    challenge_creator_subtitle: 'Pick a start and target to challenge someone',
+    challenge_start_label: 'Start page',
+    challenge_target_label: 'Target page',
+    challenge_search_placeholder: 'Search a Wikipedia article…',
+    challenge_clear: 'Clear',
+    challenge_hint: 'Choose a start page and a target page',
+    challenge_link_ready: 'Challenge ready!',
+    challenge_share_btn: 'Copy challenge link',
+    challenge_copied: 'Link copied!',
+    challenge_share_text: '⚔️ WikiHunt: can you get from "{{start}}" to "{{target}}" on Wikipedia? Accept the challenge!',
 
     // Daily
     daily_title: 'Daily Challenge',

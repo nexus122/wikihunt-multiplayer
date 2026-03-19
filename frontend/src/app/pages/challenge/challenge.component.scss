@@ -1,0 +1,177 @@
+.challenge-page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.hero {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.challenge-badge {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.challenge-subtitle {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 0;
+}
+
+.setup-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.picker-row {
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.route-arrow-divider {
+  text-align: center;
+  font-size: 20px;
+  color: var(--text-secondary);
+  line-height: 1;
+  margin: -4px 0;
+}
+
+// ─── Search ─────────────────────────────────────────────────────────────────
+.search-wrap {
+  position: relative;
+}
+
+.results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 50;
+  box-shadow: var(--shadow-md);
+  margin-top: 4px;
+}
+
+.result {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background .1s;
+
+  &:hover { background: var(--bg-tertiary); }
+}
+
+// ─── Selected chip ──────────────────────────────────────────────────────────
+.page-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.page-tag {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.start { color: var(--text-primary); }
+  &.target { color: var(--accent); }
+}
+
+.chip-clear {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 2px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  flex-shrink: 0;
+
+  &:hover { background: var(--bg-secondary); color: var(--text-primary); }
+}
+
+// ─── Link box ────────────────────────────────────────────────────────────────
+.link-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--accent-tint, rgba(88,166,255,.08));
+  border: 1px solid var(--accent-border, rgba(88,166,255,.25));
+  border-radius: 10px;
+}
+
+.link-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin: 0;
+}
+
+.link-preview {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.link-route {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.share-cta {
+  width: 100%;
+  font-size: 15px;
+  padding: 12px;
+}
+
+.hint-text {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 4px 0 0;
+}

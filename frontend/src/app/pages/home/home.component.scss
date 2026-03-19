@@ -74,6 +74,16 @@
     border-color: var(--accent-border, rgba(88, 166, 255, .30));
     background: var(--accent-tint-sm, rgba(88, 166, 255, .05));
   }
+
+  &--challenge {
+    border-color: rgba(210, 153, 34, .30);
+    background: rgba(210, 153, 34, .05);
+    grid-column: 1 / -1;
+
+    @media (max-width: 500px) { grid-column: auto; }
+
+    .mode-title { color: var(--warning, #d29922); }
+  }
 }
 
 .mode-title {

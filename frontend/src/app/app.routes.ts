@@ -23,6 +23,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/solo/solo-game.component').then(m => m.SoloGameComponent),
   },
   {
+    path: 'challenge',
+    loadComponent: () => import('./pages/challenge/challenge.component').then(m => m.ChallengeComponent),
+  },
+  {
     path: 'daily',
     loadComponent: () => import('./pages/daily/daily.component').then(m => m.DailyComponent),
   },
