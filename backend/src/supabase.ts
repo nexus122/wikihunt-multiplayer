@@ -134,3 +134,35 @@ export async function verifyUserToken(token: string): Promise<string | null> {
   if (error || !data.user) return null;
   return data.user.id;
 }
+
+// Returns cosmetics for a user profile (avatar + color). Used at socket connect time.
+export async function getPlayerCosmetics(userId: string): Promise<{ avatarEmoji: string; accentColor: string } | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('avatar_emoji, accent_color')
+    .eq('user_id', userId)
+    .single();
+  if (error || !data) return null;
+  return { avatarEmoji: data.avatar_emoji, accentColor: data.accent_color };
+}
+
+// Sets is_supporter=true for the user matching the given email (called from Ko-fi webhook).
+export async function markSupporter(email: string): Promise<boolean> {
+  if (!supabase) return false;
+  // Find the auth user by email using the admin API
+  const { data, error } = await supabase.auth.admin.listUsers();
+  if (error || !data) return false;
+  const user = data.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+  if (!user) return false;
+  const { error: updateError } = await supabase
+    .from('user_profiles')
+    .update({ is_supporter: true })
+    .eq('user_id', user.id);
+  if (updateError) {
+    console.error('[Supabase] Error marking supporter:', updateError.message);
+    return false;
+  }
+  console.log(`[Ko-fi] Marked supporter: ${email} (${user.id})`);
+  return true;
+}

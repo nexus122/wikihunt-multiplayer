@@ -150,6 +150,10 @@ export class GameComponent implements OnInit, OnDestroy {
     return `https://${this.gameLang}.wikipedia.org/wiki/`;
   }
 
+  get othersHunting(): number {
+    return this.leaderboard.filter(e => e.socketId !== this.mySocketId && !e.finished && !e.gaveUp).length;
+  }
+
   ngOnInit(): void {
     this.mySocketId = this.socketService.getSocketId();
     const state = history.state as {
@@ -601,8 +605,16 @@ export class GameComponent implements OnInit, OnDestroy {
     // Note: going back doesn't count as a step (no navigate emit)
   }
 
+  get myRank(): number {
+    const sorted = [...this.players].sort(
+      (a, b) => (Number(b.finished) - Number(a.finished)) || (a.steps - b.steps)
+    );
+    const idx = sorted.findIndex(p => p.socketId === this.mySocketId);
+    return idx >= 0 ? idx + 1 : this.players.length || 1;
+  }
+
   getAvatarColor(id: string): string {
-    const colors = ['#58a6ff', '#3fb950', '#d29922', '#f85149', '#bc8cff', '#39d353', '#ff9500'];
+    const colors = ['#ff5a3c', '#1a3a8c', '#5a8f5a', '#8b5cf6', '#d65a8a', '#2a9d8f', '#c2671f'];
     let h = 0;
     for (let i = 0; i < id.length; i++) h = id.charCodeAt(i) + ((h << 5) - h);
     return colors[Math.abs(h) % colors.length];
@@ -636,7 +648,7 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   private launchConfetti(): void {
-    const colors = ['#58a6ff', '#3fb950', '#ffd700', '#ff9500', '#bc8cff', '#f85149', '#39d353'];
+    const colors = ['#ff5a3c', '#ffd84a', '#1a3a8c', '#7ec27a', '#8b5cf6', '#e0518a', '#22d3ee'];
     this.confettiPieces = Array.from({ length: 80 }, () => ({
       x: Math.random() * 100,
       color: colors[Math.floor(Math.random() * colors.length)],

@@ -1,0 +1,92 @@
+// WikiHunt — design tokens (LIGHT theme = "paper")
+// Drop into your :root block in styles.scss. Names are chosen to be additive —
+// most existing tokens (--bg-primary, --bg-secondary, --accent, --danger, --success,
+// --streak-color, --text-primary, --text-secondary, --border-color) keep their
+// names but get new values, so existing component CSS keeps working.
+
+:root {
+  // ---- BACKGROUNDS (paper) ----
+  --bg-primary:     #f6f1e6;   // page background — cream paper
+  --bg-secondary:   #efe7d4;   // tracks, segmented bg, table headers
+  --bg-tertiary:    #e7dcc1;   // hover/active subtle
+  --surface:        #fbf7ec;   // card surface (slightly brighter than page)
+
+  // ---- BORDERS / RULES ----
+  --border-color:   #d8cfb8;   // default rules, card border
+  --border-strong:  #c6bb9d;   // input border, hr-dashed
+
+  // ---- TEXT ----
+  --text-primary:   #1a1e2e;   // ink (not pure black — book ink)
+  --text-secondary: #3d4256;   // hints, secondary copy
+  --text-muted:     #7a7e8f;   // labels, captions
+
+  // ---- BRAND COLORS ----
+  --accent:         #ff5a3c;   // CORAL — the "hunt" color. Primary CTA, target, "you", win.
+  --accent-2:       #e64a2d;   // hover state for accent
+  --accent-soft:    #ffe2d8;   // soft backgrounds (selected rows, share cards)
+
+  --knowledge:      #1a3a8c;   // INK BLUE — wiki link color, "start page", "knowledge" elements
+  --knowledge-soft: #dbe2f5;   // soft background for knowledge pills
+
+  --success:        #7ec27a;   // win states (less neon than before)
+  --danger:         #e64a2d;   // errors — same hue family as accent for visual harmony
+  --streak-color:   #ffd84a;   // BUTTER — streak fire, champion highlight
+  --streak-deep:    #b58c00;   // accessible text-on-butter
+
+  // ---- SHADOWS / RINGS ----
+  --shadow-sm:      0 1px 0 rgba(26,30,46,.04);
+  --shadow-md:      0 1px 0 rgba(26,30,46,.04), 0 6px 24px -10px rgba(26,30,46,.18);
+  --shadow-lg:      0 30px 80px -20px rgba(0,0,0,.55);
+  --ring-accent:    0 0 0 3px rgba(255,90,60,.22);
+
+  // ---- SPACING (8-pt scale anchored at 4) ----
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-7:  32px;
+  --space-8:  40px;
+  --space-9:  56px;
+  --space-10: 64px;
+
+  // ---- RADIUS ----
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-pill: 999px;
+
+  // ---- LAYOUT ----
+  --max-w-narrow:  720px;   // daily, challenge, setup profile
+  --max-w-medium:  880px;   // lobby
+  --max-w-wide:    980px;   // leaderboard
+  --max-w-page:    1280px;  // home, game (wider)
+
+  // ---- TYPOGRAPHY ----
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-prose:   'Newsreader', Georgia, serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
+
+  --fs-h1-hero: 80px;
+  --fs-h1:      60px;
+  --fs-h2:      44px;
+  --fs-h3:      28px;
+  --fs-h4:      22px;
+  --fs-body:    14px;
+  --fs-label:   10px;
+  --fs-eyebrow: 11px;
+  --fs-num-xl:  40px;
+  --fs-num-md:  26px;
+
+  --lh-tight:   0.95;
+  --lh-snug:    1.1;
+  --lh-normal:  1.45;
+  --lh-prose:   1.55;
+
+  --ls-tight:   -0.02em;
+  --ls-label:   0.12em;
+  --ls-eyebrow: 0.14em;
+}

@@ -1,0 +1,155 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 5rem var(--space-lg) var(--space-lg);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  position: relative;
+  overflow: hidden;
+}
+
+// ─── Ambient glows ──────────────────────────────────────────────────────────
+.glow {
+  position: absolute;
+  width: 24rem;
+  height: 24rem;
+  border-radius: var(--radius-full);
+  pointer-events: none;
+
+  &--blue {
+    top: -10%;
+    right: -5%;
+    background: var(--knowledge);
+    filter: blur(120px);
+    opacity: 0.12;
+  }
+
+  &--gold {
+    bottom: -10%;
+    left: -5%;
+    background: var(--accent);
+    filter: blur(120px);
+    opacity: 0.12;
+  }
+}
+
+// ─── Main layout ────────────────────────────────────────────────────────────
+.join-main {
+  width: 100%;
+  max-width: 32rem;
+  z-index: 10;
+}
+
+// ─── Card ───────────────────────────────────────────────────────────────────
+.join-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl) 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+}
+
+// ─── Invitation badge ────────────────────────────────────────────────────────
+.join-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: var(--space-2xl);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--fs-eyebrow);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-eyebrow);
+}
+
+// ─── Headline ───────────────────────────────────────────────────────────────
+.join-headline {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 400;
+  letter-spacing: var(--ls-tight);
+  margin-bottom: var(--space-2xl);
+  color: var(--text-primary);
+  line-height: 1.05;
+}
+
+// ─── Room code box ───────────────────────────────────────────────────────────
+.join-code-box {
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl) var(--space-md);
+  margin-bottom: var(--space-2xl);
+
+  &__label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--ls-label);
+    margin-bottom: var(--space-xs);
+  }
+
+  &__value {
+    font-family: var(--font-mono);
+    font-size: clamp(1.875rem, 4vw, 2.25rem);
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+  }
+}
+
+// ─── Redirecting indicator ───────────────────────────────────────────────────
+.join-redirecting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  color: var(--text-muted);
+
+  &__spinner {
+    font-size: 1.25rem;
+    animation: spin 1s linear infinite;
+  }
+
+  &__text {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+// ─── Below-card hint ─────────────────────────────────────────────────────────
+.join-hint {
+  margin-top: var(--space-xl);
+  text-align: center;
+  font-family: var(--font-prose);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+
+  &__link {
+    color: var(--accent);
+    font-style: normal;
+    font-weight: 600;
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+}

@@ -16,15 +16,15 @@
 .sidebar {
   width: 280px;
   flex-shrink: 0;
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   padding: 16px;
-  gap: 16px;
+  gap: 14px;
 
-  .logo { font-size: 20px; }
+  .logo { font-size: 22px; }
 }
 
 .sidebar-head {
@@ -48,13 +48,14 @@
 }
 
 .label {
+  font-family: var(--font-mono);
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-secondary);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .lang-pill {
@@ -72,10 +73,11 @@
 }
 
 .target-box {
-  background: var(--danger-tint, rgba(248,81,73,.10));
-  border: 1px solid var(--danger-border, rgba(248,81,73,.25));
-  border-radius: 8px;
-  padding: 10px 12px;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-md);
 
   .target-box-header {
     display: flex;
@@ -83,57 +85,68 @@
     justify-content: space-between;
     margin-bottom: 4px;
 
-    .label { margin-bottom: 0; }
+    .label { margin-bottom: 0; color: rgba(255, 255, 255, .85); }
   }
 
   .target-name {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--danger);
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 500;
+    line-height: 1.02;
+    color: #fff;
     display: block;
     word-break: break-word;
-    margin-bottom: 6px;
   }
 
   .target-extract {
-    font-size: 11px;
-    line-height: 1.5;
-    color: var(--text-secondary);
-    margin: 0 0 7px;
+    font-family: var(--font-prose);
+    font-style: italic;
+    font-size: 13px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, .85);
+    margin: 10px 0 0;
   }
 
   .target-link {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
-    color: var(--danger-border, rgba(248,81,73,.25));
-    text-decoration: none;
+    color: #fff;
+    text-decoration: underline;
     display: inline-block;
-    &:hover { color: var(--danger); text-decoration: underline; }
+    margin-top: 10px;
+    opacity: .9;
+    &:hover { opacity: 1; color: #fff; }
   }
 }
 
 .my-stats {
-  display: flex;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 
   .stat {
-    flex: 1;
-    background: var(--bg-tertiary);
+    background: var(--surface);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 8px 10px;
+    border-radius: var(--radius-lg);
+    padding: 14px 10px;
     text-align: center;
+    box-shadow: var(--shadow-sm);
 
-    .stat-label { font-size: 10px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; display: block; }
-    .stat-value { font-size: 20px; font-weight: 800; color: var(--accent); display: block; }
-    .time-val { font-size: 16px; font-variant-numeric: tabular-nums; }
+    .stat-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: var(--ls-label); display: block; }
+    .stat-value { font-family: var(--font-mono); font-size: 32px; font-weight: 500; color: var(--text-primary); display: block; margin-top: 4px; line-height: 1; font-variant-numeric: tabular-nums; }
+    .time-val { font-size: 24px; }
   }
 }
 
 .current-page {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: 10px 14px;
+
   .page-name {
-    font-size: 13px;
-    font-weight: 600;
+    font-family: var(--font-prose);
+    font-size: 16px;
+    font-weight: 500;
     color: var(--text-primary);
     display: block;
     word-break: break-word;
@@ -147,14 +160,15 @@
 .giveup-btn {
   width: 100%;
   background: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
   font-size: 12px;
+  font-weight: 600;
   padding: 7px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all .15s;
-  &:hover { border-color: var(--danger); color: var(--danger); }
+  &:hover { background: var(--accent); color: #fff; transform: translateY(-1px); }
 }
 
 /* ─── Give up modal ─── */
@@ -401,15 +415,18 @@
 }
 
 .modal {
-  background: var(--bg-secondary);
+  background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   padding: 32px;
   max-width: 480px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
+  box-shadow: var(--shadow-lg);
 }
+
+.modal h2, .modal h3 { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.01em; }
 
 .path-modal {
   h3 { font-size: 16px; margin-bottom: 16px; }
@@ -475,18 +492,20 @@
     text-align: center;
 
     .result-stat-label {
+      font-family: var(--font-mono);
       font-size: 10px;
-      font-weight: 700;
+      font-weight: 500;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-secondary);
+      letter-spacing: var(--ls-label);
+      color: var(--text-muted);
       display: block;
       margin-bottom: 4px;
     }
 
     .result-stat-value {
+      font-family: var(--font-mono);
       font-size: 24px;
-      font-weight: 800;
+      font-weight: 500;
       color: var(--text-primary);
       display: block;
       font-variant-numeric: tabular-nums;
@@ -528,6 +547,21 @@
   display: flex;
   gap: 10px;
   button { flex: 1; padding: 12px; }
+}
+
+.result-kofi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-color);
+  width: 100%;
+
+  .result-kofi-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
 }
 
 /* ─── Confetti ─── */

@@ -1,7 +1,25 @@
 <div class="auth-page">
-  <div class="card auth-card">
-    <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
+  <!-- Brand panel -->
+  <aside class="auth-brand">
+    <a class="logo wh-logo" routerLink="/" aria-label="WikiHunt - Home">
+      <span class="logo-bracket">[[</span><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span><span class="logo-bracket">]]</span>
+    </a>
+    <span class="auth-eyebrow">{{ t('auth_welcome') }}</span>
+    <h1 class="auth-headline">{{ t('auth_brand_title') }}</h1>
+    <p class="auth-brand-sub">{{ t('auth_brand_sub') }}</p>
 
+    <div class="auth-streak">
+      <span class="av lg butter auth-streak-av" aria-hidden="true">🔥</span>
+      <div class="auth-streak-text">
+        <span class="auth-streak-title">{{ t('auth_streak_teaser') }}</span>
+        <span class="auth-streak-sub">{{ t('auth_streak_teaser_sub') }}</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Form panel -->
+  <div class="auth-form-col">
+  <div class="card auth-card">
     <div class="tabs" role="tablist">
       <button class="tab-btn" role="tab" [attr.aria-selected]="activeTab === 'login'" [class.active]="activeTab === 'login'" (click)="switchTab('login')">{{ t('auth_sign_in_tab') }}</button>
       <button class="tab-btn" role="tab" [attr.aria-selected]="activeTab === 'register'" [class.active]="activeTab === 'register'" (click)="switchTab('register')">{{ t('auth_sign_up_tab') }}</button>
@@ -44,5 +62,11 @@
     @if (message) {
       <div class="success-message" role="status">{{ message }}</div>
     }
+
+    <div class="auth-guest">
+      <span class="auth-guest-text">{{ t('auth_or_just') }}</span>
+      <a class="auth-guest-link" routerLink="/">{{ t('auth_play_guest') }}</a>
+    </div>
+  </div>
   </div>
 </div>

@@ -28,9 +28,11 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
   challengeStart = '';
   challengeTarget = '';
   myName = '';
+  resetsIn = '';
 
   private langSub?: Subscription;
   private authSub?: Subscription;
+  private resetTimer?: ReturnType<typeof setInterval>;
 
   constructor(
     private supabaseService: SupabaseService,
@@ -45,6 +47,8 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
+    this.updateResetsIn();
+    this.resetTimer = setInterval(() => this.updateResetsIn(), 1000);
     this.myName = localStorage.getItem('wh_name') || '';
 
     // Override with authenticated profile name if available
@@ -73,6 +77,28 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.langSub?.unsubscribe();
     this.authSub?.unsubscribe();
+    if (this.resetTimer) clearInterval(this.resetTimer);
+  }
+
+  private updateResetsIn(): void {
+    const now = new Date();
+    const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
+    let diff = Math.max(0, next - now.getTime());
+    const h = Math.floor(diff / 3_600_000); diff -= h * 3_600_000;
+    const m = Math.floor(diff / 60_000); diff -= m * 60_000;
+    const s = Math.floor(diff / 1000);
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    this.resetsIn = `${pad(h)}:${pad(m)}:${pad(s)}`;
+  }
+
+  relativeTime(dateStr: string): string {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60_000);
+    if (mins < 1) return this.lang.current === 'es' ? 'ahora' : 'just now';
+    if (mins < 60) return `${mins}m`;
+    const hrs = Math.floor(mins / 60);
+    return `${hrs}h`;
   }
 
   async loadTab(tab: 'today' | 'alltime' | 'mine' | 'challenge'): Promise<void> {

@@ -1,33 +1,95 @@
-<app-header [backLabel]="t('lb_back')" (back)="goHome()" />
+<app-header context="daily" [backLabel]="t('lb_back')" (back)="goHome()" />
 
 <div class="daily-page">
 
-  <div class="hero">
-    <div class="daily-badge">{{ t('daily_title') }}</div>
-    <p class="daily-date">{{ challenge?.date || (loadingChallenge ? '...' : t('daily_today')) }}</p>
+  <!-- Header row: title + streak card -->
+  <div class="daily-head">
+    <div class="daily-head-text">
+      <span class="eyebrow">{{ t('tag_daily') }} @if (challenge?.date) { · {{ challenge!.date | date:'d MMM yyyy' }} }</span>
+      <h1 class="daily-h1">{{ t('daily_hero_title_1') }}<br /><span class="ital">{{ t('daily_hero_title_2') }}</span></h1>
+    </div>
+    @if (isLoggedIn) {
+      <div class="card card--butter streak-card">
+        <span class="streak-card-label">{{ t('daily_streak_card_label') }}</span>
+        <div class="streak-num">{{ streak }}</div>
+        <span class="streak-cap">{{ t('daily_dont_break') }}</span>
+      </div>
+    }
   </div>
 
   @if (loadingChallenge) {
     <div class="card loading-card">{{ t('daily_loading') }}</div>
   } @else {
-    <div class="card challenge-card">
-      @if (challenge) {
+
+    <!-- Route of the day -->
+    @if (challenge) {
+      <div class="card route-card">
+        <span class="eyebrow route-eyebrow">{{ t('daily_same_route') }}</span>
         <div class="route">
-          <div class="route-page start">
+          <div class="route-col">
             <span class="route-label">{{ t('daily_start_label') }}</span>
-            <span class="route-title">{{ challenge.start_page }}</span>
+            <span class="route-name start">{{ challenge.start_page }}</span>
           </div>
           <span class="route-arrow" aria-hidden="true">→</span>
-          <div class="route-page target">
+          <div class="route-col">
             <span class="route-label">{{ t('daily_target_label') }}</span>
-            <span class="route-title">{{ challenge.target_page }}</span>
+            <span class="route-name target">{{ challenge.target_page }}</span>
           </div>
         </div>
-      } @else {
-        <p class="no-challenge">{{ t('daily_no_challenge') }}</p>
-      }
+      </div>
+    } @else {
+      <div class="card"><p class="no-challenge">{{ t('daily_no_challenge') }}</p></div>
+    }
 
-      <div class="field">
+    <!-- Streak grid (logged in) -->
+    @if (isLoggedIn) {
+      <div class="card grid-card">
+        <div class="grid-head">
+          <span class="eyebrow">{{ t('daily_last_2_weeks') }}</span>
+          <span class="grid-played">{{ daysPlayedText }}</span>
+        </div>
+        <div class="streak-grid">
+          @for (c of streakCells; track $index) {
+            <div class="cell-wrap">
+              <div class="cell" [class.on]="c.on" [class.today]="c.today" aria-hidden="true">{{ c.today ? '🔥' : '' }}</div>
+              <span class="cell-letter">{{ c.letter }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Community stats -->
+    <div class="stats-grid">
+      <div class="card stat-card">
+        <span class="label">{{ t('daily_solved_by') }}</span>
+        <div class="stat-num">{{ stats?.solvedBy ?? 0 }}</div>
+        <span class="stat-sub">{{ t('daily_people_today') }}</span>
+      </div>
+      <div class="card stat-card">
+        <span class="label">{{ t('daily_avg_steps') }}</span>
+        <div class="stat-num">{{ stats?.avgSteps ?? '—' }}</div>
+        <span class="stat-sub">@if (stats?.avgTimeMs != null) { {{ formatTime(stats!.avgTimeMs!) }} }</span>
+      </div>
+      <div class="card stat-card">
+        <span class="label">{{ t('daily_best_ever') }}</span>
+        <div class="stat-num">{{ stats?.bestSteps ?? '—' }}</div>
+        <span class="stat-sub">
+          @if (stats && stats.bestBy) {
+            @if (stats.bestTimeMs != null) { {{ formatTime(stats.bestTimeMs) }} · }{{ stats.bestEmoji }} {{ stats.bestBy }}
+          } @else { {{ t('daily_no_data') }} }
+        </span>
+      </div>
+      <div class="card stat-card">
+        <span class="label">{{ t('daily_resets_in') }}</span>
+        <div class="stat-num resets">{{ resetsIn }}</div>
+        <span class="stat-sub">UTC</span>
+      </div>
+    </div>
+
+    <!-- Name + CTA -->
+    <div class="cta-wrap">
+      <div class="field name-field">
         <label for="daily-player-name">{{ t('your_name') }}</label>
         @if (profileName) {
           <div class="name-locked">{{ profileName }} <span class="name-locked-badge">{{ t('name_badge') }}</span></div>
@@ -36,22 +98,14 @@
         }
       </div>
 
-      @if (isLoggedIn) {
-        <div class="streak-row">
-          <span class="streak-badge">{{ t('daily_streak') }} <strong>{{ streak }}</strong> {{ t('daily_streak_days') }}</span>
-          @if (streak === 0) {
-            <span class="streak-hint">{{ t('daily_streak_hint') }}</span>
-          }
-        </div>
-      }
-
       @if (error) {
         <div class="error-message" role="alert">{{ error }}</div>
       }
 
-      <button class="btn-primary" (click)="start()" [disabled]="loading">
+      <button class="btn-primary btn-xl hunt-cta" (click)="start()" [disabled]="loading">
         {{ loading ? t('daily_loading_btn') : t('daily_play_btn') }}
       </button>
+      <p class="cta-caption">{{ t('daily_one_attempt') }}</p>
     </div>
 
     <a class="leaderboard-link" routerLink="/leaderboard">🏆 {{ t('daily_leaderboard') }}</a>

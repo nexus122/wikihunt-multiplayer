@@ -1,0 +1,36 @@
+<app-header />
+
+<!-- Ambient glows -->
+<div class="glow glow--blue" aria-hidden="true"></div>
+<div class="glow glow--gold" aria-hidden="true"></div>
+
+<!-- Main card -->
+<main class="join-main">
+  <div class="join-card">
+
+    <!-- Invitation badge -->
+    <div class="join-badge">{{ t('join_badge') }}</div>
+
+    <!-- Headline -->
+    <h1 class="join-headline">{{ t('join_headline') }}</h1>
+
+    <!-- Room code display -->
+    <div class="join-code-box">
+      <p class="join-code-box__label">{{ t('join_code_label') }}</p>
+      <div class="join-code-box__value">{{ code || '——' }}</div>
+    </div>
+
+    <!-- Redirecting indicator -->
+    <div class="join-redirecting">
+      <span class="material-symbols-outlined join-redirecting__spinner">progress_activity</span>
+      <span class="join-redirecting__text">{{ t('join_redirecting') }}</span>
+    </div>
+
+  </div>
+
+  <!-- Below-card hint -->
+  <p class="join-hint">
+    {{ t('join_full') }}
+    <a class="join-hint__link" routerLink="/">{{ t('join_full_link') }}</a>
+  </p>
+</main>

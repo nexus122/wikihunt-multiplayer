@@ -7,16 +7,23 @@ import { AuthService } from '../services/auth.service';
 import { LanguageService } from '../services/language.service';
 import { ThemeService } from '../services/theme.service';
 import { TranslationKey } from '../i18n/translations';
+import { CosmeticsComponent } from './cosmetics.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, CosmeticsComponent],
   template: `
     <header class="header">
-      <a class="logo wh-logo" routerLink="/" aria-label="WikiHunt - Home">
-        <span class="logo-wiki" aria-hidden="true">Wiki</span><span class="logo-hunt" aria-hidden="true">Hunt</span>
-      </a>
+      <div class="header-left">
+        <a class="logo wh-logo" routerLink="/" aria-label="WikiHunt - Home">
+          <span class="logo-bracket" aria-hidden="true">[[</span><span class="logo-wiki" aria-hidden="true">Wiki</span><span class="logo-hunt" aria-hidden="true">Hunt</span><span class="logo-bracket" aria-hidden="true">]]</span>
+        </a>
+        @if (context) {
+          <span class="ctx-sep" aria-hidden="true">/</span>
+          <span class="ctx-text">{{ context }}</span>
+        }
+      </div>
 
       <div class="header-controls">
         @if (backLabel) {
@@ -64,18 +71,19 @@ import { TranslationKey } from '../i18n/translations';
         <!-- User section -->
         @if (currentUser) {
           <div class="user-area">
-            <button class="avatar-btn" [class.open]="panelOpen"
+            <button class="avatar-pill" [class.open]="panelOpen"
               (click)="panelOpen = !panelOpen"
               [attr.aria-label]="profileName || 'User menu'"
               [attr.aria-expanded]="panelOpen"
               aria-haspopup="true">
-              <span class="avatar-initial" aria-hidden="true">{{ (profileName[0] || '?').toUpperCase() }}</span>
+              <span class="av sm" [class.coral]="!accentColor" [style.background]="accentColor || null" [style.borderColor]="accentColor || null" aria-hidden="true">{{ avatarEmoji || (profileName[0] || '?').toUpperCase() }}</span>
+              <span class="avatar-pill-name">{{ profileName }}</span>
             </button>
 
             @if (panelOpen) {
               <div class="user-dropdown" role="menu" aria-label="User menu">
                 <div class="dropdown-profile">
-                  <div class="dropdown-avatar" aria-hidden="true">{{ (profileName[0] || '?').toUpperCase() }}</div>
+                  <div class="av lg" [class.coral]="!accentColor" [style.background]="accentColor || null" [style.borderColor]="accentColor || null" aria-hidden="true">{{ avatarEmoji || (profileName[0] || '?').toUpperCase() }}</div>
                   <div class="dropdown-info">
                     <span class="dropdown-name">{{ profileName }}</span>
                     <span class="dropdown-email" [title]="currentUser.email || ''">{{ currentUser.email }}</span>
@@ -112,6 +120,12 @@ import { TranslationKey } from '../i18n/translations';
 
                 <div class="dropdown-divider" role="separator"></div>
 
+                <div class="dropdown-cosmetics">
+                  <app-cosmetics />
+                </div>
+
+                <div class="dropdown-divider" role="separator"></div>
+
                 <button class="dropdown-signout" (click)="signOut()" role="menuitem">
                   {{ t('sign_out') }}
                 </button>
@@ -138,21 +152,35 @@ import { TranslationKey } from '../i18n/translations';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 24px;
-      height: 52px;
+      padding: 0 28px;
+      height: 60px;
       border-bottom: 1px solid var(--border-color);
-      background: var(--bg-secondary);
+      background: var(--bg-primary);
       position: relative;
       z-index: 300;
     }
 
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
     .logo {
-      font-size: 20px;
-      letter-spacing: -.5px;
+      font-size: 24px;
       text-decoration: none;
       flex-shrink: 0;
-      .logo-wiki { color: var(--text-primary); font-weight: 800; }
-      .logo-hunt { color: var(--accent); font-weight: 800; }
+    }
+
+    .ctx-sep { color: var(--text-muted); }
+    .ctx-text {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* ── Controls row ── */
@@ -250,31 +278,32 @@ import { TranslationKey } from '../i18n/translations';
       position: relative;
     }
 
-    .avatar-btn {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: 1px solid var(--accent-border, rgba(88,166,255,.3));
-      background: var(--accent-tint, rgba(88,166,255,.10));
+    .avatar-pill {
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 8px;
+      padding: 4px 12px 4px 4px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-color);
+      background: var(--surface);
       cursor: pointer;
       flex-shrink: 0;
-      transition: all .15s;
+      max-width: 180px;
+      transition: border-color .15s, box-shadow .15s;
 
       &:hover, &.open {
         border-color: var(--accent);
-        background: var(--accent-tint-lg, rgba(88,166,255,.18));
+        box-shadow: var(--ring-accent);
       }
     }
 
-    .avatar-initial {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--accent);
-      line-height: 1;
-      text-transform: uppercase;
+    .avatar-pill-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* Sign in button */
@@ -420,6 +449,10 @@ import { TranslationKey } from '../i18n/translations';
       }
     }
 
+    .dropdown-cosmetics {
+      padding: 12px 16px;
+    }
+
     .dropdown-signout {
       display: block;
       width: 100%;
@@ -439,11 +472,14 @@ import { TranslationKey } from '../i18n/translations';
 
     /* ── Mobile ── */
     @media (max-width: 600px) {
-      .header { padding: 0 16px; height: 48px; }
-      .logo { font-size: 18px; }
+      .header { padding: 0 16px; height: 54px; }
+      .logo { font-size: 21px; }
       .back-text { display: none; }
       .btn-back { padding: 5px 7px; }
       .header-controls { gap: 6px; }
+      .ctx-text { font-size: 11px; }
+      .avatar-pill { padding: 4px; }
+      .avatar-pill-name { display: none; }
     }
 
     @media (max-width: 360px) {
@@ -454,10 +490,13 @@ import { TranslationKey } from '../i18n/translations';
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   @Input() backLabel: string | null = null;
+  @Input() context: string | null = null;
   @Output() back = new EventEmitter<void>();
 
   currentUser: User | null | undefined = undefined;
   profileName = '';
+  avatarEmoji = '';
+  accentColor = '';
   streak = 0;
   panelOpen = false;
 
@@ -481,9 +520,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
       if (user) {
         const profile = await this.authService.getProfile();
         this.profileName = profile?.display_name ?? user.email?.split('@')[0] ?? '';
+        this.avatarEmoji = profile?.avatar_emoji ?? '';
+        this.accentColor = profile?.accent_color ?? '';
         this.streak = await this.authService.getStreak();
       } else {
         this.profileName = '';
+        this.avatarEmoji = '';
+        this.accentColor = '';
         this.streak = 0;
       }
     });

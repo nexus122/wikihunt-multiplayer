@@ -1,7 +1,30 @@
 <app-header [backLabel]="t('lb_back')" (back)="goHome()" />
 
 <div class="lb-page">
-  <h1 class="lb-title">{{ t('lb_title') }}</h1>
+
+  <!-- Title block -->
+  <div class="lb-title-block">
+    <span class="lb-eyebrow">LEADERBOARD</span>
+    <h1 class="lb-title">
+      @switch (activeTab) {
+        @case ('today') { {{ t('lb_today_title') }} }
+        @case ('alltime') { {{ t('lb_alltime_title') }} }
+        @case ('mine') { {{ t('lb_mine_title') }} }
+        @case ('challenge') { {{ t('lb_challenge_title') }} }
+      }
+    </h1>
+    @if (activeTab === 'today' && todayChallenge) {
+      <div class="lb-route-row">
+        <span class="lb-route-pill lb-route-start">{{ todayChallenge.start_page }}</span>
+        <span class="lb-route-arrow" aria-hidden="true">→</span>
+        <span class="lb-route-pill lb-route-target">{{ todayChallenge.target_page }}</span>
+        <span class="lb-resets-wrap">
+          <span class="lb-resets-label">{{ t('lb_resets_in') }}</span>
+          <span class="lb-resets-time">{{ resetsIn }}</span>
+        </span>
+      </div>
+    }
+  </div>
 
   <div class="tabs" role="tablist">
     <button class="tab-btn" role="tab" [attr.aria-selected]="activeTab === 'today'" [class.active]="activeTab === 'today'" (click)="loadTab('today')">{{ t('lb_tab_today') }}</button>
@@ -18,35 +41,49 @@
 
   <!-- HOY -->
   @if (!loading && activeTab === 'today') {
-    @if (todayChallenge) {
-      <div class="challenge-info">
-        <span class="challenge-route">{{ todayChallenge.start_page }} → {{ todayChallenge.target_page }}</span>
-        <a class="play-link" routerLink="/daily">{{ t('lb_play_link') }}</a>
-      </div>
-    }
-
     @if (todayPodio.length === 0) {
       <div class="empty">
         <p>{{ t('lb_empty_today') }}</p>
         <a class="btn-primary" routerLink="/daily">{{ t('lb_play_daily_cta') }}</a>
       </div>
     } @else {
+      <!-- Champion card -->
+      <div class="card card--butter champion-card">
+        <div class="champion-main">
+          <span class="av xl champion-av" [style.background]="todayPodio[0].accent_color || '#ff5a3c'">{{ todayPodio[0].avatar_emoji || todayPodio[0].player_name[0].toUpperCase() }}</span>
+          <div class="champion-info">
+            <span class="champion-eyebrow">👑 {{ t('lb_champion') }}</span>
+            <h2 class="champion-name">{{ todayPodio[0].player_name }}</h2>
+            <div class="champion-stats">
+              <span class="champion-stat"><span class="champion-stat-label">{{ t('lb_col_steps') }}</span><span class="champion-num">{{ todayPodio[0].steps }}</span></span>
+              <span class="champion-stat"><span class="champion-stat-label">{{ t('lb_col_time') }}</span><span class="champion-num">{{ formatTime(todayPodio[0].time_ms) }}</span></span>
+            </div>
+          </div>
+        </div>
+        <div class="champion-rank">1</div>
+      </div>
+
       <table class="entries">
         <thead>
           <tr>
-            <th scope="col" class="col-rank">Rank</th>
+            <th scope="col" class="col-rank">#</th>
             <th scope="col" class="col-player">{{ t('lb_col_player') }}</th>
             <th scope="col" class="col-steps">{{ t('lb_col_steps') }}</th>
             <th scope="col" class="col-time">{{ t('lb_col_time') }}</th>
+            <th scope="col" class="col-when">{{ t('lb_col_when') }}</th>
           </tr>
         </thead>
         <tbody>
           @for (entry of todayPodio; track entry.id; let i = $index) {
             <tr class="entry" [class.top]="i < 3">
               <td class="rank">{{ rankEmoji(i) }}</td>
-              <td class="entry-main entry-name">{{ entry.player_name }}</td>
+              <td class="entry-main entry-name">
+                <span class="lb-avatar">{{ entry.avatar_emoji || entry.player_name[0].toUpperCase() }}</span>
+                {{ entry.player_name }}
+              </td>
               <td class="entry-stat entry-steps">{{ entry.steps }} {{ t('lb_steps') }}</td>
               <td class="entry-time">{{ formatTime(entry.time_ms) }}</td>
+              <td class="entry-when">{{ relativeTime(entry.created_at) }}</td>
             </tr>
           }
         </tbody>
@@ -74,7 +111,10 @@
               <td class="rank">{{ rankEmoji(i) }}</td>
               <td class="entry-main">
                 <div class="entry-info">
-                  <span class="entry-name">{{ entry.player_name }}</span>
+                  <span class="entry-name">
+                    <span class="lb-avatar">{{ entry.avatar_emoji || entry.player_name[0].toUpperCase() }}</span>
+                    {{ entry.player_name }}
+                  </span>
                   <span class="entry-route">{{ entry.start_page }} → {{ entry.target_page }}</span>
                 </div>
               </td>
@@ -117,7 +157,10 @@
           @for (entry of challengeBoard; track entry.id; let i = $index) {
             <tr class="entry" [class.top]="i < 3">
               <td class="rank">{{ rankEmoji(i) }}</td>
-              <td class="entry-main entry-name">{{ entry.player_name }}</td>
+              <td class="entry-main entry-name">
+                <span class="lb-avatar">{{ entry.avatar_emoji || entry.player_name[0].toUpperCase() }}</span>
+                {{ entry.player_name }}
+              </td>
               <td class="entry-stat entry-steps">{{ entry.steps }} {{ t('lb_steps') }}</td>
               <td class="entry-time">{{ formatTime(entry.time_ms) }}</td>
             </tr>

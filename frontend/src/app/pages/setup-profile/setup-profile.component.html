@@ -1,8 +1,18 @@
 <div class="setup-page">
   <div class="card setup-card">
-    <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
+    <div class="logo wh-logo"><span class="logo-bracket">[[</span><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span><span class="logo-bracket">]]</span></div>
     <h2>{{ t('setup_title') }}</h2>
     <p class="hint">{{ t('setup_subtitle') }}</p>
+
+    <!-- Live preview -->
+    <div class="setup-preview">
+      <span class="av xl coral setup-preview-av" aria-hidden="true">🎮</span>
+      <div class="setup-preview-info">
+        <span class="form-label">{{ t('setup_preview_label') }}</span>
+        <span class="setup-preview-name">{{ displayName || t('setup_name_placeholder') }}</span>
+        <span class="setup-preview-cap">{{ t('setup_preview_caption') }}</span>
+      </div>
+    </div>
 
     <div class="field">
       <label for="display-name-input">{{ t('setup_name_label') }}</label>
@@ -27,6 +37,11 @@
         </div>
       }
     }
+
+    <!-- Cosmetics (avatar + color) — gated to supporters inside the component -->
+    <div class="setup-cosmetics">
+      <app-cosmetics />
+    </div>
 
     @if (error) {
       <div class="error-message" role="alert">{{ error }}</div>

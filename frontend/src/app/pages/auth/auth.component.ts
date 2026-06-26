@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { LanguageService } from '../../core/services/language.service';
@@ -10,7 +10,7 @@ import { TranslationKey } from '../../core/i18n/translations';
 @Component({
   selector: 'app-auth',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './auth.component.html',
   styleUrl: './auth.component.scss',
 })

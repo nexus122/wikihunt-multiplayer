@@ -34,9 +34,15 @@ npm test -- --include="**/foo.spec.ts"  # run a single spec file
 - **`types.ts`** — Shared interfaces: `Player`, `Room`, `RoomInfo`, `PlayerPublicInfo`, `LeaderboardEntry`.
 - **`wiki.helpers.ts`** — `getCanonicalTitle(title, lang)` and `getValidRandomPage(n, exclude, lang)`. Both accept a `lang` param (`'es'` | `'en'`) and hit the corresponding Wikipedia REST API subdomain.
 - **`wikipedia.ts`** — Express router at `/api/wikipedia`. Proxies to `${lang}.wikipedia.org/api/rest_v1`. All routes accept `?lang=` query param. Includes a 5-min in-memory HTML cache keyed by `lang:title`.
-- **`supabase.ts`** — Supabase service-role client. `getDailyChallenge(lang)` creates today's challenge per language if it doesn't exist. `verifyUserToken(token)` uses `supabase.auth.getUser()` (not jsonwebtoken). Only registered users have their results saved; guests are skipped.
+- **`supabase.ts`** — Supabase service-role client. `getDailyChallenge(lang)` creates today's challenge per language if it doesn't exist. `verifyUserToken(token)` uses `supabase.auth.getUser()` (not jsonwebtoken). `getPlayerCosmetics(userId)` is called at socket connect and attaches `avatarEmoji`/`accentColor` to `socket.data`. `isNameTakenByRegisteredUser(name)` prevents guests from impersonating registered display names. `markSupporter(email)` is called from the Ko-fi webhook to set `is_supporter=true`. `updateUserStreak(userId, date)` increments or resets the daily streak after each finished daily result. Only registered users have their results saved; guests are skipped.
 
-Backend env vars required: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`.
+Backend env vars required: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `ALLOWED_ORIGIN` (CORS — defaults to `*`), `KOFI_VERIFICATION_TOKEN` (optional, validates Ko-fi webhook payloads).
+
+Additional HTTP endpoints in `index.ts`:
+- `POST /api/kofi/webhook` — Ko-fi donation webhook; calls `markSupporter(email)` on verified payment.
+- `GET /api/daily?lang=` — returns today's daily challenge JSON (used by the frontend daily page).
+
+Navigate events are rate-limited to 1 per 200ms per socket via an in-memory `Map<socketId, timestamp>` in `index.ts`.
 
 ### Frontend (`frontend/src/app/`)
 
@@ -52,12 +58,15 @@ Backend env vars required: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`.
 
 **Guards (`core/guards/auth.guard.ts`):** Three functional guards — `authGuard` (requires login), `guestGuard` (redirects logged-in users away from `/auth`), `noProfileGuard` (requires login but no profile yet for `/setup-profile`). All filter `user !== undefined` to avoid acting on the loading state.
 
-**Pages (all lazy-loaded):** `home`, `lobby`, `game`, `solo`, `solo/game`, `daily`, `leaderboard`, `auth`, `setup-profile`, `join/:code`, `not-found`.
+**Pages (all lazy-loaded):** `home`, `lobby`, `game`, `solo`, `solo/game`, `challenge`, `daily`, `leaderboard`, `auth`, `setup-profile`, `join/:code`, `not-found`.
 
 - **`solo/`** — Two-component flow: `solo.component` (page picker, mirrors lobby host controls) → navigates to `solo/game` passing state via router. `solo-game.component` runs a fully client-side game (no Socket.io); saves results to `hall_of_fame` on win. Uses `formatTime` from `core/utils/time.utils.ts`.
-- **`join/:code`** — Deep-link entry: resolves the room code then redirects to `/lobby/:code`.
+- **`challenge/`** — Challenge creator: user picks start/target pages and copies a shareable URL (`?start=X&target=Y&lang=`). Home detects these query params and routes directly to `solo/game`.
+- **`join/:code`** — Deep-link entry: shows a branded "redirecting" card, then navigates to `/lobby/:code` (or back to home if the room is full).
 
-**Shared component:** `core/components/header.component.ts` — used on home, daily, leaderboard, solo. Shows logo, language toggle (ES↔EN), and session indicator.
+**Shared components:**
+- `core/components/header.component.ts` — used on home, daily, leaderboard, solo. Shows logo, language toggle (ES↔EN), and session indicator.
+- `core/components/cosmetics.component.ts` — avatar emoji + accent color picker. Visible only to `is_supporter` users (Ko-fi backers); others see a Ko-fi CTA link. Saves via `AuthService.updateCosmetics()`, which also mirrors the values to `localStorage('wh_avatar_emoji'/'wh_accent_color')`.
 
 ### Key data flows
 
@@ -65,7 +74,7 @@ Backend env vars required: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`.
 
 2. **Navigation**: Client clicks a Wikipedia link → `WikipediaService.getPageContent(title)` (with current `lang`) → on success, increments local step count, emits `navigate` to server → server calls `RoomManager.navigate()` and compares via `normalizePage()` for win detection.
 
-3. **Win/countdown**: First `player-won` triggers a grace countdown; `setTimeout` fires `game-finished` after grace period (or immediately if all players finish/give-up). Results are saved to `hall_of_fame` and `daily_results` (only for registered users, filtered by `language`).
+3. **Win/countdown**: First `player-won` triggers a grace countdown; `setTimeout` fires `game-finished` after grace period (or immediately if all players finish/give-up). Results are saved to `hall_of_fame` and `daily_results` (only for registered users, filtered by `language`). For daily results, `updateUserStreak()` is also called.
 
 4. **Reconnection**: On every navigation step, game state (roomCode, name, steps, currentPage, path) is saved to `localStorage('wh_game')`. Home detects this and offers a rejoin prompt emitting `rejoin-game`.
 
@@ -111,4 +120,10 @@ Global shared classes in `styles.scss` (use these instead of duplicating):
 
 ### Supabase schema
 
-Tables: `user_profiles` (`user_id`, `display_name` unique), `daily_challenges` (`date` + `language` unique), `daily_results` (`date`, `language`, `user_id`), `hall_of_fame` (`language`, `user_id`). All results tables have a `language` column defaulting to `'es'`.
+Tables:
+- `user_profiles` — `user_id`, `display_name` (unique), `avatar_emoji`, `accent_color`, `is_supporter` (bool, set by Ko-fi webhook), `streak` (int), `last_daily_date` (text YYYY-MM-DD).
+- `daily_challenges` — `date` + `language` unique pair; `start_page`, `target_page`.
+- `daily_results` — `date`, `language`, `user_id`, `player_name`, `steps`, `time_ms`, `finished`, `path`.
+- `hall_of_fame` — `language`, `user_id`, `player_name`, `start_page`, `target_page`, `steps`, `time_ms`, `is_daily`, `path`.
+
+All results tables have a `language` column defaulting to `'es'`.

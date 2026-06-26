@@ -19,6 +19,8 @@ export interface DailyResult {
   path: string[];
   created_at: string;
   language?: string;
+  avatar_emoji?: string;
+  accent_color?: string;
 }
 
 export interface HallOfFameEntry {
@@ -33,6 +35,8 @@ export interface HallOfFameEntry {
   created_at: string;
   language?: string;
   game_type?: 'solo' | 'multi' | null;
+  avatar_emoji?: string;
+  accent_color?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -128,5 +132,61 @@ export class SupabaseService {
       .limit(20);
     if (error || !data) return [];
     return data as HallOfFameEntry[];
+  }
+
+  // Community stats for today's daily challenge (best result per player).
+  async getDailyStats(date?: string, lang = 'es'): Promise<{
+    solvedBy: number;
+    avgSteps: number | null;
+    avgTimeMs: number | null;
+    bestSteps: number | null;
+    bestTimeMs: number | null;
+    bestBy: string | null;
+    bestEmoji: string | null;
+  }> {
+    const empty = { solvedBy: 0, avgSteps: null, avgTimeMs: null, bestSteps: null, bestTimeMs: null, bestBy: null, bestEmoji: null };
+    const day = date || new Date().toISOString().slice(0, 10);
+    let query = this.client
+      .from('daily_results')
+      .select('player_name, steps, time_ms, finished, avatar_emoji')
+      .eq('date', day)
+      .eq('finished', true);
+    if (lang) query = query.eq('language', lang);
+    const { data, error } = await query
+      .order('steps', { ascending: true })
+      .order('time_ms', { ascending: true });
+    if (error || !data || data.length === 0) return empty;
+
+    // Keep best result per player (data is already sorted best-first)
+    const best = new Map<string, DailyResult>();
+    for (const row of data as DailyResult[]) {
+      if (!best.has(row.player_name)) best.set(row.player_name, row);
+    }
+    const rows = Array.from(best.values());
+    const totalSteps = rows.reduce((s, r) => s + (r.steps || 0), 0);
+    const timed = rows.filter(r => r.time_ms != null);
+    const totalTime = timed.reduce((s, r) => s + (r.time_ms || 0), 0);
+    const top = rows[0]; // overall best (sorted)
+
+    return {
+      solvedBy: rows.length,
+      avgSteps: rows.length ? Math.round((totalSteps / rows.length) * 10) / 10 : null,
+      avgTimeMs: timed.length ? Math.round(totalTime / timed.length) : null,
+      bestSteps: top?.steps ?? null,
+      bestTimeMs: top?.time_ms ?? null,
+      bestBy: top?.player_name ?? null,
+      bestEmoji: top?.avatar_emoji ?? null,
+    };
+  }
+
+  async getStats(): Promise<{ games: number; players: number }> {
+    const [hofResult, profilesResult] = await Promise.all([
+      this.client.from('hall_of_fame').select('*', { count: 'exact', head: true }),
+      this.client.from('user_profiles').select('*', { count: 'exact', head: true }),
+    ]);
+    return {
+      games: hofResult.count ?? 0,
+      players: profilesResult.count ?? 0,
+    };
   }
 }

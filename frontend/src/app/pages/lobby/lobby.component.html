@@ -6,7 +6,11 @@
     <!-- Room Code -->
     <div class="card code-card">
       <p class="label">{{ t('lobby_room_code') }}</p>
-      <span class="code">{{ roomCode }}</span>
+      <div class="code-tiles" [attr.aria-label]="roomCode">
+        @for (ch of roomCode.split(''); track $index) {
+          <span class="code-tile" aria-hidden="true">{{ ch }}</span>
+        }
+      </div>
       <div class="code-actions">
         <button class="btn-secondary code-btn" (click)="copyCode()">
           {{ codeCopied ? t('lobby_copied') : t('lobby_copy') }}
@@ -28,21 +32,34 @@
 
     <div class="grid">
       <!-- Players -->
-      <div class="card">
-        <h3>{{ t('lobby_players') }} <span class="badge">{{ room.players.length }}</span></h3>
+      <div class="card players-card">
+        <div class="players-head">
+          <span class="eyebrow">{{ t('lobby_players') }}</span>
+          <span class="players-count">{{ room.players.length }} / {{ maxPlayers }}</span>
+        </div>
         <ul class="player-list">
           @for (p of room.players; track p.socketId) {
-            <li class="player-item">
-              <div class="avatar" [style.background]="getAvatarColor(p.socketId)">{{ (p.name[0] || '?').toUpperCase() }}</div>
+            <li class="player-row" [class.me]="p.socketId === mySocketId">
+              <span class="avatar sm" [style.background]="p.accentColor || getAvatarColor(p.socketId)">
+                {{ p.avatarEmoji || (p.name[0] || '?').toUpperCase() }}
+              </span>
               <span class="name">{{ p.name }}</span>
-              @if (p.socketId === room.hostId) { <span class="tag host">{{ t('lobby_host_tag') }}</span> }
-              @if (p.socketId === mySocketId) { <span class="tag you">{{ t('lobby_you_tag') }}</span> }
+              @if (p.socketId === room.hostId) {
+                <span class="tag host">{{ t('lobby_host_tag') }}</span>
+              } @else if (p.socketId === mySocketId) {
+                <span class="tag you">{{ t('lobby_you_tag') }}</span>
+              } @else {
+                <span class="row-note">{{ t('lobby_ready') }}</span>
+              }
+            </li>
+          }
+          @for (slot of emptySlots; track $index) {
+            <li class="player-row player-row--empty">
+              <span class="avatar sm avatar--empty">+</span>
+              <span class="row-note">{{ t('lobby_waiting_slot') }}</span>
             </li>
           }
         </ul>
-        @if (room.players.length === 1) {
-          <p class="waiting-hint">{{ t('lobby_waiting_players') }}</p>
-        }
       </div>
 
       <!-- Host Controls / Waiting -->
@@ -144,7 +161,7 @@
           @if (error) { <div class="error-message">{{ error }}</div> }
 
           <button
-            class="btn-success start-btn"
+            class="btn-primary btn-lg start-btn"
             (click)="startGame()"
             [disabled]="starting"
           >

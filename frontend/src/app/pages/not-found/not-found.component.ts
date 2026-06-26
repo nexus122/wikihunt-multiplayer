@@ -30,24 +30,29 @@ import { TranslationKey } from '../../core/i18n/translations';
     }
 
     .nf-code {
-      font-size: 96px;
-      font-weight: 900;
+      font-family: var(--font-display);
+      font-size: 140px;
+      font-weight: 400;
       line-height: 1;
       color: var(--accent);
-      opacity: .15;
-      letter-spacing: -4px;
+      opacity: .35;
+      letter-spacing: -0.02em;
     }
 
     .nf-title {
-      font-size: 22px;
-      font-weight: 700;
+      font-family: var(--font-display);
+      font-size: var(--fs-h3);
+      font-weight: 400;
+      letter-spacing: -0.01em;
       margin: 0;
       color: var(--text-primary);
     }
 
     .nf-sub {
-      font-size: 14px;
-      color: var(--text-secondary);
+      font-family: var(--font-prose);
+      font-style: italic;
+      font-size: 15px;
+      color: var(--text-muted);
       margin: 0 0 12px;
     }
   `],

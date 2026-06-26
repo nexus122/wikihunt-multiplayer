@@ -2,13 +2,86 @@
 
 <div class="home" id="main-content">
 
+  <!-- ── Hero: editorial copy + live multiplayer card ───────────────── -->
+  <section class="hero-grid">
+    <div class="hero-copy">
+      @if (stats) {
+        <span class="live-pill">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span class="live-text mono">{{ stats.games }} {{ t('landing_stats_games') }} · {{ t('hero_live_now') }}</span>
+        </span>
+      }
+      <h1 class="hero-title">
+        {{ t('hero_line1') }}<br />
+        <span class="ital">{{ t('hero_line2') }}</span><br />
+        <span class="hero-accent">{{ t('hero_line3') }}</span>
+      </h1>
+      <p class="hero-sub news">{{ t('landing_hero_sub') }}</p>
+    </div>
+
+    <!-- Multiplayer card -->
+    <div class="card mp-card">
+      <div class="mp-head">
+        <span class="eyebrow">{{ t('multiplayer_label') }}</span>
+        <span class="mp-range mono">{{ t('mp_players') }}</span>
+      </div>
+      <h2 class="mp-title serif">{{ t('mp_play_live') }}</h2>
+
+      <div class="mode-pills mp-toggle" role="tablist">
+        <button class="pill" role="tab" [attr.aria-selected]="activeTab === 'create'" [class.active]="activeTab === 'create'" (click)="activeTab = 'create'; error = ''">{{ t('create_tab') }}</button>
+        <button class="pill" role="tab" [attr.aria-selected]="activeTab === 'join'" [class.active]="activeTab === 'join'" (click)="activeTab = 'join'; error = ''">{{ t('join_tab') }}</button>
+      </div>
+
+      <div class="field mp-field">
+        <label>{{ t('your_name') }}</label>
+        @if (profileName) {
+          <div class="name-locked">{{ profileName }} <span class="name-locked-badge">{{ t('name_badge') }}</span></div>
+        } @else {
+          <input type="text" [placeholder]="t('name_placeholder')" [(ngModel)]="guestName" maxlength="20" (keydown.enter)="activeTab === 'create' ? createRoom() : joinRoom()" />
+        }
+      </div>
+
+      @if (activeTab === 'join') {
+        <div class="field mp-field">
+          <label>{{ t('room_code_label') }}</label>
+          <input class="code-input" type="text" [placeholder]="t('room_code_placeholder')" [(ngModel)]="joinCode" maxlength="6" (keydown.enter)="joinRoom()" />
+        </div>
+      }
+
+      @if (stats) {
+        <div class="mp-live">
+          <div class="mp-avatars" aria-hidden="true">
+            <span class="av sm">😎</span><span class="av sm">🦊</span><span class="av sm">🐙</span>
+          </div>
+          <span class="mp-live-text mono">{{ stats.players }} {{ t('mp_playing_now') }}</span>
+        </div>
+      }
+
+      @if (activeTab === 'create') {
+        <button class="btn-primary btn-lg mp-cta" (click)="createRoom()" [disabled]="creating">
+          {{ creating ? t('creating') : t('create_room_btn') }}
+        </button>
+      } @else {
+        <button class="btn-primary btn-lg mp-cta" (click)="joinRoom()" [disabled]="joining">
+          {{ joining ? t('joining') : t('join_room_btn') }}
+        </button>
+      }
+
+      @if (error) { <div class="error-message">{{ error }}</div> }
+      @if (!profileName) {
+        <p class="auth-hint">{{ t('auth_hint') }} <a routerLink="/auth">{{ t('auth_hint_link') }}</a></p>
+      }
+    </div>
+  </section>
+
+  <!-- ── Challenge invite banner ───────────────────────────────────── -->
   @if (challengingStart && challengingTarget) {
-    <div class="card challenge-invite-card">
-      <p class="challenge-invite-title">{{ t('challenge_title') }}</p>
-      <div class="challenge-invite-route">
-        <span class="route-page">{{ challengingStart }}</span>
+    <div class="card card--tint challenge-invite-card">
+      <p class="challenge-invite-title eyebrow">{{ t('challenge_title') }}</p>
+      <div class="route-display">
+        <span class="route-page route-start"><span class="route-title">{{ challengingStart }}</span></span>
         <span class="route-arrow">→</span>
-        <span class="route-page accent">{{ challengingTarget }}</span>
+        <span class="route-page route-target"><span class="route-title">{{ challengingTarget }}</span></span>
       </div>
       @if (!profileName) {
         <div class="field">
@@ -21,12 +94,13 @@
     </div>
   }
 
+  <!-- ── Rejoin banner ─────────────────────────────────────────────── -->
   @if (savedGame) {
-    <div class="card rejoin-card">
+    <div class="card card--tint rejoin-card">
       <div class="rejoin-info">
-        <span class="rejoin-label">{{ t('rejoin_in_progress') }}</span>
+        <span class="rejoin-label eyebrow">{{ t('rejoin_in_progress') }}</span>
         <p class="rejoin-route">{{ savedGame.startPage }} → {{ savedGame.targetPage }}</p>
-        <span class="rejoin-code">{{ t('rejoin_room') }} {{ savedGame.roomCode }}</span>
+        <span class="rejoin-code mono">{{ t('rejoin_room') }} {{ savedGame.roomCode }}</span>
       </div>
       <div class="rejoin-actions">
         <button class="btn-primary" (click)="rejoinGame()" [disabled]="rejoining">
@@ -37,90 +111,64 @@
     </div>
   }
 
-  <div class="hero">
-    <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
-    <p class="tagline">{{ t('tagline') }}</p>
-  </div>
-
-  <div class="mode-grid">
-    <a class="mode-card mode-card--daily" routerLink="/daily">
-      <div class="mode-title">{{ t('daily_btn') }}</div>
-      <div class="mode-desc">{{ t('mode_daily_desc') }}</div>
-    </a>
-    <a class="mode-card" routerLink="/solo">
-      <div class="mode-title">{{ t('solo_btn') }}</div>
-      <div class="mode-desc">{{ t('mode_solo_desc') }}</div>
-    </a>
-    <a class="mode-card mode-card--challenge" routerLink="/challenge">
-      <div class="mode-title">{{ t('challenge_mode_btn') }}</div>
-      <div class="mode-desc">{{ t('mode_challenge_desc') }}</div>
-    </a>
-  </div>
-
-  <a class="lb-link" routerLink="/leaderboard">{{ t('leaderboard_btn') }}</a>
-
-  <div class="card form-card">
-    <p class="section-label">{{ t('multiplayer_label') }}</p>
-    <div class="tabs" role="tablist">
-      <button class="tab-btn" role="tab" [attr.aria-selected]="activeTab === 'create'" [attr.id]="'tab-create'" [class.active]="activeTab === 'create'" (click)="activeTab='create'; error=''">{{ t('create_tab') }}</button>
-      <button class="tab-btn" role="tab" [attr.aria-selected]="activeTab === 'join'" [attr.id]="'tab-join'" [class.active]="activeTab === 'join'" (click)="activeTab='join'; error=''">{{ t('join_tab') }}</button>
+  <!-- ── Modes ──────────────────────────────────────────────────────── -->
+  <section class="modes">
+    <div class="modes-head">
+      <h2 class="modes-title serif">{{ t('home_play_alone') }}</h2>
+      <button class="modes-howto mono" (click)="howto.scrollIntoView({ behavior: 'smooth', block: 'start' })">{{ t('how_to_play') }} →</button>
     </div>
 
-    @if (activeTab === 'create') {
-      <div class="tab-content">
-        <div class="field">
-          <label>{{ t('your_name') }}</label>
-          @if (profileName) {
-            <div class="name-locked">{{ profileName }} <span class="name-locked-badge">{{ t('name_badge') }}</span></div>
-          } @else {
-            <input type="text" [placeholder]="t('name_placeholder')" [(ngModel)]="guestName" maxlength="20" (keydown.enter)="createRoom()" />
-          }
+    <div class="mode-grid">
+      <a class="mode mode--daily" routerLink="/daily">
+        <div class="mode-top">
+          <div>
+            <span class="mode-tag mono">{{ t('tag_daily') }}</span>
+            <h3 class="serif">{{ t('mode_daily_title') }}</h3>
+          </div>
+          <span class="mode-ico" aria-hidden="true">🔥</span>
         </div>
-        <button class="btn-primary" (click)="createRoom()" [disabled]="creating">
-          {{ creating ? t('creating') : t('create_room_btn') }}
-        </button>
-      </div>
-    }
+        <p class="mode-desc news">{{ t('mode_daily_desc') }}</p>
+      </a>
 
-    @if (activeTab === 'join') {
-      <div class="tab-content">
-        <div class="field">
-          <label>{{ t('your_name') }}</label>
-          @if (profileName) {
-            <div class="name-locked">{{ profileName }} <span class="name-locked-badge">{{ t('name_badge') }}</span></div>
-          } @else {
-            <input type="text" [placeholder]="t('name_placeholder')" [(ngModel)]="guestName" maxlength="20" />
-          }
-        </div>
-        <div class="field">
-          <label>{{ t('room_code_label') }}</label>
-          <input class="code-input" type="text" [placeholder]="t('room_code_placeholder')" [(ngModel)]="joinCode" maxlength="6" (keydown.enter)="joinRoom()" />
-        </div>
-        <button class="btn-primary" (click)="joinRoom()" [disabled]="joining">
-          {{ joining ? t('joining') : t('join_room_btn') }}
-        </button>
-      </div>
-    }
+      <a class="mode" routerLink="/solo">
+        <span class="mode-ico" aria-hidden="true">⏱</span>
+        <span class="mode-tag mono">{{ t('tag_solo') }}</span>
+        <h3 class="serif">{{ t('mode_solo_title') }}</h3>
+        <p class="mode-desc news">{{ t('mode_solo_desc') }}</p>
+      </a>
 
-    @if (error) {
-      <div class="error-message">{{ error }}</div>
-    }
-    @if (!profileName) {
-      <p class="auth-hint">
-        {{ t('auth_hint') }} <a routerLink="/auth">{{ t('auth_hint_link') }}</a>
-      </p>
-    }
-  </div>
+      <a class="mode" routerLink="/challenge">
+        <span class="mode-ico" aria-hidden="true">🎯</span>
+        <span class="mode-tag mono">{{ t('tag_challenge') }}</span>
+        <h3 class="serif">{{ t('mode_challenge_title') }}</h3>
+        <p class="mode-desc news">{{ t('mode_challenge_desc') }}</p>
+      </a>
+    </div>
+  </section>
 
-  <div class="how-to-play">
-    <h2>{{ t('how_to_play') }}</h2>
+  <!-- ── How to play ────────────────────────────────────────────────── -->
+  <section class="how-to-play" #howto>
+    <h2 class="serif">{{ t('how_to_play') }}</h2>
     <div class="steps">
       @for (step of steps; track step.n) {
         <div class="step">
-          <span class="step-num">{{ step.n }}</span>
-          <p>{{ step.text }}</p>
+          <span class="step-num mono">{{ step.n }}</span>
+          <p class="news">{{ step.text }}</p>
         </div>
       }
     </div>
-  </div>
+  </section>
+
 </div>
+
+<!-- ── Footer band ─────────────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <div class="footer-links mono">
+    <a routerLink="/leaderboard">🏆 {{ t('leaderboard_btn') }}</a>
+    <button class="footer-link-btn" (click)="howto.scrollIntoView({ behavior: 'smooth', block: 'start' })">📖 {{ t('how_to_play') }}</button>
+    <span class="footer-langs">ES · EN</span>
+  </div>
+  <p class="footer-made news ital">
+    {{ t('landing_footer_made') }} <a href="https://ko-fi.com/jpdev" target="_blank" rel="noopener noreferrer">jpdev</a> · ko-fi ☕
+  </p>
+</footer>

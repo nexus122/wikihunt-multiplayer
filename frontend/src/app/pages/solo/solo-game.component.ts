@@ -525,7 +525,7 @@ export class SoloGameComponent implements OnInit, OnDestroy {
   // ── Confetti ───────────────────────────────────────────────
 
   private launchConfetti(): void {
-    const colors = ['#58a6ff', '#3fb950', '#ffd700', '#ff9500', '#bc8cff', '#f85149', '#39d353'];
+    const colors = ['#ff5a3c', '#ffd84a', '#1a3a8c', '#7ec27a', '#8b5cf6', '#e0518a', '#22d3ee'];
     this.confettiPieces = Array.from({ length: 80 }, () => ({
       x: Math.random() * 100,
       color: colors[Math.floor(Math.random() * colors.length)],

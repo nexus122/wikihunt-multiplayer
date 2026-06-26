@@ -7,6 +7,9 @@ export interface UserProfile {
   user_id: string;
   display_name: string;
   created_at: string;
+  avatar_emoji: string;
+  accent_color: string;
+  is_supporter: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -71,7 +74,10 @@ export class AuthService {
       .eq('user_id', user.id)
       .single();
     if (error || !data) return null;
-    return data as UserProfile;
+    const profile = data as UserProfile;
+    localStorage.setItem('wh_avatar_emoji', profile.avatar_emoji ?? '🎮');
+    localStorage.setItem('wh_accent_color', profile.accent_color ?? '#ff5a3c');
+    return profile;
   }
 
   async isNameAvailable(name: string): Promise<boolean> {
@@ -110,5 +116,18 @@ export class AuthService {
       .insert({ user_id: user.id, display_name: displayName });
     if (error) return { error: error.message };
     return {};
+  }
+
+  async updateCosmetics(avatarEmoji: string, accentColor: string): Promise<boolean> {
+    const user = this.currentUser;
+    if (!user) return false;
+    const { error } = await this.supabaseService.client
+      .from('user_profiles')
+      .update({ avatar_emoji: avatarEmoji, accent_color: accentColor })
+      .eq('user_id', user.id);
+    if (error) return false;
+    localStorage.setItem('wh_avatar_emoji', avatarEmoji);
+    localStorage.setItem('wh_accent_color', accentColor);
+    return true;
   }
 }

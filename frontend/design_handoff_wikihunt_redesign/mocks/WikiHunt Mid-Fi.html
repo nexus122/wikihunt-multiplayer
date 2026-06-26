@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>WikiHunt — Mid-fi screens</title>
+<style>
+  html,body{margin:0;padding:0;height:100%;background:#f0eee9;font-family:Inter,system-ui,sans-serif}
+  #root{height:100%}
+  .legend{position:fixed;top:10px;left:10px;z-index:100;background:#fbf7ec;border:1px solid #1a1e2e;
+          border-radius:10px;padding:14px 16px;font-family:'Instrument Serif',Georgia,serif;
+          font-size:18px;box-shadow:3px 3px 0 #1a1e2e;max-width:340px;line-height:1.1;letter-spacing:-0.01em}
+  .legend .bk{color:#ff5a3c}
+  .legend .hunt{font-style:italic;font-weight:600}
+  .legend .sub{font-family:'Newsreader',Georgia,serif;font-style:italic;font-size:12px;color:#3d4256;margin-top:6px;line-height:1.35}
+  .legend .row{display:flex;gap:8px;align-items:center;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#7a7e8f}
+  .legend .sw{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.15)}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="legend">
+  <div><span class="bk">[[</span>Wiki<span class="hunt">Hunt</span><span class="bk">]]</span> · mid-fi</div>
+  <div class="sub">4 screens · light &amp; dark side by side. Click any board to focus fullscreen.</div>
+  <div class="row"><span class="sw" style="background:#f6f1e6"></span>paper<span class="sw" style="background:#0f1220"></span>ink<span class="sw" style="background:#ff5a3c"></span>hunt<span class="sw" style="background:#1a3a8c"></span>knowledge</div>
+</div>
+
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="mf-kit.jsx"></script>
+<script type="text/babel" src="mf-home.jsx"></script>
+<script type="text/babel" src="mf-game.jsx"></script>
+<script type="text/babel" src="mf-leaderboard.jsx"></script>
+<script type="text/babel" src="mf-lobby.jsx"></script>
+<script type="text/babel" src="mf-daily.jsx"></script>
+<script type="text/babel" src="mf-challenge.jsx"></script>
+<script type="text/babel" src="mf-auth.jsx"></script>
+<script type="text/babel" src="mf-extras.jsx"></script>
+<script type="text/babel" src="mf-flows.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+function App() {
+  const W = 1280, H = 820;
+  const MOB_W = 380, MOB_H = 760;
+  return (
+    <DesignCanvas>
+      <DCSection id="home" title="Home" subtitle="Hero copy + live multiplayer card + mode grid">
+        <DCArtboard id="home-light" label="Home · light" width={W} height={H}><HomeScreen/></DCArtboard>
+        <DCArtboard id="home-dark" label="Home · dark" width={W} height={H}><HomeScreen dark/></DCArtboard>
+      </DCSection>
+      <DCSection id="game" title="Game" subtitle="Article + sidebar HUD · target is the hero">
+        <DCArtboard id="game-light" label="Game · light" width={W} height={H}><GameScreen/></DCArtboard>
+        <DCArtboard id="game-dark" label="Game · dark" width={W} height={H}><GameScreen dark/></DCArtboard>
+        <DCArtboard id="game-mobile-light" label="Mobile · light" width={MOB_W} height={MOB_H}><MobileGame/></DCArtboard>
+        <DCArtboard id="game-mobile-dark" label="Mobile · dark" width={MOB_W} height={MOB_H}><MobileGame dark/></DCArtboard>
+      </DCSection>
+      <DCSection id="solo" title="Solo game" subtitle="No players sidebar · stats in top bar · full-width article">
+        <DCArtboard id="solo-light" label="Solo · light" width={W} height={H}><SoloGame/></DCArtboard>
+        <DCArtboard id="solo-dark" label="Solo · dark" width={W} height={H}><SoloGame dark/></DCArtboard>
+      </DCSection>
+      <DCSection id="endgame" title="End of hunt" subtitle="Results modal — overlays the game">
+        <DCArtboard id="end-light" label="End modal · light" width={W} height={H}><EndGameModal/></DCArtboard>
+        <DCArtboard id="end-dark" label="End modal · dark" width={W} height={H}><EndGameModal dark/></DCArtboard>
+        <DCArtboard id="giveup-light" label="Give-up confirm · light" width={W} height={H}><ConfirmModal variant="giveup"/></DCArtboard>
+        <DCArtboard id="leave-dark" label="Leave confirm · dark" width={W} height={H}><ConfirmModal variant="leave" dark/></DCArtboard>
+      </DCSection>
+      <DCSection id="lb" title="Leaderboard" subtitle="Champion card + ranked table">
+        <DCArtboard id="lb-light" label="Leaderboard · light" width={W} height={H}><LeaderboardScreen/></DCArtboard>
+        <DCArtboard id="lb-dark" label="Leaderboard · dark" width={W} height={H}><LeaderboardScreen dark/></DCArtboard>
+      </DCSection>
+      <DCSection id="lobby" title="Lobby" subtitle="Code spectacle + route + players + host settings">
+        <DCArtboard id="lobby-light" label="Lobby · light" width={W} height={H}><LobbyScreen/></DCArtboard>
+        <DCArtboard id="lobby-dark" label="Lobby · dark" width={W} height={H}><LobbyScreen dark/></DCArtboard>
+      </DCSection>
+      <DCSection id="daily" title="Daily" subtitle="Today's route + streak + community stats">
+        <DCArtboard id="daily-light" label="Daily · light" width={W} height={H}><DailyScreen/></DCArtboard>
+        <DCArtboard id="daily-dark" label="Daily · dark" width={W} height={H}><DailyScreen dark/></DCArtboard>
+      </DCSection>
+      <DCSection id="challenge" title="Challenge creator" subtitle="Pick two pages → generate shareable link">
+        <DCArtboard id="ch-form-light" label="Form · light" width={W} height={H}><ChallengeScreen/></DCArtboard>
+        <DCArtboard id="ch-form-dark" label="Form · dark" width={W} height={H}><ChallengeScreen dark/></DCArtboard>
+        <DCArtboard id="ch-share-light" label="After share · light" width={W} height={H}><ChallengeScreen shared/></DCArtboard>
+        <DCArtboard id="ch-share-dark" label="After share · dark" width={W} height={H}><ChallengeScreen shared dark/></DCArtboard>
+      </DCSection>
+      <DCSection id="challenge-invite" title="Challenge invite" subtitle="What the recipient sees opening a /c/:id link">
+        <DCArtboard id="ci-light" label="Invite landing · light" width={W} height={H}><ChallengeInvite/></DCArtboard>
+        <DCArtboard id="ci-dark" label="Invite landing · dark" width={W} height={H}><ChallengeInvite dark/></DCArtboard>
+      </DCSection>
+      <DCSection id="auth" title="Auth & Profile" subtitle="Sign in (magic link) + cosmetics setup">
+        <DCArtboard id="auth-light" label="Sign in · light" width={W} height={H}><AuthScreen/></DCArtboard>
+        <DCArtboard id="auth-dark" label="Sign in · dark" width={W} height={H}><AuthScreen dark/></DCArtboard>
+        <DCArtboard id="setup-light" label="Setup profile · light" width={W} height={H}><SetupScreen/></DCArtboard>
+        <DCArtboard id="setup-dark" label="Setup profile · dark" width={W} height={H}><SetupScreen dark/></DCArtboard>
+      </DCSection>
+      <DCSection id="misc" title="Small screens & states" subtitle="Join transition · user dropdown · how to play">
+        <DCArtboard id="join-light" label="Join transition · light" width={W} height={H}><JoinTransition/></DCArtboard>
+        <DCArtboard id="join-dark" label="Join transition · dark" width={W} height={H}><JoinTransition dark/></DCArtboard>
+        <DCArtboard id="dropdown-light" label="User dropdown · light" width={W} height={H}><UserDropdown/></DCArtboard>
+        <DCArtboard id="howto-light" label="How to play · light" width={W} height={H}><HowToPlay/></DCArtboard>
+        <DCArtboard id="howto-dark" label="How to play · dark" width={W} height={H}><HowToPlay dark/></DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

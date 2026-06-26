@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { SocketService } from '../../core/services/socket.service';
 import { AuthService } from '../../core/services/auth.service';
 import { LanguageService } from '../../core/services/language.service';
+import { SupabaseService } from '../../core/services/supabase.service';
 import { HeaderComponent } from '../../core/components/header.component';
 import { TranslationKey } from '../../core/i18n/translations';
 
@@ -36,6 +37,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   savedGame: { roomCode: string; playerName: string; isHost: boolean; startPage: string; targetPage: string; steps?: number; currentPage?: string; path?: string[] } | null = null;
+  stats: { games: number; players: number } | null = null;
 
   get steps() {
     const l = this.lang;
@@ -53,6 +55,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private authService: AuthService,
     public lang: LanguageService,
+    private supabaseService: SupabaseService,
   ) {}
 
   t(key: TranslationKey): string {
@@ -102,6 +105,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     // Triggers Angular change detection so t() re-evaluates on language change
     this.langSub = this.lang.lang$.subscribe(() => {});
+    this.supabaseService.getStats().then(s => (this.stats = s));
   }
 
   ngOnDestroy(): void {

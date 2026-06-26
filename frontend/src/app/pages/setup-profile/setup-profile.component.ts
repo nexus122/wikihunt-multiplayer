@@ -6,11 +6,12 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { LanguageService } from '../../core/services/language.service';
 import { TranslationKey } from '../../core/i18n/translations';
+import { CosmeticsComponent } from '../../core/components/cosmetics.component';
 
 @Component({
   selector: 'app-setup-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CosmeticsComponent],
   templateUrl: './setup-profile.component.html',
   styleUrl: './setup-profile.component.scss',
 })

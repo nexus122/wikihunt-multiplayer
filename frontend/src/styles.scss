@@ -1,9 +1,57 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+// ─── WikiHunt design system ──────────────────────────────────────────────────
+// "Encyclopedic but electric." Wikipedia serif voice + paper feel + one bold
+// hunt color (coral). Fonts are loaded in index.html.
+// Single source of truth for tokens — components only consume var(--…).
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+// ─── Theme-independent tokens ────────────────────────────────────────────────
 :root {
-  // Spacing scale
+  // Typography families
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body:    'Inter', system-ui, -apple-system, sans-serif;
+  --font-prose:   'Newsreader', Georgia, serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
+
+  // Type scale
+  --fs-h1-hero: 80px;
+  --fs-h1:      60px;
+  --fs-h2:      44px;
+  --fs-h3:      28px;
+  --fs-h4:      22px;
+  --fs-body:    14px;
+  --fs-label:   10px;
+  --fs-eyebrow: 11px;
+  --fs-num-xl:  40px;
+  --fs-num-md:  26px;
+
+  --lh-tight:  0.95;
+  --lh-snug:   1.1;
+  --lh-normal: 1.45;
+  --lh-prose:  1.55;
+  --ls-tight:   -0.02em;
+  --ls-label:   0.12em;
+  --ls-eyebrow: 0.14em;
+
+  // Legacy font-size tokens (kept for existing component CSS)
+  --font-xs: 12px;
+  --font-sm: 13px;
+  --font-base: 14px;
+  --font-lg: 15px;
+  --font-xl: 16px;
+
+  // Spacing — new scale
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-7:  32px;
+  --space-8:  40px;
+  --space-9:  56px;
+  --space-10: 64px;
+  // Legacy spacing aliases
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 12px;
@@ -11,12 +59,20 @@
   --space-xl: 24px;
   --space-2xl: 32px;
 
-  // Border radius
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  // Radius — new + legacy
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-pill: 999px;
+  --radius-xs:   4px;
   --radius-full: 9999px;
+
+  // Layout max-widths
+  --max-w-narrow: 720px;
+  --max-w-medium: 880px;
+  --max-w-wide:   980px;
+  --max-w-page:   1280px;
 
   // Transitions
   --duration-fast: 0.1s;
@@ -26,238 +82,340 @@
   --transition-fast: all 0.1s ease;
 
   // Z-index scale
-  --z-header: 300;
+  --z-header:  300;
   --z-backdrop: 400;
-  --z-modal: 500;
-  --z-toast: 600;
+  --z-modal:   500;
+  --z-toast:   600;
   --z-tooltip: 700;
-
-  // Font sizes
-  --font-xs: 12px;
-  --font-sm: 13px;
-  --font-base: 14px;
-  --font-lg: 15px;
-  --font-xl: 16px;
 }
 
-// ── Default (dark) theme — applied when no data-theme is set OR data-theme="dark"
+// ─── Light theme ("paper") — default ─────────────────────────────────────────
 :root,
-[data-theme="dark"] {
-  // Backgrounds
-  --bg-primary:      #0d1117;
-  --bg-secondary:    #161b22;
-  --bg-tertiary:     #21262d;
-  --border-color:    #30363d;
-
-  // Text
-  --text-primary:    #f0f6fc;
-  --text-secondary:  #8b949e;
-
-  // Brand
-  --accent:          #58a6ff;
-  --accent-hover:    #79b8ff;
-  --success:         #4ade80;
-  --warning:         #d29922;
-  --danger:          #f85149;
-  --streak-color:    #ff9500;
-
-  // Semantic tints (replaces all hardcoded rgba in components)
-  --accent-tint:     rgba(88,166,255,0.10);
-  --accent-tint-sm:  rgba(88,166,255,0.05);
-  --accent-tint-lg:  rgba(88,166,255,0.18);
-  --accent-border:   rgba(88,166,255,0.30);
-  --danger-tint:     rgba(248,81,73,0.10);
-  --danger-tint-sm:  rgba(248,81,73,0.06);
-  --danger-border:   rgba(248,81,73,0.25);
-  --success-tint:    rgba(74,222,128,0.10);
-  --success-border:  rgba(74,222,128,0.25);
-  --warning-tint:    rgba(255,149,0,0.08);
-  --warning-border:  rgba(255,149,0,0.22);
-
-  // Button text colors
-  --btn-primary-text: #0d1117;
-  --btn-success-text: #0d1117;
-
-  // Overlays
-  --overlay-bg:      rgba(0,0,0,0.60);
-  --overlay-dark:    rgba(13,17,23,0.90);
-
-  // Shadows
-  --shadow-sm:  0 2px 8px rgba(0,0,0,.22);
-  --shadow-md:  0 4px 16px rgba(0,0,0,.32);
-  --shadow-lg:  0 8px 24px rgba(0,0,0,.44);
-  --shadow-panel: -4px 0 24px rgba(0,0,0,.44);
-
-  // Wiki content (game/solo-game page Wikipedia area)
-  --wiki-bg:          #ffffff;
-  --wiki-text:        #202122;
-  --wiki-link:        #0645ad;
-  --wiki-link-hover:  #0b0080;
-  --wiki-border:      #a2a9b1;
-  --wiki-table-head:  #eaecf0;
-  --wiki-infobox-bg:  #f8f9fa;
-}
-
-// ── Light theme
 [data-theme="light"] {
   // Backgrounds
-  --bg-primary:      #ffffff;
-  --bg-secondary:    #f6f8fa;
-  --bg-tertiary:     #eaeef2;
-  --border-color:    #d0d7de;
+  --bg-primary:    #f6f1e6;   // cream paper
+  --bg-secondary:  #efe7d4;   // tracks, segmented bg, table headers
+  --bg-tertiary:   #e7dcc1;   // hover/active subtle
+  --surface:       #fbf7ec;   // card surface
+
+  // Borders / rules
+  --border-color:  #d8cfb8;
+  --border-strong: #c6bb9d;
 
   // Text
-  --text-primary:    #1f2328;
-  --text-secondary:  #57606a;
+  --text-primary:   #1a1e2e;  // ink
+  --text-secondary: #3d4256;
+  --text-muted:     #7a7e8f;
 
   // Brand
-  --accent:          #0969da;
-  --accent-hover:    #0860ca;
-  --success:         #1a7f37;
-  --warning:         #9a6700;
-  --danger:          #cf222e;
-  --streak-color:    #e16f24;
+  --accent:        #ff5a3c;   // coral / hunt
+  --accent-2:      #e64a2d;
+  --accent-hover:  #e64a2d;
+  --accent-soft:   #ffe2d8;
+  --knowledge:     #1a3a8c;   // wiki link blue
+  --knowledge-soft:#dbe2f5;
+  --success:       #7ec27a;
+  --danger:        #e64a2d;
+  --warning:       #b58c00;
+  --streak-color:  #ffd84a;   // butter
+  --streak-deep:   #b58c00;
+  --gold:          #ffd84a;
 
-  // Semantic tints
-  --accent-tint:     rgba(9,105,218,0.08);
-  --accent-tint-sm:  rgba(9,105,218,0.04);
-  --accent-tint-lg:  rgba(9,105,218,0.15);
-  --accent-border:   rgba(9,105,218,0.25);
-  --danger-tint:     rgba(207,34,46,0.08);
-  --danger-tint-sm:  rgba(207,34,46,0.04);
-  --danger-border:   rgba(207,34,46,0.20);
-  --success-tint:    rgba(26,127,55,0.08);
-  --success-border:  rgba(26,127,55,0.20);
-  --warning-tint:    rgba(154,103,0,0.08);
-  --warning-border:  rgba(154,103,0,0.22);
+  // Semantic tints (legacy aliases, repainted to coral palette)
+  --accent-tint:     rgba(255,90,60,0.10);
+  --accent-tint-sm:  rgba(255,90,60,0.05);
+  --accent-tint-lg:  rgba(255,90,60,0.18);
+  --accent-border:   rgba(255,90,60,0.30);
+  --danger-tint:     rgba(230,74,45,0.10);
+  --danger-tint-sm:  rgba(230,74,45,0.05);
+  --danger-tint-lg:  rgba(230,74,45,0.20);
+  --danger-border:   rgba(230,74,45,0.28);
+  --success-tint:    rgba(126,194,122,0.14);
+  --success-border:  rgba(126,194,122,0.35);
+  --warning-tint:    rgba(255,216,74,0.18);
+  --warning-border:  rgba(255,216,74,0.45);
 
   // Button text colors
   --btn-primary-text: #ffffff;
-  --btn-success-text: #ffffff;
+  --btn-success-text: #15310f;
 
-  // Overlays (lighter for light theme)
-  --overlay-bg:      rgba(0,0,0,0.45);
-  --overlay-dark:    rgba(0,0,0,0.65);
+  // Overlays
+  --overlay-bg:   rgba(26,30,46,0.40);
+  --overlay-dark: rgba(26,30,46,0.65);
 
-  // Shadows (softer for light theme)
-  --shadow-sm:  0 2px 8px rgba(31,35,40,.08);
-  --shadow-md:  0 4px 16px rgba(31,35,40,.12);
-  --shadow-lg:  0 8px 24px rgba(31,35,40,.16);
-  --shadow-panel: -4px 0 24px rgba(31,35,40,.16);
+  // Shadows / rings
+  --shadow-sm:    0 1px 0 rgba(26,30,46,.04);
+  --shadow-md:    0 1px 0 rgba(26,30,46,.04), 0 6px 24px -10px rgba(26,30,46,.18);
+  --shadow-lg:    0 30px 80px -20px rgba(0,0,0,.55);
+  --shadow-panel: -4px 0 24px rgba(26,30,46,.16);
+  --ring-accent:  0 0 0 3px rgba(255,90,60,.22);
 
-  // Wiki content — stays standard Wikipedia colors in both themes
-  --wiki-bg:          #ffffff;
-  --wiki-text:        #202122;
-  --wiki-link:        #0645ad;
-  --wiki-link-hover:  #0b0080;
-  --wiki-border:      #a2a9b1;
-  --wiki-table-head:  #eaecf0;
-  --wiki-infobox-bg:  #f8f9fa;
+  // Wiki article colors (standard Wikipedia, same in both themes)
+  --wiki-bg:         #ffffff;
+  --wiki-text:       #202122;
+  --wiki-link:       #1a3a8c;
+  --wiki-link-hover: #0b0080;
+  --wiki-border:     #a2a9b1;
+  --wiki-table-head: #eaecf0;
+  --wiki-infobox-bg: #f8f9fa;
 }
 
+// ─── Dark theme ("ink") ──────────────────────────────────────────────────────
+[data-theme="dark"] {
+  // Backgrounds
+  --bg-primary:    #0f1220;   // deep navy
+  --bg-secondary:  #161a30;
+  --bg-tertiary:   #1f243f;
+  --surface:       #181c33;
+
+  // Borders / rules
+  --border-color:  #2a2f4a;
+  --border-strong: #3a4060;
+
+  // Text
+  --text-primary:   #f0ebde;  // warm cream
+  --text-secondary: #b9b4a5;
+  --text-muted:     #7a7e8f;
+
+  // Brand
+  --accent:        #ff6b50;
+  --accent-2:      #ff8268;
+  --accent-hover:  #ff8268;
+  --accent-soft:   #3a1e1a;
+  --knowledge:     #6f8eff;
+  --knowledge-soft:#1c2645;
+  --success:       #7ec27a;
+  --danger:        #ff6b50;
+  --warning:       #ffd84a;
+  --streak-color:  #ffd84a;
+  --streak-deep:   #ffd84a;
+  --gold:          #ffd84a;
+
+  // Semantic tints
+  --accent-tint:     rgba(255,107,80,0.12);
+  --accent-tint-sm:  rgba(255,107,80,0.06);
+  --accent-tint-lg:  rgba(255,107,80,0.20);
+  --accent-border:   rgba(255,107,80,0.30);
+  --danger-tint:     rgba(255,107,80,0.12);
+  --danger-tint-sm:  rgba(255,107,80,0.06);
+  --danger-tint-lg:  rgba(255,107,80,0.20);
+  --danger-border:   rgba(255,107,80,0.28);
+  --success-tint:    rgba(126,194,122,0.12);
+  --success-border:  rgba(126,194,122,0.28);
+  --warning-tint:    rgba(255,216,74,0.10);
+  --warning-border:  rgba(255,216,74,0.25);
+
+  // Button text colors
+  --btn-primary-text: #ffffff;
+  --btn-success-text: #0f1220;
+
+  // Overlays
+  --overlay-bg:   rgba(15,18,32,0.85);
+  --overlay-dark: rgba(15,18,32,0.92);
+
+  // Shadows / rings
+  --shadow-sm:    0 1px 0 rgba(0,0,0,.3);
+  --shadow-md:    0 1px 0 rgba(0,0,0,.3), 0 8px 28px -10px rgba(0,0,0,.6);
+  --shadow-lg:    0 30px 80px -20px rgba(0,0,0,.85);
+  --shadow-panel: -4px 0 24px rgba(0,0,0,.5);
+  --ring-accent:  0 0 0 3px rgba(255,107,80,.28);
+
+  // Wiki article colors stay standard Wikipedia
+  --wiki-bg:         #ffffff;
+  --wiki-text:       #202122;
+  --wiki-link:       #1a3a8c;
+  --wiki-link-hover: #0b0080;
+  --wiki-border:     #a2a9b1;
+  --wiki-table-head: #eaecf0;
+  --wiki-infobox-bg: #f8f9fa;
+}
+
+// ─── Base ────────────────────────────────────────────────────────────────────
 html, body {
   height: 100%;
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 a { color: var(--accent); text-decoration: none; }
 a:hover { color: var(--accent-hover); text-decoration: underline; }
-a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 2px;
-}
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 a:active { opacity: 0.8; }
 
 button {
   cursor: pointer;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
   padding: 10px 20px;
-  transition: all 0.15s ease;
+  transition: transform .12s ease, background .15s ease, box-shadow .15s ease, color .15s ease, border-color .15s ease;
   &:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(30%); }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-  &:active:not(:disabled) {
-    transform: translateY(1px);
-  }
+  &:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  &:active:not(:disabled) { transform: translateY(1px); }
 }
 
+// ─── Buttons ─────────────────────────────────────────────────────────────────
+// Default = ghost (transparent, ink border). .btn-primary = coral filled.
 .btn-primary {
-  background: var(--accent); color: var(--btn-primary-text);
-  &:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+  background: var(--accent);
+  border: 1.5px solid var(--accent);
+  color: var(--btn-primary-text);
+  &:hover:not(:disabled) { background: var(--accent-2); border-color: var(--accent-2); transform: translateY(-1px); box-shadow: var(--ring-accent); }
 }
 .btn-secondary {
-  background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color);
-  &:hover:not(:disabled) { background: var(--border-color); }
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border-strong);
+  &:hover:not(:disabled) { transform: translateY(-1px); color: var(--text-primary); border-color: var(--text-secondary); }
 }
 .btn-success {
-  background: var(--success); color: var(--btn-success-text);
-  &:hover:not(:disabled) { filter: brightness(1.1); }
+  background: var(--success);
+  border: 1.5px solid var(--success);
+  color: var(--btn-success-text);
+  &:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
 }
 .btn-danger {
-  background: var(--danger); color: white;
-  &:hover:not(:disabled) { filter: brightness(1.1); }
+  background: transparent;
+  border: 1.5px solid var(--danger);
+  color: var(--danger);
+  &:hover:not(:disabled) { background: var(--danger); color: #fff; transform: translateY(-1px); }
 }
 
+// Button size modifiers
+.btn-lg { padding: 14px 22px; font-size: 16px; border-radius: var(--radius-md); }
+.btn-xl { padding: 16px 26px; font-size: 17px; border-radius: var(--radius-md); }
+.btn-sm { padding: 6px 10px; font-size: 12px; border-radius: var(--radius-sm); }
+
+// Ko-fi support button
+.kofi-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  background: #ff5e5b;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity .15s, transform .12s;
+
+  &:hover { opacity: 0.88; transform: translateY(-1px); text-decoration: none; color: #fff; }
+  &:active { transform: translateY(0); }
+}
+
+// ─── Inputs ──────────────────────────────────────────────────────────────────
 input, select {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
   color: var(--text-primary);
   font-family: inherit;
   font-size: 14px;
-  padding: 10px 14px;
+  padding: 11px 14px;
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   width: 100%;
-  &:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
-  &::placeholder { color: var(--text-secondary); }
+  &:focus { border-color: var(--accent); box-shadow: var(--ring-accent); }
+  &::placeholder { color: var(--text-muted); }
 }
 
+// ─── Cards ───────────────────────────────────────────────────────────────────
 .card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-md);
+}
+.card--flat   { box-shadow: none; }
+.card--coral  { background: var(--accent); color: #fff; border-color: var(--accent); }
+.card--tint   { background: var(--accent-soft); border-color: var(--accent-soft); }
+.card--knowledge { background: var(--knowledge-soft); border-color: var(--knowledge-soft); }
+.card--butter { background: var(--streak-color); color: #1a1e2e; border-color: var(--streak-color); }
+
+// ─── Typography helpers ──────────────────────────────────────────────────────
+.serif { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.01em; }
+.news  { font-family: var(--font-prose); }
+.mono  { font-family: var(--font-mono); }
+.ital  { font-style: italic; }
+.num   { font-family: var(--font-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 500;
+}
+.label-mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+// ─── Badges ──────────────────────────────────────────────────────────────────
+.badge {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 24px;
-}
-
-.badge {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
+  border-radius: var(--radius-pill);
   font-size: 12px;
   font-weight: 600;
   padding: 4px 10px;
   color: var(--text-secondary);
 }
+.badge-accent  { background: var(--accent-tint); color: var(--accent); border-color: var(--accent-border); }
+.badge-success { background: var(--success-tint); color: var(--success); border-color: var(--success-border); }
 
+// ─── Messages ────────────────────────────────────────────────────────────────
 .error-message {
   background: var(--danger-tint);
   border: 1px solid var(--danger-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--danger);
   font-size: 14px;
   padding: 10px 14px;
   margin-top: 8px;
 }
-
-.wh-logo {
-  font-weight: 800;
-  .logo-wiki { color: var(--text-primary); }
-  .logo-hunt { color: var(--accent); }
+.success-message {
+  background: var(--success-tint);
+  border: 1px solid var(--success-border);
+  border-radius: var(--radius-md);
+  color: var(--success);
+  font-size: 14px;
+  padding: 10px 14px;
+  margin-top: 8px;
 }
 
-// Accessibility: respect user motion preferences
+// ─── Logo: [[WikiHunt]] ──────────────────────────────────────────────────────
+.wh-logo {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: baseline;
+  line-height: 1;
+  color: var(--text-primary);
+  user-select: none;
+
+  .logo-bracket { color: var(--accent); font-weight: 400; }
+  .logo-wiki    { color: var(--text-primary); font-weight: 400; }
+  .logo-hunt    { color: var(--text-primary); font-style: italic; font-weight: 600; }
+}
+
+// ─── Accessibility ───────────────────────────────────────────────────────────
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -266,7 +424,6 @@ input, select {
   }
 }
 
-// Screen reader only utility
 .sr-only {
   position: absolute;
   width: 1px;
@@ -279,64 +436,59 @@ input, select {
   border-width: 0;
 }
 
-// ─── Shared shadow scale ──────────────────────────────────────────────────────
-// Use these instead of ad-hoc box-shadow values throughout the app
-// sm: subtle elevation (dropdowns, cards)
-// md: standard modal/panel elevation
-// lg: high emphasis overlays
-
 // ─── Shared component: .route-display ────────────────────────────────────────
-// Unified start → target route pattern used on Home, Daily, Lobby
+// start (knowledge blue) → target (coral) — used on Home, Daily, Lobby
 .route-display {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
 
   .route-page {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 2px;
     min-width: 0;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    border: 1.5px solid transparent;
+    font-weight: 500;
   }
 
   .route-label {
-    font-size: var(--font-xs);
-    font-weight: 700;
+    font-family: var(--font-mono);
+    font-size: var(--fs-label);
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--text-secondary);
+    letter-spacing: var(--ls-label);
+    color: var(--text-muted);
   }
 
   .route-title {
     font-size: 14px;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  .route-start .route-title { color: var(--accent); }
-  .route-target .route-title { color: var(--danger); }
+  .route-start  { background: var(--knowledge-soft); color: var(--knowledge); .route-title { color: var(--knowledge); } }
+  .route-target { background: var(--accent-soft); color: var(--accent); .route-title { color: var(--accent); } }
 
   .route-arrow {
-    font-size: 18px;
-    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 16px;
+    color: var(--text-muted);
     flex-shrink: 0;
   }
 }
 
 // ─── Shared component: .name-locked ──────────────────────────────────────────
-// Used on Home and Daily pages for authenticated user display
 .name-locked {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   padding: 10px 14px;
@@ -344,10 +496,11 @@ input, select {
   color: var(--text-primary);
 
   .name-locked-badge {
+    font-family: var(--font-mono);
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: .06em;
+    letter-spacing: .08em;
     color: var(--success);
     background: var(--success-tint);
     border: 1px solid var(--success-border);
@@ -357,31 +510,17 @@ input, select {
   }
 }
 
-// ─── Shared component: .badge-accent / .badge-danger ─────────────────────────
-// Color variants for the .badge base class
-.badge-accent {
-  background: var(--accent-tint);
-  color: var(--accent);
-  border-color: var(--accent-border);
-}
-
-.badge-success {
-  background: var(--success-tint);
-  color: var(--success);
-  border-color: var(--success-border);
-}
-
-// ─── Shared form label ────────────────────────────────────────────────────────
+// ─── Shared form label ───────────────────────────────────────────────────────
 .form-label {
-  font-size: var(--font-xs);
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: .06em;
-  color: var(--text-secondary);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
 }
 
-// ─── Shared component: .field ─────────────────────────────────────────────────
-// Standard form field wrapper used on Home, Lobby, Solo, Daily
+// ─── Shared component: .field ────────────────────────────────────────────────
 .field {
   display: flex;
   flex-direction: column;
@@ -389,60 +528,57 @@ input, select {
 
   label {
     display: block;
-    font-size: var(--font-xs);
-    font-weight: 700;
+    font-family: var(--font-mono);
+    font-size: var(--fs-label);
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--text-secondary);
+    letter-spacing: var(--ls-label);
+    color: var(--text-muted);
     margin: 0;
   }
 
   .field-hint {
-    font-size: var(--font-xs);
-    color: var(--text-secondary);
+    font-family: var(--font-prose);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--text-muted);
     margin-top: 4px;
     line-height: 1.4;
   }
 }
 
-// ─── Shared component: .mode-pills ───────────────────────────────────────────
-// Random/Custom toggle pills used on Lobby and Solo setup
+// ─── Shared component: .mode-pills (segmented track) ─────────────────────────
 .mode-pills {
   display: flex;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+  gap: 4px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 4px;
   width: fit-content;
 
   .pill {
-    padding: 5px 12px;
+    padding: 6px 14px;
     font-size: 12px;
     font-weight: 600;
     background: transparent;
     color: var(--text-secondary);
-    border: none;
-    border-radius: 0;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all .15s;
 
     &.active {
-      background: var(--accent-tint);
-      color: var(--accent);
-    }
-
-    &:not(.active):hover {
-      background: var(--bg-tertiary);
+      background: var(--surface);
       color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
     }
 
-    & + .pill {
-      border-left: 1px solid var(--border-color);
-    }
+    &:not(.active):hover { color: var(--text-primary); }
   }
 }
 
 // ─── Shared component: .page-chip ────────────────────────────────────────────
-// Selected Wikipedia page tag (start=blue, target=red) used on Lobby and Solo
+// start = knowledge-soft, target = coral-soft
 .page-chip {
   display: inline-flex;
   align-items: center;
@@ -452,14 +588,13 @@ input, select {
   font-size: 12px;
   font-weight: 600;
   max-width: 100%;
-  border: 1px solid var(--accent-border);
-  background: var(--accent-tint);
-  color: var(--accent);
+  border: 1px solid transparent;
+  background: var(--knowledge-soft);
+  color: var(--knowledge);
 
   &.target {
-    border-color: var(--danger-border);
-    background: var(--danger-tint);
-    color: var(--danger);
+    background: var(--accent-soft);
+    color: var(--accent);
   }
 
   .chip-name {
@@ -484,20 +619,17 @@ input, select {
 }
 
 // ─── Shared component: .search-wrap ──────────────────────────────────────────
-// Wikipedia page search input + dropdown (Lobby, Solo)
 .search-wrap {
   position: relative;
 
-  .search-input {
-    width: 100%;
-  }
+  .search-input { width: 100%; }
 
   .results {
     position: absolute;
     top: calc(100% + 4px);
     left: 0;
     right: 0;
-    background: var(--bg-secondary);
+    background: var(--surface);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     max-height: 200px;
@@ -519,27 +651,37 @@ input, select {
   }
 }
 
-// ─── Shared component: .avatar-circle ────────────────────────────────────────
-// Colored player avatar circle used in game, lobby, leaderboard
-.avatar-circle {
+// ─── Shared component: .avatar-circle / .av ──────────────────────────────────
+// Emoji + accent-color avatar. Used in header, player lists, leaderboard, modal.
+.avatar-circle,
+.av {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
-  color: #fff;
+  background: var(--bg-secondary);
+  border: 1.5px solid var(--border-color);
   flex-shrink: 0;
+  line-height: 1;
   text-transform: uppercase;
+  overflow: hidden;
+}
+.av {
+  &.coral  { background: var(--accent); color: #fff; border-color: var(--accent); }
+  &.butter { background: var(--streak-color); color: #1a1e2e; border-color: var(--streak-color); }
+  &.sm { width: 24px; height: 24px; font-size: 13px; }
+  &.lg { width: 48px; height: 48px; font-size: 24px; }
+  &.xl { width: 72px; height: 72px; font-size: 36px; }
 }
 
-// ─── Shared component: .tabs ─────────────────────────────────────────────────
-// Tab navigation bar used on Home (create/join), Auth (sign in/up), Leaderboard
+// ─── Shared component: .tabs (segmented) ─────────────────────────────────────
 .tabs {
   display: flex;
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   border-radius: var(--radius-md);
   padding: 4px;
   gap: 4px;
@@ -547,7 +689,7 @@ input, select {
   .tab {
     flex: 1;
     padding: 8px 12px;
-    border: none;
+    border: 1px solid transparent;
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-secondary);
@@ -557,30 +699,16 @@ input, select {
     transition: all .15s;
 
     &.active {
-      background: var(--bg-secondary);
+      background: var(--surface);
       color: var(--text-primary);
       box-shadow: var(--shadow-sm);
     }
 
-    &:not(.active):hover {
-      color: var(--text-primary);
-    }
+    &:not(.active):hover { color: var(--text-primary); }
   }
 }
 
-// ─── Shared component: .success-message ──────────────────────────────────────
-.success-message {
-  background: var(--success-tint);
-  border: 1px solid var(--success-border);
-  border-radius: 8px;
-  color: var(--success);
-  font-size: 14px;
-  padding: 10px 14px;
-  margin-top: 8px;
-}
-
 // ─── Shared component: .streak-row ───────────────────────────────────────────
-// Streak display used on Daily and header panel
 .streak-row {
   display: flex;
   align-items: center;
@@ -593,24 +721,22 @@ input, select {
   .streak-fire { font-size: 18px; line-height: 1; }
 
   .streak-badge {
+    font-family: var(--font-mono);
     font-size: 16px;
-    font-weight: 800;
-    color: var(--streak-color);
+    font-weight: 700;
+    color: var(--streak-deep);
   }
 
-  .streak-label {
-    font-size: 13px;
-    color: var(--text-secondary);
-  }
+  .streak-label { font-size: 13px; color: var(--text-secondary); }
 
   .streak-hint {
+    font-family: var(--font-prose);
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     font-style: italic;
   }
 }
 
-// ─── Tailwind utilities ───────────────────────────────────────────────────────
-// Tailwind is configured with preflight:false so it only adds utility classes
-// without touching the existing design system above.
+// ─── Tailwind utilities ──────────────────────────────────────────────────────
+// preflight:false — utility classes only, no reset.
 @tailwind utilities;

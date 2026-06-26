@@ -1,18 +1,30 @@
 <div class="game">
 
-  <!-- ─── Mobile top HUD ─── -->
+  <!-- ─── Mobile top HUD (coral target band) ─── -->
   <div class="mobile-hud">
     <div class="hud-target">
-      <span class="hud-label">{{ t('game_target') }}</span>
+      <span class="hud-label">🎯 {{ t('game_target') }}</span>
       <span class="hud-value">{{ targetPage }}</span>
     </div>
-    <div class="hud-meta">
-      <span class="hud-chip accent">{{ mySteps }} {{ t('game_steps') }}</span>
-      <span class="hud-chip">{{ elapsed }}</span>
-    </div>
-    <button class="hud-players-btn" (click)="mobileMenuOpen = true" aria-label="Open navigation menu" [attr.aria-expanded]="mobileMenuOpen">
+    <button class="hud-menu-btn" (click)="mobileMenuOpen = true" aria-label="Open navigation menu" [attr.aria-expanded]="mobileMenuOpen">
       <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> {{ players.length }}
     </button>
+  </div>
+
+  <!-- ─── Mobile stats strip ─── -->
+  <div class="mobile-stats">
+    <div class="mstat">
+      <span class="mstat-label">{{ t('game_steps') }}</span>
+      <span class="mstat-value">{{ mySteps }}</span>
+    </div>
+    <div class="mstat">
+      <span class="mstat-label">{{ t('game_time') }}</span>
+      <span class="mstat-value">{{ elapsed }}</span>
+    </div>
+    <div class="mstat">
+      <span class="mstat-label">{{ t('game_players') }}</span>
+      <span class="mstat-value">{{ myRank }}/{{ players.length }}</span>
+    </div>
   </div>
 
   <!-- ─── Mobile overlay ─── -->
@@ -24,7 +36,7 @@
   <aside class="sidebar" [class.mobile-open]="mobileMenuOpen">
     <div class="sidebar-top">
       <div class="sidebar-head">
-        <div class="logo wh-logo"><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span></div>
+        <div class="logo wh-logo"><span class="logo-bracket">[[</span><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span><span class="logo-bracket">]]</span></div>
         <button class="sidebar-close-btn btn-secondary" (click)="mobileMenuOpen = false">✕</button>
       </div>
 
@@ -63,7 +75,9 @@
       <ul class="players">
         @for (p of players; track p.socketId) {
           <li class="player" [class.me]="p.socketId === mySocketId" [class.finished]="p.finished" [class.disconnected]="p.disconnected">
-            <div class="avatar sm" [style.background]="getAvatarColor(p.socketId)">{{ (p.name[0] || '?').toUpperCase() }}</div>
+            <div class="avatar sm" [style.background]="p.accentColor || getAvatarColor(p.socketId)">
+              {{ p.avatarEmoji || (p.name[0] || '?').toUpperCase() }}
+            </div>
             <div class="player-info">
               <span class="player-name" [title]="p.name">{{ p.name }}</span>
               <span class="player-page">{{ p.disconnected ? t('game_disconnected') : (p.currentPage || '...') }}</span>
@@ -149,17 +163,26 @@
     }
   </main>
 
-  <!-- ─── Mobile bottom bar ─── -->
+  <!-- ─── Mobile bottom dock ─── -->
   <div class="mobile-bottom">
-    @if (myPath.length > 1) {
-      <button class="btn-secondary mobile-btn" (click)="goBack()">{{ t('game_back') }}</button>
-    } @else {
-      <div class="mobile-btn-ghost"></div>
-    }
-    <span class="mobile-current-page">{{ currentPage }}</span>
-    <button class="btn-secondary mobile-btn" (click)="showPath = !showPath" [attr.aria-expanded]="showPath">📍 {{ t('game_path_route') }}</button>
+    <button class="dock-icon-btn" (click)="goBack()" [disabled]="myPath.length <= 1" aria-label="Back">
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+
+    <button class="dock-avatars" (click)="mobileMenuOpen = true" aria-label="Open players panel">
+      @for (p of players.slice(0, 4); track p.socketId) {
+        <span class="avatar sm dock-av" [class.me]="p.socketId === mySocketId" [style.background]="p.accentColor || getAvatarColor(p.socketId)">{{ p.avatarEmoji || (p.name[0] || '?').toUpperCase() }}</span>
+      }
+    </button>
+
     @if (searchAllowed) {
-      <button class="btn-secondary mobile-btn" [class.search-active]="searchOpen" (click)="searchOpen ? closeSearch() : openSearch()">🔍</button>
+      <button class="dock-icon-btn" [class.search-active]="searchOpen" (click)="searchOpen ? closeSearch() : openSearch()" aria-label="Search">🔍</button>
+    }
+
+    @if (!iWon && !isSpectating) {
+      <button class="dock-giveup" (click)="showGiveUpConfirm = true">{{ t('game_give_up') }}</button>
+    } @else {
+      <button class="dock-icon-btn" (click)="showPath = !showPath" aria-label="Path">📍</button>
     }
   </div>
 
@@ -167,12 +190,12 @@
   @if (showGiveUpConfirm) {
     <div class="modal-overlay" (click)="showGiveUpConfirm = false" aria-hidden="true">
       <div class="modal giveup-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="giveup-modal-title">
-        <p class="giveup-emoji">🏳️</p>
+        <p class="giveup-emoji" aria-hidden="true">🏳️</p>
         <h3 id="giveup-modal-title">{{ t('game_giveup_title') }}</h3>
         <p class="giveup-sub">{{ t('game_giveup_sub') }}</p>
         <div class="giveup-actions">
-          <button class="btn-danger" (click)="giveUp()">{{ t('game_giveup_confirm') }}</button>
-          <button class="btn-secondary" (click)="showGiveUpConfirm = false">{{ t('game_giveup_cancel') }}</button>
+          <button class="btn-secondary" (click)="showGiveUpConfirm = false">{{ t('game_giveup_keep') }}</button>
+          <button class="btn-primary" (click)="giveUp()">{{ t('game_giveup_confirm') }}</button>
         </div>
       </div>
     </div>
@@ -221,56 +244,74 @@
     </div>
   }
 
-  <!-- ─── Leaderboard ─── -->
+  <!-- ─── End of Hunt modal ─── -->
   @if (showLeaderboard) {
     <div class="modal-overlay" aria-hidden="true">
       <div class="modal leaderboard-modal" role="dialog" aria-modal="true" aria-labelledby="leaderboard-modal-title">
+
+        <!-- Header -->
         <div class="lb-header">
-          @if (iWon) {
-            <div class="result-badge won">{{ t('game_finish_won') }}</div>
-          } @else {
-            <div class="result-badge lost">{{ t('game_finish_lost') }}</div>
-          }
-          <h2 id="leaderboard-modal-title">{{ t('game_finish_title') }}</h2>
-          <p class="route-label">{{ startPage }} → {{ targetPage }}</p>
+          <span class="lb-flag" aria-hidden="true">🏁</span>
+          <span class="lb-eyebrow">{{ t('game_hunt_complete') }}</span>
+          <h2 id="leaderboard-modal-title" class="lb-title-main">
+            <em>{{ iWon ? t('game_finish_won') : t('game_finish_lost') }}</em>
+          </h2>
+          <p class="lb-subtitle">
+            {{ mySteps }} {{ t('game_steps') }} · {{ elapsed }}
+            @if (othersHunting > 0) { · {{ othersHunting }} {{ t('game_others_hunting') }} }
+          </p>
         </div>
 
+        <!-- Path chain -->
+        @if (myPath.length > 1) {
+          <div class="path-chain">
+            <span class="path-chain-label">{{ t('game_path_title') }}</span>
+            <div class="chain">
+              @for (p of myPath; track $index; let last = $last) {
+                <span class="chain-page" [class.chain-last]="last">{{ p }}</span>
+                @if (!last) { <span class="chain-arrow" aria-hidden="true">→</span> }
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Results -->
+        <p class="lb-results-label">{{ t('game_results_label') }}</p>
         <ul class="leaderboard">
           @for (e of leaderboard; track e.socketId; let i = $index) {
-            <li class="lb-entry" [class.me]="e.socketId === mySocketId" [class.winner]="i === 0 && e.finished">
-              <div class="lb-row">
-                <span class="rank">{{ getRankEmoji(i) }}</span>
-                <div class="avatar sm" [style.background]="getAvatarColor(e.socketId)">{{ (e.name[0] || '?').toUpperCase() }}</div>
-                <span class="lb-name">{{ e.name }}@if (e.socketId === mySocketId) { <span class="you-tag">{{ t('game_you_tag') }}</span> }</span>
-                <span class="lb-steps">{{ e.steps }} {{ t('game_steps') }}</span>
-                <span class="lb-time">{{ e.finished ? formatTime(e.time) : (e.gaveUp ? t('game_gave_up') : t('game_not_finished')) }}</span>
-                @if (e.path && e.path.length > 1) {
-                  <button class="lb-path-toggle" (click)="togglePath(e.socketId)">
-                    {{ expandedPathPlayer === e.socketId ? '▲' : '▼' }} {{ t('game_path_route') }}
-                  </button>
-                }
+            <li class="lb-entry" [class.me]="e.socketId === mySocketId">
+              <span class="rank">{{ getRankEmoji(i) }}</span>
+              <div class="avatar sm" [style.background]="e.accentColor || getAvatarColor(e.socketId)">
+                {{ e.avatarEmoji || (e.name[0] || '?').toUpperCase() }}
               </div>
-              @if (expandedPathPlayer === e.socketId && e.path && e.path.length) {
-                <ol class="lb-path-list">
-                  @for (page of e.path; track $index) {
-                    <li>{{ page }}</li>
-                  }
-                </ol>
-              }
+              <span class="lb-name">
+                {{ e.name }}
+                @if (e.socketId === mySocketId) { <span class="you-tag">{{ t('game_you_tag') }}</span> }
+              </span>
+              <span class="lb-right">
+                <span class="lb-steps">{{ e.steps }}</span>
+                <span class="lb-time">{{ e.finished ? formatTime(e.time) : (e.gaveUp ? t('game_gave_up') : t('game_not_finished')) }}</span>
+              </span>
             </li>
           }
         </ul>
 
+        <!-- Actions -->
         <div class="lb-actions">
-          <button class="btn-primary" (click)="playAgain()">{{ t('game_play_again') }}</button>
-          <button class="btn-secondary" (click)="goHome()">{{ t('game_home') }}</button>
-          <button class="btn-secondary share-btn" (click)="shareResult()">
-            @if (shareCopied) {
-              ✓ {{ t('share_copied') }}
-            } @else {
-              {{ t('share_result') }}
-            }
+          <button class="btn-secondary" (click)="playAgain()">{{ t('game_play_again') }}</button>
+          <button class="btn-primary share-btn" (click)="shareResult()">
+            @if (shareCopied) { ✓ {{ t('share_copied') }} } @else { {{ t('share_result') }} }
           </button>
+        </div>
+        <div class="lb-footer">
+          <button class="lb-back-home" (click)="goHome()">← {{ t('game_back_home') }}</button>
+          <div class="lb-kofi">
+            <span class="lb-kofi-hint">{{ t('kofi_support') }}</span>
+            <a class="kofi-btn" href="https://ko-fi.com/jpdev" target="_blank" rel="noopener noreferrer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.216 6.415l-.132-.666c-.119-.598-.388-1.163-1.001-1.379-.197-.069-.42-.098-.57-.241-.152-.143-.196-.366-.231-.572-.065-.378-.125-.756-.192-1.133-.057-.325-.102-.69-.25-.987-.195-.4-.542-.69-.94-.733-.615-.065-1.225.2-1.71.51a7.99 7.99 0 0 1-.907.436c-.275.112-.556.213-.842.237-.35.028-.659-.093-.944-.234a17.04 17.04 0 0 0-.978-.427 3.052 3.052 0 0 0-.997-.21 1.61 1.61 0 0 0-.854.2c-.368.234-.592.657-.642 1.093-.056.47.008.946.14 1.4.137.47.306.943.514 1.391-.13.063-.26.12-.391.18-.19.084-.382.167-.562.27-.354.198-.659.45-.925.73-.514.54-.856 1.218-1.073 1.93a6.2 6.2 0 0 0-.203 1.528c0 .553.113 1.1.323 1.61.21.514.516.993.898 1.394a5.278 5.278 0 0 0 1.37.955c.5.234 1.049.346 1.595.346.449 0 .904-.097 1.33-.258a5.9 5.9 0 0 0 1.2-.694 5.9 5.9 0 0 0 1.2.694c.426.161.881.258 1.33.258.546 0 1.095-.112 1.595-.346a5.278 5.278 0 0 0 1.37-.955c.382-.401.688-.88.898-1.394.21-.51.323-1.057.323-1.61 0-.523-.069-1.044-.203-1.528-.217-.712-.559-1.39-1.073-1.93z"/></svg>
+              {{ t('kofi_cta') }}
+            </a>
+          </div>
         </div>
       </div>
     </div>

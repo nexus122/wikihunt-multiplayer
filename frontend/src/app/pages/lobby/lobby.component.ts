@@ -24,6 +24,12 @@ export class LobbyComponent implements OnInit, OnDestroy {
   codeCopied = false;
   linkCopied = false;
   showQr = false;
+  readonly maxPlayers = 8;
+
+  get emptySlots(): number[] {
+    const n = Math.max(0, this.maxPlayers - (this.room?.players.length ?? 0));
+    return Array.from({ length: n });
+  }
 
   customStart = false;
   customTarget = false;
@@ -146,7 +152,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
   }
 
   getAvatarColor(id: string): string {
-    const colors = ['#58a6ff', '#3fb950', '#d29922', '#f85149', '#bc8cff', '#39d353', '#ff9500'];
+    const colors = ['#ff5a3c', '#1a3a8c', '#5a8f5a', '#8b5cf6', '#d65a8a', '#2a9d8f', '#c2671f'];
     let h = 0;
     for (let i = 0; i < id.length; i++) h = id.charCodeAt(i) + ((h << 5) - h);
     return colors[Math.abs(h) % colors.length];

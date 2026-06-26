@@ -24,7 +24,11 @@ export class SocketService {
       transports: ['websocket'],
       autoConnect: false,
       auth: (cb: (data: object) => void) => {
-        this.authService.getAccessToken().then(token => cb({ token }));
+        this.authService.getAccessToken().then(token => cb({
+          token,
+          avatarEmoji: localStorage.getItem('wh_avatar_emoji') ?? undefined,
+          accentColor: localStorage.getItem('wh_accent_color') ?? undefined,
+        }));
       },
     });
 

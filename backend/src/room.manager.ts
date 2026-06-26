@@ -14,7 +14,7 @@ class RoomManager {
   private rooms = new Map<string, Room>();
   private socketToRoom = new Map<string, string>();
 
-  createRoom(hostSocketId: string, hostName: string, isDaily = false, userId?: string): Room {
+  createRoom(hostSocketId: string, hostName: string, isDaily = false, userId?: string, avatarEmoji?: string, accentColor?: string): Room {
     let code = generateCode();
     while (this.rooms.has(code)) {
       code = generateCode();
@@ -24,6 +24,8 @@ class RoomManager {
       socketId: hostSocketId,
       name: hostName,
       userId,
+      avatarEmoji,
+      accentColor,
       currentPage: null,
       steps: 0,
       path: [],
@@ -46,7 +48,7 @@ class RoomManager {
     return room;
   }
 
-  joinRoom(code: string, socketId: string, name: string, userId?: string): Room | null {
+  joinRoom(code: string, socketId: string, name: string, userId?: string, avatarEmoji?: string, accentColor?: string): Room | null {
     const room = this.rooms.get(code);
     if (!room || room.status !== 'waiting') return null;
 
@@ -54,6 +56,8 @@ class RoomManager {
       socketId,
       name,
       userId,
+      avatarEmoji,
+      accentColor,
       currentPage: null,
       steps: 0,
       path: [],
@@ -148,6 +152,8 @@ class RoomManager {
     currentPage?: string | null,
     path?: string[],
     userId?: string,
+    avatarEmoji?: string,
+    accentColor?: string,
   ): Room | null {
     const room = this.rooms.get(code);
     if (!room || room.status !== 'playing') return null;
@@ -190,6 +196,8 @@ class RoomManager {
       socketId,
       name,
       userId,
+      avatarEmoji,
+      accentColor,
       currentPage: currentPage || room.startPage,
       steps,
       path: path?.length ? path : (room.startPage ? [room.startPage] : []),
@@ -283,6 +291,8 @@ class RoomManager {
     const players: PlayerPublicInfo[] = Array.from(room.players.values()).map(p => ({
       socketId: p.socketId,
       name: p.name,
+      avatarEmoji: p.avatarEmoji,
+      accentColor: p.accentColor,
       currentPage: p.currentPage,
       steps: p.steps,
       path: p.path,

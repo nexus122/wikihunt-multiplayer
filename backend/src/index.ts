@@ -6,7 +6,7 @@ import cors from 'cors';
 import wikipediaRouter, { preWarmCache } from './wikipedia';
 import { roomManager } from './room.manager';
 import { getCanonicalTitle, getValidRandomPage, normalizePage } from './wiki.helpers';
-import { getDailyChallenge, isNameTakenByRegisteredUser, saveDailyResult, saveHallOfFame, updateUserStreak, verifyUserToken } from './supabase';
+import { getDailyChallenge, getPlayerCosmetics, isNameTakenByRegisteredUser, markSupporter, saveDailyResult, saveHallOfFame, updateUserStreak, verifyUserToken } from './supabase';
 
 const app = express();
 const httpServer = createServer(app);
@@ -20,6 +20,30 @@ app.use(cors({ origin: allowedOrigin }));
 app.use(express.json());
 app.use('/api/wikipedia', wikipediaRouter);
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
+app.use(express.urlencoded({ extended: true }));
+
+app.post('/api/kofi/webhook', async (req, res) => {
+  try {
+    const raw = req.body?.data;
+    if (!raw) return res.status(400).json({ error: 'No data' });
+    const payload = JSON.parse(raw);
+    const token = process.env.KOFI_VERIFICATION_TOKEN;
+    if (token && payload.verification_token !== token) {
+      console.warn('[Ko-fi] Invalid verification token');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const email: string | undefined = payload.email;
+    if (email) {
+      await markSupporter(email);
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[Ko-fi] Webhook error:', err);
+    res.status(500).json({ error: 'Internal error' });
+  }
+});
+
 app.get('/api/daily', async (req, res) => {
   const lang = (req.query.lang as string) || 'es';
   try {
@@ -35,7 +59,14 @@ io.use(async (socket, next) => {
   const token = socket.handshake.auth?.token;
   if (token) {
     const userId = await verifyUserToken(token);
-    if (userId) socket.data.userId = userId;
+    if (userId) {
+      socket.data.userId = userId;
+      const cosmetics = await getPlayerCosmetics(userId);
+      if (cosmetics) {
+        socket.data.avatarEmoji = cosmetics.avatarEmoji;
+        socket.data.accentColor = cosmetics.accentColor;
+      }
+    }
   }
   next();
 });
@@ -116,7 +147,7 @@ io.on('connection', (socket) => {
     const validName = validateName(name);
     if (!validName) { callback({ error: 'Invalid name' }); return; }
     try {
-      const room = roomManager.createRoom(socket.id, validName, false, socket.data.userId);
+      const room = roomManager.createRoom(socket.id, validName, false, socket.data.userId, socket.data.avatarEmoji, socket.data.accentColor);
       socket.join(room.code);
       console.log(`[Room] Created: ${room.code} by ${name}`);
       callback({ code: room.code, room: roomManager.getRoomInfo(room) });
@@ -129,7 +160,7 @@ io.on('connection', (socket) => {
     const validName = validateName(name);
     if (!validName) { callback({ success: false, error: 'Invalid name' }); return; }
     try {
-      const room = roomManager.joinRoom(code.toUpperCase().trim(), socket.id, validName, socket.data.userId);
+      const room = roomManager.joinRoom(code.toUpperCase().trim(), socket.id, validName, socket.data.userId, socket.data.avatarEmoji, socket.data.accentColor);
       if (!room) {
         callback({ success: false, error: 'Room not found or game already started' });
         return;
@@ -211,7 +242,7 @@ io.on('connection', (socket) => {
   ) => {
     try {
       navigateLastTs.delete(socket.id); // reset rate-limit for new socket ID
-      const room = roomManager.rejoinRoom(code.toUpperCase().trim(), socket.id, name, steps, currentPage, path, socket.data.userId);
+      const room = roomManager.rejoinRoom(code.toUpperCase().trim(), socket.id, name, steps, currentPage, path, socket.data.userId, socket.data.avatarEmoji, socket.data.accentColor);
       if (!room) {
         callback({ success: false, error: 'La partida no existe o ya ha terminado' });
         return;
@@ -340,7 +371,7 @@ io.on('connection', (socket) => {
     try {
       const gameLang = validateLang(lang);
       const challenge = await getDailyChallenge(gameLang);
-      const room = roomManager.createRoom(socket.id, validName, true, socket.data.userId);
+      const room = roomManager.createRoom(socket.id, validName, true, socket.data.userId, socket.data.avatarEmoji, socket.data.accentColor);
       room.lang = gameLang;
       socket.join(room.code);
       roomManager.startGame(room.code, challenge.start_page, challenge.target_page, 0);

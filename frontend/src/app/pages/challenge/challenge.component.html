@@ -1,19 +1,17 @@
-<app-header [backLabel]="t('challenge_back')" (back)="goHome()" />
+<app-header context="challenge" [backLabel]="t('challenge_back')" (back)="goHome()" />
 
 <div class="challenge-page">
 
-  <div class="hero">
-    <div class="challenge-badge">⚔️ {{ t('challenge_creator_title') }}</div>
-    <p class="challenge-subtitle">{{ t('challenge_creator_subtitle') }}</p>
+  <div class="challenge-head">
+    <span class="eyebrow">{{ t('challenge_eyebrow') }}</span>
+    <h1 class="challenge-h1">{{ generated ? t('challenge_live_title') : t('challenge_pick_title') }}</h1>
+    <p class="challenge-sub">{{ generated ? t('challenge_shared_sub') : t('challenge_creator_subtitle') }}</p>
   </div>
 
-  <div class="card setup-card">
-
+  @if (!generated) {
     <!-- Start page -->
-    <div class="picker">
-      <div class="picker-row">
-        <label>{{ t('challenge_start_label') }}</label>
-      </div>
+    <div class="card picker-card">
+      <span class="label">{{ t('challenge_start_label') }}</span>
       @if (selectedStart) {
         <div class="page-chip">
           <span class="page-tag start">{{ selectedStart.title }}</span>
@@ -21,13 +19,10 @@
         </div>
       } @else {
         <div class="search-wrap">
-          <input
-            type="text"
-            [placeholder]="t('challenge_search_placeholder')"
-            [(ngModel)]="searchStartQuery"
-            (input)="searchStart()"
-            autocomplete="off"
-          />
+          <div class="search-box">
+            <span class="search-ico" aria-hidden="true">🔍</span>
+            <input type="text" [placeholder]="t('challenge_search_placeholder')" [(ngModel)]="searchStartQuery" (input)="searchStart()" autocomplete="off" />
+          </div>
           @if (startResults.length) {
             <div class="results">
               @for (r of startResults; track r.title) {
@@ -39,13 +34,9 @@
       }
     </div>
 
-    <div class="route-arrow-divider" aria-hidden="true">↓</div>
-
     <!-- Target page -->
-    <div class="picker">
-      <div class="picker-row">
-        <label>{{ t('challenge_target_label') }}</label>
-      </div>
+    <div class="card picker-card">
+      <span class="label">{{ t('challenge_target_label') }}</span>
       @if (selectedTarget) {
         <div class="page-chip">
           <span class="page-tag target">{{ selectedTarget.title }}</span>
@@ -53,13 +44,10 @@
         </div>
       } @else {
         <div class="search-wrap">
-          <input
-            type="text"
-            [placeholder]="t('challenge_search_placeholder')"
-            [(ngModel)]="searchTargetQuery"
-            (input)="searchTarget()"
-            autocomplete="off"
-          />
+          <div class="search-box">
+            <span class="search-ico" aria-hidden="true">🎯</span>
+            <input type="text" [placeholder]="t('challenge_search_placeholder')" [(ngModel)]="searchTargetQuery" (input)="searchTarget()" autocomplete="off" />
+          </div>
           @if (targetResults.length) {
             <div class="results">
               @for (r of targetResults; track r.title) {
@@ -71,27 +59,70 @@
       }
     </div>
 
-    <!-- Generated link -->
-    @if (challengeUrl) {
-      <div class="link-box">
-        <p class="link-label">{{ t('challenge_link_ready') }}</p>
-        <div class="link-preview">
-          <span class="link-route">{{ selectedStart!.title }} → {{ selectedTarget!.title }}</span>
+    <!-- Preview -->
+    @if (selectedStart && selectedTarget) {
+      <div class="card card--tint preview-card">
+        <span class="label preview-label">{{ t('challenge_preview') }}</span>
+        <div class="route-display">
+          <span class="route-page route-start"><span class="route-title">{{ selectedStart.title }}</span></span>
+          <span class="route-arrow">→</span>
+          <span class="route-page route-target"><span class="route-title">{{ selectedTarget.title }}</span></span>
         </div>
-        <button class="btn-primary share-cta" (click)="share()">
-          @if (copied) {
-            ✓ {{ t('challenge_copied') }}
-          } @else {
-            ⚔️ {{ t('challenge_share_btn') }}
-          }
-        </button>
-        <a class="ranking-link" [routerLink]="['/leaderboard']" [queryParams]="{start: selectedStart!.title, target: selectedTarget!.title, lang: lang.current}">
-          🏆 {{ t('challenge_view_ranking') }}
-        </a>
+        <p class="preview-hint">{{ t('challenge_preview_hint') }}</p>
       </div>
     } @else {
       <p class="hint-text">{{ t('challenge_hint') }}</p>
     }
 
-  </div>
+    <button class="btn-primary btn-xl generate-cta" (click)="generate()" [disabled]="!canGenerate">
+      {{ t('challenge_generate') }}
+    </button>
+  } @else {
+    <!-- Share card (screenshot-bait) -->
+    <div class="card share-card">
+      <div class="share-card-head">
+        <span class="logo wh-logo"><span class="logo-bracket">[[</span><span class="logo-wiki">Wiki</span><span class="logo-hunt">Hunt</span><span class="logo-bracket">]]</span></span>
+        <span class="share-id">#{{ challengeId }}</span>
+      </div>
+
+      <span class="eyebrow share-from">{{ t('challenge_a_hunt_from') }}</span>
+      <div class="share-author">
+        <span class="av sm" [class.coral]="!accentColor" [style.background]="accentColor || null" [style.borderColor]="accentColor || null">{{ avatarEmoji || (profileName[0] || '?').toUpperCase() }}</span>
+        <span class="share-author-name">{{ profileName || '—' }}</span>
+      </div>
+
+      <div class="share-route">
+        <span class="label">{{ t('challenge_start_label') }}</span>
+        <span class="share-start">{{ selectedStart!.title }}</span>
+        <span class="share-down" aria-hidden="true">↓</span>
+        <span class="label">{{ t('challenge_target_label') }}</span>
+        <span class="share-target">{{ selectedTarget!.title }}</span>
+      </div>
+
+      <div class="share-rule"></div>
+      <p class="share-quote">{{ t('challenge_quote') }}</p>
+    </div>
+
+    <!-- Link + copy -->
+    <div class="card link-card">
+      <span class="link-url">{{ challengeUrl }}</span>
+      <button class="btn-primary" (click)="copyLink()">
+        {{ copied ? '✓ ' + t('challenge_copied') : t('challenge_copy_link') }}
+      </button>
+    </div>
+
+    <!-- Share buttons -->
+    <div class="share-buttons">
+      <button class="btn-secondary" (click)="shareTweet()">{{ t('challenge_tweet') }}</button>
+      <button class="btn-secondary" (click)="shareWhatsApp()">{{ t('challenge_whatsapp') }}</button>
+      <button class="btn-secondary" (click)="shareEmail()">{{ t('challenge_email') }}</button>
+    </div>
+
+    <div class="shared-actions">
+      <button class="btn-secondary edit-btn" (click)="edit()">{{ t('challenge_edit') }}</button>
+      <a class="ranking-link" [routerLink]="['/leaderboard']" [queryParams]="{start: selectedStart!.title, target: selectedTarget!.title, lang: lang.current}">
+        🏆 {{ t('challenge_view_ranking') }}
+      </a>
+    </div>
+  }
 </div>

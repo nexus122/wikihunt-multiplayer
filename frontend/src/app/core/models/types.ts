@@ -8,6 +8,8 @@ export interface PlayerPublicInfo {
   finishTime?: number;
   gaveUp?: boolean;
   disconnected?: boolean;
+  avatarEmoji?: string;
+  accentColor?: string;
 }
 
 export interface RoomInfo {
@@ -28,6 +30,8 @@ export interface LeaderboardEntry {
   finished: boolean;
   gaveUp?: boolean;
   path: string[];
+  avatarEmoji?: string;
+  accentColor?: string;
 }
 
 export interface PlayerGaveUpEvent {

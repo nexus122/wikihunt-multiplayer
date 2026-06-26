@@ -1,7 +1,7 @@
 .solo-page {
-  max-width: 480px;
+  max-width: var(--max-w-narrow);
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 40px clamp(16px, 4vw, 24px);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -12,18 +12,23 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .solo-badge {
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--accent);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--fs-h2);
+  line-height: 1;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
 }
 
 .solo-subtitle {
-  color: var(--text-secondary);
-  font-size: 13px;
+  font-family: var(--font-prose);
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 15px;
   margin: 0;
 }
 
@@ -31,6 +36,8 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+
+  .btn-primary { width: 100%; }
 }
 
 // ─── Name field ───────────────────────────────────────────────────────────────
@@ -40,11 +47,12 @@
   gap: 6px;
 
   label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: var(--fs-label);
+    font-weight: 500;
+    color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: var(--ls-label);
   }
 }
 
@@ -83,11 +91,12 @@
   gap: 8px;
 
   label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: var(--fs-label);
+    font-weight: 500;
+    color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: var(--ls-label);
     white-space: nowrap;
   }
 }
@@ -159,22 +168,24 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+
+  &:has(.page-tag.start)  { background: var(--knowledge-soft); }
+  &:has(.page-tag.target) { background: var(--accent-soft); }
 }
 
 .page-tag {
   flex: 1;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 
-  &.start { color: var(--text-primary); }
-  &.target { color: var(--accent); }
+  &.start  { color: var(--knowledge); }
+  &.target { color: var(--accent); font-style: italic; }
 }
 
 .chip-clear {

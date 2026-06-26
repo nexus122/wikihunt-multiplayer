@@ -2,6 +2,8 @@ export interface Player {
   socketId: string;
   name: string;
   userId?: string;
+  avatarEmoji?: string;
+  accentColor?: string;
   currentPage: string | null;
   steps: number;
   path: string[];
@@ -42,6 +44,8 @@ export interface RoomInfo {
 export interface PlayerPublicInfo {
   socketId: string;
   name: string;
+  avatarEmoji?: string;
+  accentColor?: string;
   currentPage: string | null;
   steps: number;
   path: string[];

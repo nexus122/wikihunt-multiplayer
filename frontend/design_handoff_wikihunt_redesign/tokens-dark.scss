@@ -1,0 +1,39 @@
+// WikiHunt — design tokens (DARK theme = "ink")
+// Drop into your [data-theme="dark"] block (or body.dark, whatever your toggle uses).
+// All existing token names keep working — only the values change.
+
+[data-theme="dark"] {
+  // ---- BACKGROUNDS (ink) ----
+  --bg-primary:     #0f1220;   // deep navy — NOT gray. Book-closed feel.
+  --bg-secondary:   #161a30;   // tracks, segmented bg, table headers
+  --bg-tertiary:    #1f243f;   // hover/active
+  --surface:        #181c33;   // card surface
+
+  // ---- BORDERS / RULES ----
+  --border-color:   #2a2f4a;
+  --border-strong:  #3a4060;
+
+  // ---- TEXT ----
+  --text-primary:   #f0ebde;   // cream foreground — warm, not stark white
+  --text-secondary: #b9b4a5;
+  --text-muted:     #7a7e8f;
+
+  // ---- BRAND COLORS (lifted for dark contrast) ----
+  --accent:         #ff6b50;   // coral, slightly brighter for dark legibility
+  --accent-2:       #ff8268;
+  --accent-soft:    #3a1e1a;   // muted coral background for "me" rows
+
+  --knowledge:      #6f8eff;   // blue, lifted from #1a3a8c for AA contrast on dark
+  --knowledge-soft: #1c2645;
+
+  --success:        #7ec27a;
+  --danger:         #ff6b50;
+  --streak-color:   #ffd84a;
+  --streak-deep:    #ffd84a;
+
+  // ---- SHADOWS / RINGS ----
+  --shadow-sm:      0 1px 0 rgba(0,0,0,.3);
+  --shadow-md:      0 1px 0 rgba(0,0,0,.3), 0 8px 28px -10px rgba(0,0,0,.6);
+  --shadow-lg:      0 30px 80px -20px rgba(0,0,0,.85);
+  --ring-accent:    0 0 0 3px rgba(255,107,80,.28);
+}
