@@ -4,10 +4,14 @@ import { translations, TranslationKey } from '../i18n/translations';
 
 export type Lang = 'es' | 'en';
 
+function detectLang(): Lang {
+  return navigator.language?.toLowerCase().startsWith('es') ? 'es' : 'en';
+}
+
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
   private langSubject = new BehaviorSubject<Lang>(
-    (localStorage.getItem('wh_lang') as Lang) || 'es'
+    (localStorage.getItem('wh_lang') as Lang) || detectLang()
   );
 
   lang$ = this.langSubject.asObservable();
